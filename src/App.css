@@ -1,0 +1,124 @@
+/* RESET */
+* {
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+}
+
+/* GOOGLE FONT */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap');
+
+/* GLOBAL FONT SETTINGS */
+p,
+button,
+li,
+h1,
+h2,
+h3,
+h4,
+span,
+b {
+    font-family: "Poppins", sans-serif;
+    font-weight: 500;
+}
+
+button,
+input {
+    outline: none;
+}
+
+/* ROOT VARIABLES (RESPONSIVE) */
+:root {
+    /* BORDER FIX — to‘g‘rilandi */
+    --border-1: 1px solid black;
+
+    /* COLOR VARIABLES */
+    --primary-color: #2563eb;
+    --white: #ffffff;
+    --black: #000000;
+
+    /* RESPONSIVE FONT-SIZES */
+    --font-size-16: clamp(14px, 1.2vw, 16px);
+    --font-size-18: clamp(15px, 1.4vw, 18px);
+    --font-size-20: clamp(16px, 1.6vw, 20px);
+    --font-size-25: clamp(18px, 2vw, 25px);
+    --font-size-30: clamp(22px, 2.5vw, 30px);
+    --font-size-35: clamp(26px, 3vw, 35px);
+    --font-size-40: clamp(30px, 3.5vw, 40px);
+    --font-size-45: clamp(34px, 4vw, 45px);
+    --font-size-50: clamp(38px, 4.5vw, 50px);
+    --font-size-55: clamp(42px, 5vw, 55px);
+    --font-size-60: clamp(46px, 6vw, 60px);
+
+    /* FONT WEIGHTS (tartiblangan / to‘g‘ri) */
+    --font-weight-100: 100;
+    --font-weight-200: 200;
+    --font-weight-300: 300;
+    --font-weight-400: 400;
+    --font-weight-500: 500;
+    --font-weight-600: 600;
+    --font-weight-700: 700;
+    --font-weight-800: 800;
+    --font-weight-900: 900;
+
+    /* RESPONSIVE GAP */
+    --gap-10: clamp(6px, 1vw, 10px);
+    --gap-20: clamp(12px, 2vw, 20px);
+    --gap-30: clamp(18px, 3vw, 30px);
+    --gap-40: clamp(24px, 4vw, 40px);
+    --gap-50: clamp(30px, 5vw, 50px);
+}
+
+/* CURSOR POINTER */
+button,
+i,
+svg,
+li {
+    cursor: pointer;
+}
+
+/* LINK STYLES RESET */
+a {
+    text-decoration: none;
+    
+}   
+
+/* MAX WIDTH */
+.max-width {
+    max-width: 1300px;
+    margin: auto;
+    transition: all 0.3s ease;
+}
+
+/* DISPLAY HELPERS */
+.display-flex {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.flex-wrap {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.none {
+    display: none;
+}
+
+.block {
+    display: block;
+}
+
+@media (max-width: 1000) {
+    .max-width{
+        padding: 10px;
+    }
+}
+
+@media (max-width: 900) {
+    img{
+        max-width: 100%;
+        
+    }
+}
