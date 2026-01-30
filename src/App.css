@@ -3,28 +3,18 @@
     padding: 0;
     margin: 0;
     box-sizing: border-box;
+    font-family: "Poppins", sans-serif;
 }
 
 /* GOOGLE FONT */
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600;700;800;900&display=swap');
 
 /* GLOBAL FONT SETTINGS */
-p,
-button,
-li,
-h1,
-h2,
-h3,
-h4,
-span,
-b {
-    font-family: "Poppins", sans-serif;
-    font-weight: 500;
-}
 
 button,
 input {
     outline: none;
+
 }
 
 /* ROOT VARIABLES (RESPONSIVE) */
@@ -33,11 +23,13 @@ input {
     --border-1: 1px solid black;
 
     /* COLOR VARIABLES */
-    --primary-color: #2563eb;
+    --primary-color: #9f2728;
     --white: #ffffff;
     --black: #000000;
 
     /* RESPONSIVE FONT-SIZES */
+    --font-size-12: clamp(10px, 1vw, 12px);
+    --font-size-14: clamp(12px, 1.1vw, 14px);
     --font-size-16: clamp(14px, 1.2vw, 16px);
     --font-size-18: clamp(15px, 1.4vw, 18px);
     --font-size-20: clamp(16px, 1.6vw, 20px);
@@ -80,8 +72,28 @@ li {
 /* LINK STYLES RESET */
 a {
     text-decoration: none;
-    
-}   
+
+}
+
+.gap-10 {
+    gap: var(--gap-10);
+}
+
+.gap-20 {
+    gap: var(--gap-20);
+}
+
+.gap-30 {
+    gap: var(--gap-30);
+}
+
+.gap-40 {
+    gap: var(--gap-40);
+}
+
+.gap-50 {
+    gap: var(--gap-50);
+}
 
 /* MAX WIDTH */
 .max-width {
@@ -111,14 +123,14 @@ a {
 }
 
 @media (max-width: 1000) {
-    .max-width{
+    .max-width {
         padding: 10px;
     }
 }
 
 @media (max-width: 900) {
-    img{
+    img {
         max-width: 100%;
-        
+
     }
 }

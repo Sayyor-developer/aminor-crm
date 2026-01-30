@@ -5,6 +5,7 @@ import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import './App.css';
 import Header from './components/header/Header';
+import SideBar from './components/sidebar/SideBar';
 
 function App() {
   
@@ -14,6 +15,7 @@ function App() {
       <ToastContainer />
 
       <Header />
+      <SideBar />
      
 
       
