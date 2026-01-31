@@ -46,7 +46,7 @@
 .side {
  display: flex;
     align-items: center;
-    padding: 10px 15px;
+    padding: 10px 25px;
     margin-bottom: 8px;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -84,7 +84,6 @@
     transform: translateX(-10px);
     pointer-events: none;
     white-space: nowrap;
-    
 }
 
 
