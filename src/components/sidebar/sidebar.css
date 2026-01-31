@@ -44,18 +44,21 @@
 }
 
 .side {
-    display: flex;
+ display: flex;
     align-items: center;
     padding: 10px 15px;
     margin-bottom: 8px;
     cursor: pointer;
     transition: all 0.3s ease;
-    /* Matn pastga tushib ketmasligi uchun */
     white-space: nowrap;
     overflow: hidden;
     border-left: 4px solid transparent;
+    /* Link dekoratsiyasini olib tashlash */
+    text-decoration: none;
+    color: inherit;
 }
-.side:hover {
+.side:hover, 
+.side.active { 
     background-color: #f5f5f5;
     color: var(--primary-color);
     border-left: 4px solid var(--primary-color);
