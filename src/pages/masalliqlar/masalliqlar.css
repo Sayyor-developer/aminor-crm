@@ -1,0 +1,229 @@
+.masalliqlar {
+    position: absolute;
+    top: 90px;
+    left: 260px; 
+    right: 0px;
+    background-color: #f4f6f9;
+    padding: 20px;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.masalliqlar.sidebar-closed {
+    left: 80px;
+}
+
+.main-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+.section-container {
+    background: #fff;
+    border: 1px solid #e0e6ed;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.section-header {
+    padding: 15px 20px;
+    border-bottom: 1px solid #f0f2f5;
+    background-color: #fbfbfc;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.section-title {
+    font-size: 18px;
+    color: #4a5568;
+    font-weight: var(--font-weight-500);
+}
+
+.search-box {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.search-icon {
+    position: absolute;
+    left: 10px;
+    color: #a0aec0;
+}
+
+.search-box input {
+    padding: 8px 10px 8px 35px;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    background: #f8fafc;
+    /* width: 250px; */
+        max-width: 600px;
+        width: 170px;
+}
+
+.cards-grid {
+    display: flex;
+    gap: 20px;
+    padding: 20px;
+    flex-wrap: wrap;
+}
+
+.card {
+    flex: 1;
+    padding: 20px;
+    border-radius: 10px;
+    border: 1px solid transparent;
+}
+
+.card-top {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 15px;
+}
+
+.card-top .i { 
+    font-size: var(--font-size-40); 
+}
+.card-top h3 {
+     margin: 0;
+      font-size: var(--font-size-16); 
+      color: #2d3748; }
+.kg { 
+    margin: 0; 
+    font-size: var(--font-size-25); 
+    font-weight: var(--font-weight-600)
+}
+.kg span { 
+    font-size: var(--font-size-14); 
+    font-weight: normal; 
+    color: #718096; }
+
+/* Colors */
+.meat { 
+    background: #fff5f5; 
+    border-color: #fed7d7; 
+    color: #c53030; 
+}
+
+.egg {
+     background: #fffaf0; 
+     border-color: #feebc8; 
+     color: #dd6b20; 
+    }
+
+.spice { 
+    background: #f0fff4; 
+    border-color: #c6f6d5; 
+    color: #2f855a; 
+}
+
+.cabbage { 
+    background: #f7fafc; 
+    border-color: #edf2f7; 
+    color: #4a5568; }
+
+
+/* Table Section */
+.remaining-info {
+     padding: 15px 20px; 
+     font-size: var(--font-size-16); 
+     color: #4a5568; }
+
+.remaining-info span { 
+    color: #3182ce; 
+    font-weight: var(--font-weight-600); 
+}
+
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+.o-skrol{
+    overflow-x: scroll;
+
+}
+/* !sana kirim sarf orqa fon */
+.data-table th {
+    text-align: left;
+    padding: 12px 20px;
+    background: #f8fafc;
+    color: #718096;
+    font-weight: var(--font-weight-500);
+    border-bottom: 1px solid #edf2f7;
+}
+/* !ichidagi sana maxsulotlar uchun hr rangi   */
+.data-table td {
+    padding: 15px 20px;
+    border-bottom: 1px solid #edf2f7;
+    color: #4a5568;
+}
+
+.blue-text { 
+    color: #3182ce; 
+    cursor: pointer; }
+.dona { 
+    color: #e53e3e; 
+    font-weight: var(--font-weight-600); 
+}
+.kilo { 
+    color: #38a169;
+    font-weight: var(--font-weight-600); 
+}
+
+.table-footer {
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #413f3f;
+}
+button{
+    padding: 3px 3px;
+    background-color: #3182ce;
+    border: none;
+}
+
+.oldin-keyin {
+    display: flex;
+    align-items: center;
+    gap: 15px; 
+}
+
+.page-numbers {
+    border: 1px solid #e2e8f0; 
+    border-radius: 6px;
+    overflow: hidden; 
+}
+
+.page-numbers button {
+    background: #fff;
+    padding: 8px 12px;
+    color: #3182ce;
+    font-size: var(--font-size-14);
+    transition: all 0.2s ease;
+}
+
+
+
+.page-numbers button.active {
+    background: #ebf4ff;
+    color: #3182ce;
+    font-weight: var(--font-weight-600);
+}
+
+.page-numbers button:hover:not(.active) {
+    background: #f8fafc;
+}
+
+.oldingi, .keyingi {
+    color: #718096;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.oldingi:hover, .keyingi:hover {
+    color: var(--primary-color);
+}

@@ -137,40 +137,40 @@ a {
 /* ! go back */
 
 
-.go-back {
-    position: absolute;
-    top: 110px;
-    left: 260px; /* Sidebar ochiq holatda */
-    z-index: 999;
-    color: var(--color-black);
-    font-size: var(--font-size-20);
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    gap: 5px;
-    padding: 10px;
-    cursor: pointer;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); /* Sidebar bilan bir xil tezlik */
-}
+/* .go-back { */
+    /* position: absolute; */
+    /* top: 110px; */
+    /* left: 260px; */
+    /* z-index: 999; */
+    /* color: var(--color-black); */
+    /* font-size: var(--font-size-20); */
+    /* display: flex; */
+    /* align-items: center; */
+    /* justify-content: flex-start; */
+    /* gap: 5px; */
+    /* padding: 10px; */
+    /* cursor: pointer; */
+    /* transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); */
+/* } */
 
 /* Sidebar yopilganda tugmani surish */
-.go-back.sidebar-closed {
-    left: 80px; 
-}
+/* .go-back.sidebar-closed { */
+    /* left: 80px;  */
+/* } */
 
-.go-back svg {
-    color: var(--primary-color);
-    font-size: var(--font-size-20);
-}
+/* .go-back svg { */
+    /* color: var(--primary-color); */
+    /* font-size: var(--font-size-20); */
+/* } */
 
-.go-back:hover {
-    transform: translateX(-10px);
-}
-.go-back {
-    left: 260px; /* Ochiq holatda */
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.go-back.sidebar-closed {
-    left: 80px; /* Yopiq holatda Sidebar kengligiga moslashadi */
-}
+/* .go-back:hover { */
+    /* transform: translateX(-10px); */
+/* } */
+/* .go-back { */
+    /* left: 260px;  */
+    /* transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); */
+/* } */
+/*  */
+/* .go-back.sidebar-closed { */
+    /* left: 80px;  */
+/* } */

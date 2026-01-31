@@ -19,32 +19,33 @@ import Foydalanuvchilar from './pages/foydalanuvchilar/Foydalanuvchilar';
 import User from './pages/user/User';
 
 function App() {
-  const navigate = useNavigate();
+  // const navigate = useNavigate();
   const [open, setOpen] = useState(true); // Sidebar holati
 
   return (
     <div className="App">
       <ToastContainer />
       
-      {/* Sidebar yopilganda 'sidebar-closed' klassi qo'shiladi */}
-      <div className={`go-back ${!open ? 'sidebar-closed' : ''}`} onClick={() => navigate(-1)}>
+      {/* Sidebar yopilganda 'sidebar-closed' klassi orqali chapga suriladi */}
+      {/* <div className={`go-back ${!open ? 'sidebar-closed' : ''}`} onClick={() => navigate(-1)}>
         <IoIosArrowBack />
         <p>go back</p>
-      </div>
+      </div> */}
 
       <Header />
       <SideBar open={open} setOpen={setOpen} />
 
       <Routes>
-        <Route path='/' element={<Home />}/>
-        <Route path='kolbasamaxsulotlar' element={<Kolbasamaxsulotlar />}/>
-        <Route path='mijozlar' element={<Mijozlar />}/>
-        <Route path='masalliqlar' element={<Masalliqlar />}/>
-        <Route path='tannarxhisoblash' element={<Tannarxhisoblash />}/>
-        <Route path='moliya' element={<Moliya />}/>
-        <Route path='tovuqchiqim' element={<Tovuqchiqim />}/>
-        <Route path='foydalanuvchilar' element={<Foydalanuvchilar />}/>
-        <Route path='user' element={<User />}/>
+        {/* Barcha sahifalarga sidebar holatini (open) prop qilib beramiz */}
+        <Route path='/' element={<Home open={open} />}/>
+        <Route path='/kolbasamaxsulotlar' element={<Kolbasamaxsulotlar open={open} />}/>
+        <Route path='/mijozlar' element={<Mijozlar open={open} />}/>
+        <Route path='/masalliqlar' element={<Masalliqlar open={open} />}/>
+        <Route path='/tannarxhisoblash' element={<Tannarxhisoblash open={open} />}/>
+        <Route path='/moliya' element={<Moliya open={open} />}/>
+        <Route path='/tovuqchiqim' element={<Tovuqchiqim open={open} />}/>
+        <Route path='/foydalanuvchilar' element={<Foydalanuvchilar open={open} />}/>
+        <Route path='/user' element={<User open={open} />}/>
       </Routes>
     </div>
   );

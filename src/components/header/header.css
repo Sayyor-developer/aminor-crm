@@ -1,18 +1,34 @@
-header{
+.header-wrapper {
+    position: fixed; 
+    top: 0;
+    left: 60px; 
+    right: 0;
+    height: 90px; 
     background-color: white;
-    padding: 29px;
-    text-align: center;
-   
+    display: flex;
+    z-index: 999;
+    flex-direction: column;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
-.hr{
+
+.header-wrapper.sidebar-closed {
+    left: 80px;
+}
+
+.hr {
     width: 100%;
     height: 1px;
     background-image: linear-gradient(to right, transparent, #ccc, #ccc, transparent);
-    
+    margin-top: 10px;
 }
-header h1{
+
+.header-title {
     font-size: var(--font-size-40);
     color: var(--primary-color);
     margin: 0;
+    padding-left: 20px; 
 }
 
+.header-title b {
+    font-weight: 800;
+}
