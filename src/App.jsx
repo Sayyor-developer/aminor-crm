@@ -11,6 +11,7 @@ import SideBar from './components/sidebar/SideBar';
 import Home from "./pages/home/Home";
 import Kolbasamaxsulotlar from './pages/kolbasamaxsulotlar/Kolbasamaxsulotlar'; 
 import Mijozlar from './pages/mijozlar/Mijozlar'; 
+import Masalliqlar from './pages/masalliqlar/Masalliqlar';
 import Tannarxhisoblash from './pages/tannarxhisoblash/Tannarxhisoblash';
 import Moliya from './pages/moliya/Moliya';
 import Tovuqchiqim from './pages/tovuqchiqim/Tovuqchiqim';
@@ -38,6 +39,7 @@ function App() {
         <Route path='/' element={<Home />}/>
         <Route path='kolbasamaxsulotlar' element={<Kolbasamaxsulotlar />}/>
         <Route path='mijozlar' element={<Mijozlar />}/>
+        <Route path='masalliqlar' element={<Masalliqlar />}/>
         <Route path='tannarxhisoblash' element={<Tannarxhisoblash />}/>
         <Route path='moliya' element={<Moliya />}/>
         <Route path='tovuqchiqim' element={<Tovuqchiqim />}/>

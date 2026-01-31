@@ -34,6 +34,11 @@ const SideBar = ({ open, setOpen }) => {
           </NavLink>
         </li>
         <li>
+          <NavLink to="/masalliqlar" className={({ isActive }) => isActive ? "side active" : "side"}>
+            <MdMenuBook /> <span className="link-text">Masalliqlar</span>
+          </NavLink>
+        </li>
+        <li>
           <NavLink to="/tannarxhisoblash" className={({ isActive }) => isActive ? "side active" : "side"}>
             <MdOutlinePriceChange /> <span className="link-text">Tannarx hisoblash</span>
           </NavLink>
