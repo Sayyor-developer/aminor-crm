@@ -1,229 +1,412 @@
-.masalliqlar {
-    position: absolute;
-    top: 90px;
-    left: 260px; 
-    right: 0px;
-    background-color: #f4f6f9;
-    padding: 20px;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+/* Asosiy konteyner */
+.m-page {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    padding: 2rem;
+    background-color: #f1f5f9;
+    min-height: 100vh;
+    margin-top: 70px;
 }
 
-.masalliqlar.sidebar-closed {
-    left: 80px;
+.m-sidebar-open { margin-left: 260px; }
+.m-sidebar-closed { margin-left: 80px; }
+
+.m-container {
+    max-width: 1200px;
+    margin: 0 auto;
 }
 
-.main-wrapper {
-    display: flex;
-    flex-direction: column;
-    gap: 25px;
-}
-
-.section-container {
-    background: #fff;
-    border: 1px solid #e0e6ed;
-    border-radius: 8px;
-    overflow: hidden;
-}
-
-.section-header {
-    padding: 15px 20px;
-    border-bottom: 1px solid #f0f2f5;
-    background-color: #fbfbfc;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-}
-
-.section-title {
-    font-size: 18px;
-    color: #4a5568;
-    font-weight: var(--font-weight-500);
-}
-
-.search-box {
-    position: relative;
+/* Sarlavha */
+.m-title-area {
     display: flex;
     align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
 }
 
-.search-icon {
-    position: absolute;
-    left: 10px;
-    color: #a0aec0;
+.m-main-icon {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 12px;
+    background: var(--primary-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
 }
 
-.search-box input {
-    padding: 8px 10px 8px 35px;
+.m-title-area h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0;
+}
+
+/* Card dizayni */
+.m-data-card {
+    background: white;
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
     border: 1px solid #e2e8f0;
-    border-radius: 6px;
-    background: #f8fafc;
-    /* width: 250px; */
-        max-width: 600px;
-        width: 170px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
 }
 
-.cards-grid {
-    display: flex;
-    gap: 20px;
-    padding: 20px;
-    flex-wrap: wrap;
-}
-
-.card {
-    flex: 1;
-    padding: 20px;
-    border-radius: 10px;
-    border: 1px solid transparent;
-}
-
-.card-top {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 15px;
-}
-
-.card-top .i { 
-    font-size: var(--font-size-40); 
-}
-.card-top h3 {
-     margin: 0;
-      font-size: var(--font-size-16); 
-      color: #2d3748; }
-.kg { 
-    margin: 0; 
-    font-size: var(--font-size-25); 
-    font-weight: var(--font-weight-600)
-}
-.kg span { 
-    font-size: var(--font-size-14); 
-    font-weight: normal; 
-    color: #718096; }
-
-/* Colors */
-.meat { 
-    background: #fff5f5; 
-    border-color: #fed7d7; 
-    color: #c53030; 
-}
-
-.egg {
-     background: #fffaf0; 
-     border-color: #feebc8; 
-     color: #dd6b20; 
-    }
-
-.spice { 
-    background: #f0fff4; 
-    border-color: #c6f6d5; 
-    color: #2f855a; 
-}
-
-.cabbage { 
-    background: #f7fafc; 
-    border-color: #edf2f7; 
-    color: #4a5568; }
-
-
-/* Table Section */
-.remaining-info {
-     padding: 15px 20px; 
-     font-size: var(--font-size-16); 
-     color: #4a5568; }
-
-.remaining-info span { 
-    color: #3182ce; 
-    font-weight: var(--font-weight-600); 
-}
-
-.data-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-.o-skrol{
-    overflow-x: scroll;
-
-}
-/* !sana kirim sarf orqa fon */
-.data-table th {
-    text-align: left;
-    padding: 12px 20px;
-    background: #f8fafc;
-    color: #718096;
-    font-weight: var(--font-weight-500);
-    border-bottom: 1px solid #edf2f7;
-}
-/* !ichidagi sana maxsulotlar uchun hr rangi   */
-.data-table td {
-    padding: 15px 20px;
-    border-bottom: 1px solid #edf2f7;
-    color: #4a5568;
-}
-
-.blue-text { 
-    color: #3182ce; 
-    cursor: pointer; }
-.dona { 
-    color: #e53e3e; 
-    font-weight: var(--font-weight-600); 
-}
-.kilo { 
-    color: #38a169;
-    font-weight: var(--font-weight-600); 
-}
-
-.table-footer {
-    padding: 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    color: #413f3f;
-}
-button{
-    padding: 3px 3px;
-    background-color: #3182ce;
-    border: none;
-}
-
-.oldin-keyin {
-    display: flex;
-    align-items: center;
-    gap: 15px; 
-}
-
-.page-numbers {
-    border: 1px solid #e2e8f0; 
-    border-radius: 6px;
-    overflow: hidden; 
-}
-
-.page-numbers button {
-    background: #fff;
-    padding: 8px 12px;
-    color: #3182ce;
-    font-size: var(--font-size-14);
-    transition: all 0.2s ease;
-}
-
-
-
-.page-numbers button.active {
-    background: #ebf4ff;
-    color: #3182ce;
+.m-card-subtitle {
+    margin-bottom: 1.25rem;
+    font-size: 1.1rem;
+    color: #1e293b;
     font-weight: var(--font-weight-600);
 }
 
-.page-numbers button:hover:not(.active) {
+/* Inputlar */
+.m-input-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+}
+
+.m-custom-input, .m-custom-select {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 10px;
+    font-size: var(--font-size-14);
+    outline: none;
+    transition: 0.2s;
     background: #f8fafc;
 }
 
-.oldingi, .keyingi {
-    color: #718096;
-    cursor: pointer;
-    font-size: 14px;
+.m-custom-input:focus {
+    border-color: var(--primary-color);
+    background: white;
+    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
 }
 
-.oldingi:hover, .keyingi:hover {
-    color: var(--primary-color);
+.m-split-input { display: flex; gap: 8px; }
+.m-custom-select { width: 90px; cursor: pointer; }
+
+/* Tugmalar */
+.m-add-btn {
+    background: var(--primary-color);
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: var(--font-weight-600);
+    transition: 0.2s;
+}
+
+.m-add-btn:hover { 
+    background: var(--primary-hover-color); 
+}
+
+/* Qidiruv */
+.m-search-box { 
+    position: relative; 
+    margin-bottom: 1.5rem; 
+}
+.m-search-icon { 
+    position: absolute; 
+    left:12px; 
+    top: 50%; 
+    transform: translateY(-50%); 
+    color: #94a3b8; 
+}
+.m-pl-40 {
+     padding-left: 45px !important; 
+    }
+
+/* Jadval */
+.m-table-wrapper { 
+    overflow-x: auto; 
+    border-radius: 12px; 
+    border: 1px solid #f1f5f9; }
+.m-data-table { 
+    width: 100%; 
+    border-collapse: collapse; 
+    text-align: left; 
+}
+.m-data-table th { 
+    background: #f8fafc; 
+    padding: 1rem; 
+    font-size: 0.75rem; 
+    text-transform: uppercase; 
+    color: #64748b; 
+    font-weight: var(--font-weight-700); 
+}
+.m-data-table td { 
+    padding: 1rem; 
+    font-size: var(--font-size-14); 
+    border-bottom: 1px solid #f1f5f9; 
+    color: #334155; 
+}
+
+.m-font-bold { 
+    font-weight: var(--font-weight-600); 
+    color: #1e293b; }
+.m-price-col { 
+    font-weight: var(--font-weight-700); 
+    color: #059669; 
+}
+.m-tag { 
+    background: #f1f5f9; 
+    padding: 2px 6px; 
+    border-radius: 4px; 
+    font-size: var(--font-size-12); 
+    color: #64748b; 
+}
+
+/* Status Toggle (Switch) */
+.m-toggle {
+    width: 44px;
+    height: 22px;
+    border-radius: 20px;
+    cursor: pointer;
+    position: relative;
+    transition: 0.3s;
+    margin: 0 auto;
+}
+.m-toggle-on { background: #10b981; }
+.m-toggle-off { background: #cbd5e1; }
+.m-toggle-circle {
+    width: 16px;
+    height: 16px;
+    background: white;
+    border-radius: 50%;
+    position: absolute;
+    top: 3px;
+    transition: 0.3s;
+}
+.m-toggle-on .m-toggle-circle { left: 25px; }
+.m-toggle-off .m-toggle-circle { left: 3px; }
+
+/* Amallar */
+.m-action-flex { 
+    display: flex; 
+    justify-content: center; 
+    gap: 8px; }
+.m-icon-btn { 
+    width: 32px; 
+    height: 32px; 
+    border-radius: 8px; 
+    border: none; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    cursor: pointer; 
+    color: var(--white);
+}
+.m-edit { background: var(--primary-color); }
+.m-delete { background: var(--primary-color); }
+
+/* Row Disabled */
+.m-row-disabled td { opacity: 0.5; color: #94a3b8 !important; }
+.m-row-disabled .m-action-flex, .m-row-disabled .m-toggle { opacity: 1; }
+
+/* Pagination */
+.m-pagination-row {
+     display: flex; 
+     justify-content: space-between; 
+     align-items: center; 
+     margin-top: 1.5rem; 
+    }
+.m-page-btns { 
+    display: flex; 
+    align-items: center; 
+    gap: 12px; 
+}
+.m-num-group {
+     display: flex; 
+     gap: 5px; 
+    }
+.m-num-btn { 
+    width: 32px; 
+    height: 32px; 
+    border-radius: 6px; 
+    border: 1px solid #e2e8f0;
+     background: var(--white);
+     cursor: pointer;
+     }
+.m-num-active { 
+    background: var(--primary-color); 
+    color: var(--white);
+ border-color: var(--primary-color);
+ }
+.m-nav-btn { 
+    display: flex; 
+    align-items: center; 
+    gap: 4px; 
+    padding: 6px 12px; 
+    border-radius: 6px; 
+    border: 1px solid #e2e8f0; 
+    background: white; 
+    cursor: pointer; 
+    font-size: var(--font-size-12);
+}
+.m-nav-btn:disabled { 
+    opacity: 0.4; 
+    cursor: not-allowed; 
+}
+
+/* Modallar */
+.m-overlay { 
+    position: fixed; 
+    inset: 0; 
+    background: rgba(15, 23, 42, 0.6);
+     display: flex; 
+     align-items: center; 
+     justify-content: center; 
+     z-index: 9999; 
+     backdrop-filter: blur(4px); 
+    }
+.m-modal {
+     background: white; 
+     width: 95%;
+      max-width: 450px;
+       border-radius: 20px; 
+       overflow: hidden; 
+       animation: m-slide 0.3s ease; }
+.m-modal-sm {
+     max-width: 350px;
+    }
+.m-modal-head {
+     background: var(--primary-color); 
+     color: var(--white);
+      padding: 1.25rem;
+       display: flex; 
+       justify-content: space-between;
+        align-items: center; 
+        font-weight: var(--font-weight-600);
+     }
+.m-modal-body { 
+    padding: 1.5rem; 
+}
+.m-modal-field {
+     margin-bottom: 1rem; 
+    }
+.m-modal-field label { 
+    display: block;
+     margin-bottom: 5px;
+      font-size: var(--font-size-12); 
+      font-weight: var(--font-weight-600); 
+      color: #475569; 
+    }
+.m-modal-grid { 
+    display: grid; 
+    grid-template-columns: 1fr 1fr; 
+    gap: 1rem;
+     margin-bottom: 1rem; 
+    }
+.m-save-btn { 
+    width: 100%; 
+    padding: 0.8rem; 
+    background: var(--primary-color); 
+    color: var(--white); 
+    border: none; 
+    border-radius: 10px; 
+    font-weight: var(--font-weight-700); 
+    cursor: pointer; 
+    margin-top: 0.5rem; }
+
+/* O'chirish modal elementlari */
+.m-warn-circle {
+     width: 70px; 
+     height: 70px; 
+     background: #fee2e2;
+      color: #ef4444;
+       border-radius: 50%; 
+       display: flex; 
+       align-items: center;
+        justify-content: center; 
+        margin: 0 auto 1rem; 
+    }
+.m-modal-btns { 
+    display: flex;
+     gap: var(--gap-10); 
+     margin-top: 1.5rem; 
+    }
+.m-btn-gray { 
+    flex: 1;
+     padding: 0.75rem; 
+     border-radius: 8px; 
+     border: none; 
+     background: #f1f5f9;
+      cursor: pointer;
+     }
+.m-btn-danger {
+     flex: 1; 
+     padding: 0.75rem; 
+     border-radius: 8px; 
+     border: none; 
+     background: #ef4444;
+      color: var(--white); 
+      cursor: pointer; }
+
+/* --- PAGINATION RESPONSIVE FIX --- */
+@media (max-width: 480px) {
+    .m-pagination-row {
+        display: flex !important;
+        flex-direction: column !important; /* Jami: 6 xil va tugmalarni ustma-ust qo'yadi */
+        align-items: center !important;
+        gap: 12px !important;
+        width: 100% !important;
+        padding: 10px 0 !important;
+    }
+
+    .m-page-btns {
+        display: flex !important;
+        flex-direction: row !important; /* Tugmalar yonma-yon turishi shart */
+        justify-content: center !important;
+        align-items: center !important;
+        width: 100% !important;
+        gap: 5px !important;
+        flex-wrap: nowrap !important; /* Siqilib bo'lsa ham bir qatorda turadi */
+    }
+
+    /* "Oldingi" va "Keyingi" so'zlarini butunlay o'chiramiz */
+    .m-nav-btn {
+        width: 38px !important;
+        height: 38px !important;
+        padding: 0 !important;
+        font-size: 0 !important; /* Matnni yashirish */
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        min-width: 38px !important;
+    }
+
+    /* Ikonkalarni tugma markazida chiqarish */
+    .m-nav-btn svg {
+        width: 20px !important;
+        height: 20px !important;
+        margin: 0 !important;
+    }
+
+    /* Sahifa raqamlari */
+    .m-num-btn {
+        width: 34px !important;
+        height: 34px !important;
+        font-size: 14px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
+    .m-num-group {
+        display: flex !important;
+        gap: 4px !important;
+    }
+
+    /* "Jami: 6 xil" yozuvini markazga olish */
+    .m-total-count {
+        margin: 0 !important;
+        font-size: 14px !important;
+        font-weight: 500 !important;
+    }
 }

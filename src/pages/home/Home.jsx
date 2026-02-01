@@ -2,6 +2,8 @@ import React from 'react';
 import { TbMoneybag, TbMeat, TbUsers, TbUserExclamation } from "react-icons/tb";
 import './home.css';
 
+
+
 const Home = ({ open }) => {
   return (
     /* Sidebar holatiga qarab klass o'zgaradi */

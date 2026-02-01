@@ -16,7 +16,9 @@ input {
     outline: none;
 
 }
-
+.cursor-pointer {
+    cursor: pointer;
+}
 /* ROOT VARIABLES (RESPONSIVE) */
 :root {
     /* BORDER FIX — to‘g‘rilandi */
@@ -24,6 +26,8 @@ input {
 
     /* COLOR VARIABLES */
     --primary-color: #9f2728;
+    --primary-hover-color: #751313;
+
     --white: #ffffff;
     --black: #000000;
 
