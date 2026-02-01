@@ -30,5 +30,5 @@
 }
 
 .header-title b {
-    font-weight: 800;
+    font-weight: var(--font-weight-800);
 }
