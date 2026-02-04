@@ -1,0 +1,521 @@
+/* ASOSIY PAGE VA SIDEBAR BILAN TO'QNAShUVNI OLDINI OLISh */
+.tovuqchiqim-page {
+    transition: all 0.3s ease-in-out;
+    min-height: 100vh;
+    background-color: #f8fafc;
+    padding-top: 90px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Sidebar kengligiga qarab padding beramiz */
+.tovuqchiqim-page.sidebar-open {
+    padding-left: 260px;
+}
+
+.tovuqchiqim-page.sidebar-closed {
+    padding-left: 80px;
+}
+
+/* KONTENTNI MARKAZLAShTIRISH */
+.tovuqchiqim-content {
+    width: 100%;
+    max-width: 1200px;
+    /* Kontent juda yoyilib ketmasligi uchun siqildi */
+    margin: 0 auto;
+    /* Sahifa o'rtasiga kelishi uchun */
+    padding: 0 20px 50px 20px;
+    box-sizing: border-box;
+}
+
+/* HEADER */
+.tovuqchiqim-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.tovuqchiqim-title-box h1 {
+    font-size: var(--font-size-25);
+    font-weight: var(--font-weight-800);
+    color: var(--primary-color);
+    margin-left: 60px;
+
+}
+
+.tovuqchiqim-title-box p {
+    color: var(--light-gray);
+    font-size: var(--font-size-14);
+    margin-left: 60px;
+}
+
+.tovuqchiqim-add-btn {
+    background: var(--primary-color);
+    color: var(--white);
+    border: none;
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-weight: var(--font-weight-700);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: var(--gap-10);
+}
+
+/* KAROBKALARNI O'RTADA SIQISh */
+.tovuqchiqim-stats-container {
+    display: grid;
+    /* Karobkalar o'rtada va bir xil o'lchamda turishi uchun */
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+
+    gap: var(--gap-40);
+    margin-left: 47px;
+    margin-bottom: 30px;
+    justify-content: space-between;
+}
+
+.tovuqchiqim-stat-card {
+    background: white;
+    padding: 30px;
+    border-radius: 20px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 6px -1px var(--white);
+    text-align: center;
+}
+
+.tovuqchiqim-info h3 {
+    font-size: var(--font-size-30);
+    margin-top: 10px;
+    color: var(--black);
+}
+
+/* KALKULYATOR BANNER */
+.tovuqchiqim-calc-banner {
+    background: #9b1c1c;
+    color: var(--white);
+    padding: 25px 35px;
+    border-radius: 20px;
+    display: flex;
+    width: calc(100% - 60px);
+    margin-left: 60px;
+    align-items: center;
+    gap: var(--gap-30);
+    margin-bottom: 30px;
+    box-sizing: border-box;
+}
+
+.tovuqchiqim-calc-banner input {
+    flex: 1;
+    padding: 14px;
+    border-radius: 12px;
+    border: 1px solid var(--white);
+    outline: none;
+}
+
+.tovuqchiqim-calc-res {
+    background: var(--white);
+    color: var(--primary-color);
+    padding: 14px 25px;
+    border-radius: 12px;
+    font-weight: var(--font-weight-700);
+}
+
+/* JADVAL */
+.tovuqchiqim-main-card {
+    background: var(--white);
+    border-radius: 20px;
+    border: 1px solid var(--light-gray);
+    margin-left: 60px;
+
+    overflow: hidden;
+    box-shadow: 0 4px 6px -1px var(--white);
+}
+
+.tovuqchiqim-table-tools {
+    padding: 20px;
+    border-bottom: 1px solid var(--white);
+}
+
+.tovuqchiqim-search {
+    position: relative;
+    width: 350px;
+}
+
+.tovuqchiqim-search input {
+    width: 100%;
+    padding: 12px 12px 12px 45px;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+}
+
+.tovuqchiqim-search svg {
+    position: absolute;
+    left: 15px;
+    top: 13px;
+    color: var(--light-gray);
+}
+
+/* TABLE SCROLL (MOBIL UCHUN) */
+.tovuqchiqim-table-responsive {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.tovuqchiqim-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 800px;
+}
+
+.tovuqchiqim-table th {
+    background: var(--white);
+    padding: 18px;
+    text-align: left;
+    font-size: 11px;
+    color: var(--light-gray);
+    text-transform: uppercase;
+}
+
+.tovuqchiqim-table td {
+    padding: 18px;
+    border-bottom: 1px solid var(--white);
+}
+
+/* PAGINATION - O'NGDA */
+.tovuqchiqim-pagination {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: var(--gap-20);
+    padding: 20px;
+    background: var(--white);
+}
+
+.pag-btns {
+    display: flex;
+    gap: var(--gap-10);
+}
+
+.pag-btns button {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    border: 1px solid var(--light-gray);
+    background: var(--white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+/* MODAL FIX */
+.tovuqchiqim-modal {
+    position: fixed;
+    inset: 0;
+    background: var(--white-smoke);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    backdrop-filter: blur(4px);
+}
+
+.tovuqchiqim-modal-content {
+    background: var(--white);
+    padding: 35px;
+    border-radius: 25px;
+    width: 450px;
+    box-sizing: border-box;
+}
+
+.tovuqchiqim-modal-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 25px;
+}
+
+.tovuqchiqim-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-20);
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+}
+
+.tovuqchiqim-form input {
+    width: 100%;
+    padding: 14px;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    box-sizing: border-box;
+}
+
+/* RESPONSIVE (380px va undan kichik ekranlar) */
+@media (max-width: 768px) {
+
+    .tovuqchiqim-page.sidebar-open,
+    .tovuqchiqim-page.sidebar-closed {
+        padding-left: 20px;
+        /* Mobilda sidebar yopilganda yoki tepada bo'lganda */
+    }
+}
+
+@media (max-width: 480px) {
+    .tovuqchiqim-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    .tovuqchiqim-add-btn {
+        width: 100%;
+        justify-content: center;
+        margin-left: 40px;
+    }
+
+    .tovuqchiqim-calc-banner {
+        flex-direction: column;
+        gap: 15px;
+        margin-left: 60px;
+        padding: 20px;
+    }
+
+    .tovuqchiqim-search {
+        width: 100%;
+    }
+
+    .tovuqchiqim-modal-content {
+        width: 95%;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* DIZAYN ELEMENTLARI (STATUS, EDIT, DEL) */
+.tovuqchiqim-toggle {
+    width: 44px;
+    height: 22px;
+    background: #cbd5e1;
+    border-radius: 20px;
+    position: relative;
+    cursor: pointer;
+}
+
+.tovuqchiqim-toggle.active {
+    background: #10b981;
+}
+
+.tovuqchiqim-dot {
+    width: 16px;
+    height: 16px;
+    background: white;
+    border-radius: 50%;
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    transition: 0.2s;
+}
+
+.tovuqchiqim-toggle.active .tovuqchiqim-dot {
+    left: 25px;
+}
+
+.tovuqchiqim-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+}
+
+.tovuqchiqim-edit {
+    background: var(--white);
+    color: var(--primary-color);
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.tovuqchiqim-del {
+    background: var(--white);
+    color: var(--primary-color);
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.close-x {
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--light-gray);
+}
+
+.btn-cancel {
+    background: var(--white);
+    color: var(--light-gray);
+    padding: 14px;
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+    flex: 1;
+}
+
+.tovuqchiqim-save {
+    background: var(--primary-color);
+    color: var(--white);
+    padding: 14px;
+    border-radius: 12px;
+    border: none;
+    cursor: pointer;
+    flex: 1;
+}
+
+.tovuqchiqim-confirm-box {
+    text-align: center;
+    background: var(--white);
+    padding: 40px;
+    border-radius: 25px;
+    width: 400px;
+    box-sizing: border-box;
+}
+
+/* Faqat jadval (mahsulotlar) qismini scroll qilish */
+.tovuqchiqim-table-responsive {
+    width: 100%;
+    max-height: 450px;
+    /* Jadvalning maksimal balandligi */
+    overflow-y: auto;
+    /* Tikka (vertical) scroll */
+    overflow-x: auto;
+    /* Yotiq (horizontal) scroll mobil uchun */
+    border-bottom: 1px solid var(--white);
+}
+
+/* Scrollbarni ixcham qilish */
+.tovuqchiqim-table-responsive::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+}
+
+.tovuqchiqim-table-responsive::-webkit-scrollbar-thumb {
+    background: var(--light-gray);
+    border-radius: 10px;
+}
+
+/* Jadval sarlavhasi scroll paytida tepada qotib turishi uchun */
+.tovuqchiqim-table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: var(--white);
+}
+
+/* CHOP ETISH TUGMASI STILI */
+.tovuqchiqim-print-btn {
+    background: #64748b;
+    /* Kulrangroq rang dizayn buzilmasligi uchun */
+    color: var(--white);
+    border: none;
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: var(--gap-10);
+    transition: 0.3s;
+}
+
+.tovuqchiqim-print-btn:hover {
+    background: var(--light-gray);
+}
+
+/* PDF CHOP ETILAYOTGANDA KERAKSIZLARNI YASHIRISH */
+@media print {
+
+    .tovuqchiqim-add-btn,
+    .tovuqchiqim-print-btn,
+    .tovuqchiqim-search,
+    .tovuqchiqim-actions,
+    .pag-btns,
+    .tovuqchiqim-calc-banner,
+    .sidebar,
+    /* Sidebar klassing nomi nima bo'lsa shuni yozasan */
+    aside {
+        display: none !important;
+    }
+
+    .tovuqchiqim-page {
+        padding-left: 0 !important;
+        padding-top: 0 !important;
+    }
+
+    .tovuqchiqim-main-card {
+        margin-left: 0 !important;
+        box-shadow: none !important;
+        border: none !important;
+    }
+
+    .tovuqchiqim-table-responsive {
+        max-height: none !important;
+        /* Scrollni yopib, hamma listni chiqaradi */
+        overflow: visible !important;
+    }
+}
+/* Qator holatiga qarab ranglar */
+.row-active {
+    background-color: transparent;
+}
+
+.row-disabled {
+    background-color: var(--white-smoke);
+    opacity: 0.7;
+}
+
+.row-disabled .tovuqchiqim-bold, 
+.row-disabled .tovuqchiqim-vendor {
+    color: #94a3b8 !important;
+}
+
+/* Toggle (Knopka) stili */
+.tovuqchiqim-toggle {
+    width: 44px;
+    height: 22px;
+    background: #cbd5e1; /* Noactive holatda kulrang */
+    border-radius: 20px;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.tovuqchiqim-toggle.active {
+    background: #10b981; /* Active holatda yashil */
+}
+
+.tovuqchiqim-dot {
+    width: 16px;
+    height: 16px;
+    background: white;
+    border-radius: 50%;
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tovuqchiqim-toggle.active .tovuqchiqim-dot {
+    left: 25px; /* Aktiv bo'lganda o'ngga suriladi */
+}
