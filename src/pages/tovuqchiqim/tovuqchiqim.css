@@ -86,14 +86,14 @@
 }
 
 .tovuqchiqim-info h3 {
-    font-size: var(--font-size-30);
+    font-size: var(--font-size-20);
     margin-top: 10px;
     color: var(--black);
 }
 
 /* KALKULYATOR BANNER */
 .tovuqchiqim-calc-banner {
-    background: #9b1c1c;
+    background: var(--primary-color);
     color: var(--white);
     padding: 25px 35px;
     border-radius: 20px;
@@ -518,4 +518,51 @@
 
 .tovuqchiqim-toggle.active .tovuqchiqim-dot {
     left: 25px; /* Aktiv bo'lganda o'ngga suriladi */
+}
+/* RESPONSIVE (Mobil qurilmalar uchun) */
+@media (max-width: 480px) {
+    .tovuqchiqim-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 20px;
+    }
+
+    /* Tugmalar konteynerini ustma-ust qilish */
+    .tovuqchiqim-header-btns {
+        flex-direction: column; 
+        width: 100%;
+        margin-left: 0; /* Headerdagi marginlarni mobilda nolga tushiramiz */
+        gap: 12px;
+    }
+
+    /* Har bir tugmani 100% qilish */
+    .tovuqchiqim-print-btn,
+    .tovuqchiqim-add-btn {
+        width: 100%;
+        justify-content: center; /* Ikonka va matn markazda turishi uchun */
+        margin-left: 0 !important;
+        box-sizing: border-box;
+    }
+
+    .tovuqchiqim-title-box h1,
+    .tovuqchiqim-title-box p {
+        margin-left: 0; /* Mobilda sarlavhani chapga surish */
+    }
+
+    .tovuqchiqim-calc-banner {
+        flex-direction: column;
+        gap: 15px;
+        margin-left: 0;
+        width: 100%;
+        padding: 20px;
+    }
+
+    .tovuqchiqim-main-card {
+        margin-left: 0;
+    }
+
+    .tovuqchiqim-stats-container {
+        margin-left: 0;
+        grid-template-columns: 1fr; /* Stat kartalar ham ustma-ust */
+    }
 }

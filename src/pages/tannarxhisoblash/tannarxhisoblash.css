@@ -55,7 +55,7 @@
 }
 
 .main-page-title {
-    font-size: 26px;
+    font-size: var(--font-size-25);
     color: #1e293b;
     margin: 0;
 }
@@ -325,10 +325,25 @@ input:checked+.toggle-slider:before {
 }
 
 .confirm-del-btn {
-    background: #b91c1c;
+    background: var(--primary-color);
     color: white;
     border: none;
     padding: 12px 30px;
     border-radius: 10px;
     cursor: pointer;
+}
+/* Responsive: Tugma ichidagi textni pastga tushirish */
+@media (max-width: 576px) {
+    .add-main-btn {
+        width: 100%;
+        padding: 10px;
+        text-align: center;
+        gap: 4px; /* Icon va text orasidagi masofa */
+        font-size: var(--font-size-12); /* Kichik ekran uchun matnni biroz kichraytirish */
+    }
+
+    .page-header-box {
+        gap: 10px; /* Header elementlari orasidagi masofa */
+        flex-direction: column;
+    }
 }

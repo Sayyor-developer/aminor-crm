@@ -103,7 +103,7 @@ const Tovuqchiqim = ({ open }) => {
         
         <div className="tovuqchiqim-header">
           <div className="tovuqchiqim-title-box">
-            <h1>Dashboard - Tovuq Chiqimlari</h1>
+            <h1>Tovuq Chiqimlari</h1>
             <p>Barcha mahsulotlar nazorati va hisoboti</p>
           </div>
           
