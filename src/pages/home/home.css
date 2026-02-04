@@ -1,120 +1,254 @@
+/* --- ASOSIY DIZAYN (O'ZGARISHSIZ) --- */
 .home-page {
     position: absolute;
-    top: 100px;
-    left: 260px; /* Sidebar ochiq holati */
+    top: 70px;
+    left: 260px;
+    /* Sidebar ochiq holati */
     right: 0;
     padding: 20px;
     background-color: #f4f6f9;
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    min-height: calc(100vh - 100px);
 }
 
-.home-page.sidebar-closed {
-    left : 80px;
+.home-page.sidebar-h-closed {
+    
+    left: 80px;
 }
 
 .main-wrapper {
     display: flex;
     flex-direction: column;
-    gap: var(--gap-30);
+    gap: 30px;
+    max-width: 1600px;
+    margin: 0 auto;
 }
 
 .stats-container {
-    display: flex;
-    align-items: center;
-    justify-content: space-around;
-    flex-wrap: wrap; 
-    gap: var(--gap-20);
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
     width: 100%;
 }
 
 .stat-card {
-    background: #ffffff;
-    border: 1px solid #e0e6ed;
+    background: var(--white);
+    border: 1px solid var(--light-gray);
     border-radius: 12px;
-    padding: 20px;
-    min-width: 240px; 
-    flex: 1 1 calc(25% - 20px);
+    padding: 16px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    box-shadow: 0 1px 3px var(--white-smoke);
+    transition: transform 0.2s ease;
+}
+
+.stat-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px var(--white-smoke);
 }
 
 .stat-header {
     display: flex;
     align-items: center;
-    gap: var(--gap-10);
+    gap: 12px;
+    margin-bottom: 10px;
 }
 
 .icon-box {
-    width: 45px;
-    height: 45px;
+    width: 42px;
+    height: 42px;
     border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
 }
 
 .icon-svg {
-     font-size: var(--font-size-25);
+    font-size: var(--font-size-20);
 }
 
-/* Ranglar */
-.blue-bg { background: #eef2ff; color: #4338ca; }
-.red-bg { background: #fff1f2; color: #e11d48; }
-.purple-bg { background: #faf5ff; color: #7c3aed; }
-.orange-bg { background: #fff7ed; color: #ea580c; }
+.blue-bg {
+    background:
+var(--white-smoke);
+    color: #4338ca;
+}
+
+.red-bg {
+    background:
+var(--white-smoke);
+    color: #e11d48;
+}
+
+.purple-bg {
+    background:
+var(--white-smoke);
+    color: #7c3aed;
+}
+
+.orange-bg {
+    background:
+var(--white-smoke);
+    color: #ea580c;
+}
+
+.stat-label {
+    font-size: var(--font-size-16);
+    color: var(--black);
+    font-weight: var(--font-weight-500);
+}
 
 .stat-value {
-    font-size: var(--font-size-25);
+    font-size: var(--font-size-20);
     font-weight: var(--font-weight-700);
-    color: #1e293b;
+    color: var(--black);
     margin: 10px 0;
+    display: flex;
+    align-items: baseline;
+    gap: var(--gap-10);
 }
 
-.unit { 
+.unit {
     font-size: var(--font-size-14);
-    color: #64748b; 
+    color: var(--white);
     font-weight: var(--font-weight-400);
 }
 
 .stat-footer {
-    font-size: var(--font-size-12);
+    font-size: var(--font-size-14);
     color: #94a3b8;
-    margin-top: 10px;
+    margin-top: auto;
     padding-top: 10px;
     border-top: 1px solid #f1f5f9;
 }
 
-/* --- Diagramma uchun yangi qo'shilgan CSS --- */
-
 .chart-section {
-    background: #ffffff;
+    background: var(--white);
     border: 1px solid #e0e6ed;
     border-radius: 12px;
-    padding: 20px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+    padding: 15px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap
+    ;
+    margin-bottom: 25px;
 }
 
 .section-title {
-    font-size: var(--font-size-18, 18px);
-    font-weight: var(--font-weight-600, 600);
-    color: #2d3748;
-    margin-bottom: var(--gap-20);
+    font-size: var(--font-size-18);
+    font-weight: var(--font-weight-600);
+    color: #1e293b;
+    margin: 0;
+}
+
+.period-select {
+    padding: 8px 16px;
+    border: 1px solid var(white);
+    border-radius: 8px;
+    background-color: var(--white);
+    color: #475569;
+    font-size: var(--font-size-14);
+    font-weight: var(--font-weight-500);
+    cursor: pointer;
 }
 
 .chart-wrapper {
     width: 100%;
-    overflow-x: auto; /* Mobilda scroll bo'lishi uchun */
+    height: 320px;
 }
 
-/* Mobilda ko'rinishni to'g'rilash */
-@media (max-width: 768px) {
+/* --- MANASHU QISMI RASMDAGIDEK QILIB TO'G'IRLANDI --- */
+
+@media (max-width: 480px) {
     .home-page {
-        left: 0 !important;
-        padding: 15px;
+        /* Sidebar yonida bo'sh joy qoldirish */
+        left: 80px !important;
+        padding: 20px !important;
+        position: relative !important;
+        top: 10 !important;
+        width: calc(100% - 80px) !important;
+        /* Ekran kengligidan sidebar kengligini ayiramiz */
+        box-sizing: border-box;
     }
+
+    .main-wrapper {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        /* Barcha elementlarni o'rtaga tekislaydi */
+        justify-content: center !important;
+        width: 100% !important;
+        margin: 0 auto !important;
+    }
+
+    .stats-container {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        /* Kartochkalarni o'rtaga markazlaydi */
+        width: 100% !important;
+        gap: 15px !important;
+        max-width: 350px;
+        /* Kartochkalar haddan tashqari kengayib ketmasligi uchun */
+        margin: 0 auto !important;
+    }
+
     .stat-card {
-        flex: 1 1 100%;
+        width: 100% !important;
+        /* stats-container ichida to'liq eni bo'yicha markazda turadi */
+        max-width: 320px !important;
+        /* Rasmdagi kabi ixcham ko'rinish uchun */
+        margin: 0 auto !important;
+        border-radius: 16px !important;
+        /* Burchaklarni yanada yumshoqroq qilish */
+        padding: 15px !important;
     }
+
+    /* Diagramma qismi ham o'rtada turishi uchun */
+    .chart-section {
+        width: 100% !important;
+        max-width: 340px !important;
+        margin: 0 auto !important;
+        box-sizing: border-box;
+    }
+}
+
+/* 380px va undan kichik ekranlar uchun qo'shimcha aniqlik */
+@media (max-width: 380px) {
+    .home-page {
+        left: 70px !important;
+        width: calc(100% - 70px) !important;
+    }
+
+    .stats-container {
+        max-width: 290px;
+    }
+}
+
+/* .clickable-card { */
+/* cursor: pointer; */
+/* transition: all 0.3s ease !important; */
+/* } */
+
+
+.clickable-card {
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.clickable-card:hover {
+    transform: scale(1.02);
+    border-color: #6366f1;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.03);
+    background-color: var(white);
+}
+
+.clickable-card:active {
+    transform: translateY(-2px) scale(0.98);
 }

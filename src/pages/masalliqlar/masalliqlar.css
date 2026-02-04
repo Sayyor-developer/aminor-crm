@@ -4,11 +4,16 @@
     padding: 2rem;
     background-color: #f1f5f9;
     min-height: 100vh;
-    margin-top: 70px;
+    margin-top: 60px;
 }
 
-.m-sidebar-open { margin-left: 260px; }
-.m-sidebar-closed { margin-left: 80px; }
+.m-sidebar-open {
+    margin-left: 260px;
+}
+
+.m-sidebar-closed {
+    margin-left: 80px;
+}
 
 .m-container {
     max-width: 1200px;
@@ -67,7 +72,8 @@
     margin-bottom: 1.25rem;
 }
 
-.m-custom-input, .m-custom-select {
+.m-custom-input,
+.m-custom-select {
     width: 100%;
     padding: 0.75rem 1rem;
     border: 1.5px solid #e2e8f0;
@@ -84,8 +90,15 @@
     box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
 }
 
-.m-split-input { display: flex; gap: 8px; }
-.m-custom-select { width: 90px; cursor: pointer; }
+.m-split-input {
+    display: flex;
+    gap: 8px;
+}
+
+.m-custom-select {
+    width: 90px;
+    cursor: pointer;
+}
 
 /* Tugmalar */
 .m-add-btn {
@@ -102,64 +115,73 @@
     transition: 0.2s;
 }
 
-.m-add-btn:hover { 
-    background: var(--primary-hover-color); 
+.m-add-btn:hover {
+    background: var(--primary-hover-color);
 }
 
 /* Qidiruv */
-.m-search-box { 
-    position: relative; 
-    margin-bottom: 1.5rem; 
+.m-search-box {
+    position: relative;
+    margin-bottom: 1.5rem;
 }
-.m-search-icon { 
-    position: absolute; 
-    left:12px; 
-    top: 50%; 
-    transform: translateY(-50%); 
-    color: #94a3b8; 
+
+.m-search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
 }
+
 .m-pl-40 {
-     padding-left: 45px !important; 
-    }
+    padding-left: 45px !important;
+}
 
 /* Jadval */
-.m-table-wrapper { 
-    overflow-x: auto; 
-    border-radius: 12px; 
-    border: 1px solid #f1f5f9; }
-.m-data-table { 
-    width: 100%; 
-    border-collapse: collapse; 
-    text-align: left; 
-}
-.m-data-table th { 
-    background: #f8fafc; 
-    padding: 1rem; 
-    font-size: 0.75rem; 
-    text-transform: uppercase; 
-    color: #64748b; 
-    font-weight: var(--font-weight-700); 
-}
-.m-data-table td { 
-    padding: 1rem; 
-    font-size: var(--font-size-14); 
-    border-bottom: 1px solid #f1f5f9; 
-    color: #334155; 
+.m-table-wrapper {
+    overflow-x: auto;
+    border-radius: 12px;
+    border: 1px solid #f1f5f9;
 }
 
-.m-font-bold { 
-    font-weight: var(--font-weight-600); 
-    color: #1e293b; }
-.m-price-col { 
-    font-weight: var(--font-weight-700); 
-    color: #059669; 
+.m-data-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: left;
 }
-.m-tag { 
-    background: #f1f5f9; 
-    padding: 2px 6px; 
-    border-radius: 4px; 
-    font-size: var(--font-size-12); 
-    color: #64748b; 
+
+.m-data-table th {
+    background: #f8fafc;
+    padding: 1rem;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    color: #64748b;
+    font-weight: var(--font-weight-700);
+}
+
+.m-data-table td {
+    padding: 1rem;
+    font-size: var(--font-size-14);
+    border-bottom: 1px solid #f1f5f9;
+    color: #334155;
+}
+
+.m-font-bold {
+    font-weight: var(--font-weight-600);
+    color: #1e293b;
+}
+
+.m-price-col {
+    font-weight: var(--font-weight-700);
+    color: #059669;
+}
+
+.m-tag {
+    background: #f1f5f9;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: var(--font-size-12);
+    color: #64748b;
 }
 
 /* Status Toggle (Switch) */
@@ -172,8 +194,15 @@
     transition: 0.3s;
     margin: 0 auto;
 }
-.m-toggle-on { background: #10b981; }
-.m-toggle-off { background: #cbd5e1; }
+
+.m-toggle-on {
+    background: #10b981;
+}
+
+.m-toggle-off {
+    background: #cbd5e1;
+}
+
 .m-toggle-circle {
     width: 16px;
     height: 16px;
@@ -183,176 +212,218 @@
     top: 3px;
     transition: 0.3s;
 }
-.m-toggle-on .m-toggle-circle { left: 25px; }
-.m-toggle-off .m-toggle-circle { left: 3px; }
+
+.m-toggle-on .m-toggle-circle {
+    left: 25px;
+}
+
+.m-toggle-off .m-toggle-circle {
+    left: 3px;
+}
 
 /* Amallar */
-.m-action-flex { 
-    display: flex; 
-    justify-content: center; 
-    gap: 8px; }
-.m-icon-btn { 
-    width: 32px; 
-    height: 32px; 
-    border-radius: 8px; 
-    border: none; 
-    display: flex; 
-    align-items: center; 
-    justify-content: center; 
-    cursor: pointer; 
+.m-action-flex {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+}
+
+.m-icon-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
     color: var(--white);
 }
-.m-edit { background: var(--primary-color); }
-.m-delete { background: var(--primary-color); }
+
+.m-edit {
+    background: var(--primary-color);
+}
+
+.m-delete {
+    background: var(--primary-color);
+}
 
 /* Row Disabled */
-.m-row-disabled td { opacity: 0.5; color: #94a3b8 !important; }
-.m-row-disabled .m-action-flex, .m-row-disabled .m-toggle { opacity: 1; }
+.m-row-disabled td {
+    opacity: 0.5;
+    color: #94a3b8 !important;
+}
+
+.m-row-disabled .m-action-flex,
+.m-row-disabled .m-toggle {
+    opacity: 1;
+}
 
 /* Pagination */
 .m-pagination-row {
-     display: flex; 
-     justify-content: space-between; 
-     align-items: center; 
-     margin-top: 1.5rem; 
-    }
-.m-page-btns { 
-    display: flex; 
-    align-items: center; 
-    gap: 12px; 
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1.5rem;
 }
+
+.m-page-btns {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
 .m-num-group {
-     display: flex; 
-     gap: 5px; 
-    }
-.m-num-btn { 
-    width: 32px; 
-    height: 32px; 
-    border-radius: 6px; 
+    display: flex;
+    gap: 5px;
+}
+
+.m-num-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
     border: 1px solid #e2e8f0;
-     background: var(--white);
-     cursor: pointer;
-     }
-.m-num-active { 
-    background: var(--primary-color); 
+    background: var(--white);
+    cursor: pointer;
+}
+
+.m-num-active {
+    background: var(--primary-color);
     color: var(--white);
- border-color: var(--primary-color);
- }
-.m-nav-btn { 
-    display: flex; 
-    align-items: center; 
-    gap: 4px; 
-    padding: 6px 12px; 
-    border-radius: 6px; 
-    border: 1px solid #e2e8f0; 
-    background: white; 
-    cursor: pointer; 
+    border-color: var(--primary-color);
+}
+
+.m-nav-btn {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
+    background: white;
+    cursor: pointer;
     font-size: var(--font-size-12);
 }
-.m-nav-btn:disabled { 
-    opacity: 0.4; 
-    cursor: not-allowed; 
+
+.m-nav-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
 }
 
 /* Modallar */
-.m-overlay { 
-    position: fixed; 
-    inset: 0; 
+.m-overlay {
+    position: fixed;
+    inset: 0;
     background: rgba(15, 23, 42, 0.6);
-     display: flex; 
-     align-items: center; 
-     justify-content: center; 
-     z-index: 9999; 
-     backdrop-filter: blur(4px); 
-    }
-.m-modal {
-     background: white; 
-     width: 95%;
-      max-width: 450px;
-       border-radius: 20px; 
-       overflow: hidden; 
-       animation: m-slide 0.3s ease; }
-.m-modal-sm {
-     max-width: 350px;
-    }
-.m-modal-head {
-     background: var(--primary-color); 
-     color: var(--white);
-      padding: 1.25rem;
-       display: flex; 
-       justify-content: space-between;
-        align-items: center; 
-        font-weight: var(--font-weight-600);
-     }
-.m-modal-body { 
-    padding: 1.5rem; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    backdrop-filter: blur(4px);
 }
+
+.m-modal {
+    background: white;
+    width: 95%;
+    max-width: 450px;
+    border-radius: 20px;
+    overflow: hidden;
+    animation: m-slide 0.3s ease;
+}
+
+.m-modal-sm {
+    max-width: 350px;
+}
+
+.m-modal-head {
+    background: var(--primary-color);
+    color: var(--white);
+    padding: 1.25rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: var(--font-weight-600);
+}
+
+.m-modal-body {
+    padding: 1.5rem;
+}
+
 .m-modal-field {
-     margin-bottom: 1rem; 
-    }
-.m-modal-field label { 
+    margin-bottom: 1rem;
+}
+
+.m-modal-field label {
     display: block;
-     margin-bottom: 5px;
-      font-size: var(--font-size-12); 
-      font-weight: var(--font-weight-600); 
-      color: #475569; 
-    }
-.m-modal-grid { 
-    display: grid; 
-    grid-template-columns: 1fr 1fr; 
+    margin-bottom: 5px;
+    font-size: var(--font-size-12);
+    font-weight: var(--font-weight-600);
+    color: #475569;
+}
+
+.m-modal-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     gap: 1rem;
-     margin-bottom: 1rem; 
-    }
-.m-save-btn { 
-    width: 100%; 
-    padding: 0.8rem; 
-    background: var(--primary-color); 
-    color: var(--white); 
-    border: none; 
-    border-radius: 10px; 
-    font-weight: var(--font-weight-700); 
-    cursor: pointer; 
-    margin-top: 0.5rem; }
+    margin-bottom: 1rem;
+}
+
+.m-save-btn {
+    width: 100%;
+    padding: 0.8rem;
+    background: var(--primary-color);
+    color: var(--white);
+    border: none;
+    border-radius: 10px;
+    font-weight: var(--font-weight-700);
+    cursor: pointer;
+    margin-top: 0.5rem;
+}
 
 /* O'chirish modal elementlari */
 .m-warn-circle {
-     width: 70px; 
-     height: 70px; 
-     background: #fee2e2;
-      color: #ef4444;
-       border-radius: 50%; 
-       display: flex; 
-       align-items: center;
-        justify-content: center; 
-        margin: 0 auto 1rem; 
-    }
-.m-modal-btns { 
+    width: 70px;
+    height: 70px;
+    background: #fee2e2;
+    color: #ef4444;
+    border-radius: 50%;
     display: flex;
-     gap: var(--gap-10); 
-     margin-top: 1.5rem; 
-    }
-.m-btn-gray { 
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1rem;
+}
+
+.m-modal-btns {
+    display: flex;
+    gap: var(--gap-10);
+    margin-top: 1.5rem;
+}
+
+.m-btn-gray {
     flex: 1;
-     padding: 0.75rem; 
-     border-radius: 8px; 
-     border: none; 
-     background: #f1f5f9;
-      cursor: pointer;
-     }
+    padding: 0.75rem;
+    border-radius: 8px;
+    border: none;
+    background: #f1f5f9;
+    cursor: pointer;
+}
+
 .m-btn-danger {
-     flex: 1; 
-     padding: 0.75rem; 
-     border-radius: 8px; 
-     border: none; 
-     background: #ef4444;
-      color: var(--white); 
-      cursor: pointer; }
+    flex: 1;
+    padding: 0.75rem;
+    border-radius: 8px;
+    border: none;
+    background: #ef4444;
+    color: var(--white);
+    cursor: pointer;
+}
 
 /* --- PAGINATION RESPONSIVE FIX --- */
 @media (max-width: 480px) {
     .m-pagination-row {
         display: flex !important;
-        flex-direction: column !important; /* Jami: 6 xil va tugmalarni ustma-ust qo'yadi */
+        flex-direction: column !important;
+        /* Jami: 6 xil va tugmalarni ustma-ust qo'yadi */
         align-items: center !important;
         gap: 12px !important;
         width: 100% !important;
@@ -361,12 +432,14 @@
 
     .m-page-btns {
         display: flex !important;
-        flex-direction: row !important; /* Tugmalar yonma-yon turishi shart */
+        flex-direction: row !important;
+        /* Tugmalar yonma-yon turishi shart */
         justify-content: center !important;
         align-items: center !important;
         width: 100% !important;
         gap: 5px !important;
-        flex-wrap: nowrap !important; /* Siqilib bo'lsa ham bir qatorda turadi */
+        flex-wrap: nowrap !important;
+        /* Siqilib bo'lsa ham bir qatorda turadi */
     }
 
     /* "Oldingi" va "Keyingi" so'zlarini butunlay o'chiramiz */
@@ -374,7 +447,8 @@
         width: 38px !important;
         height: 38px !important;
         padding: 0 !important;
-        font-size: 0 !important; /* Matnni yashirish */
+        font-size: 0 !important;
+        /* Matnni yashirish */
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
@@ -409,4 +483,67 @@
         font-size: 14px !important;
         font-weight: 500 !important;
     }
+}
+
+/* 1. Jadvalni o'rab turgan qism - balandlikni cheklaymiz */
+.m-table-wrapper {
+    max-height: 600px;
+    /* 15 ta qator uchun ideal balandlik */
+    overflow-y: auto;
+    /* Faqat vertikal skroll */
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    background: #fff;
+}
+
+/* 2. Skroll bo'lganda jadval tepasi (header) qotib turishi uchun */
+.m-data-table thead th {
+    position: sticky;
+    top: 0;
+    background-color: #f8fafc;
+    /* Orqa fon rangi */
+    z-index: 5;
+    box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1);
+    /* Header ajralib turishi uchun */
+}
+
+/* 3. Pagination tugmalari qismi (pastda chiroyli turishi uchun) */
+.m-pagination-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 0;
+    margin-top: 10px;
+}
+
+.m-page-btns {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.m-num-btn {
+    width: 35px;
+    height: 35px;
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
+    background: #fff;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.m-num-active {
+    background: #3b82f6;
+    color: #fff;
+    border-color: #3b82f6;
+}
+
+/* 4. Skrollbarni chiroyli qilish (Chrome va Safari uchun) */
+.m-table-wrapper::-webkit-scrollbar {
+    width: 6px;
+}
+
+.m-table-wrapper::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 10px;
 }

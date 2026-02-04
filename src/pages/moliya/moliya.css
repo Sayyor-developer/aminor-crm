@@ -1,0 +1,261 @@
+:root {
+    --sb-open: 260px;
+    --sb-closed: 80px;
+    --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --bg-main: #f8f9fa;
+    --white: #ffffff;
+    --text-gray: #6b7280;
+    --green: #10b981;
+    --red: #ef4444;
+    --blue: #3b82f6;
+    --purple: #a855f7;
+}
+
+/* ASOSIY WRAPPER */
+.moliya-wrapper {
+    width: 100%;
+    min-height: 100vh;
+    background-color: var(--bg-main);
+    display: flex;
+    overflow-x: hidden;
+    /* Gorizontal scroll 100% yo'qoladi */
+    box-sizing: border-box;
+}
+
+/* KONTENT KONTEYNERI */
+.moliya-container {
+    flex: 1;
+    padding: 25px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+    transition: margin-left var(--transition), width var(--transition);
+}
+
+/* Sidebar holatiga qarab kontent o'lchami */
+.sidebar-moliya-open .moliya-container {
+    margin-left: var(--sb-open);
+    width: calc(100% - var(--sb-open));
+}
+
+.sidebar-moliya-closed .moliya-container {
+    margin-left: var(--sb-closed);
+    width: calc(100% - var(--sb-closed));
+}
+
+/* SARLAVHA */
+.header-section {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.header-title {
+    font-size: 24px;
+    font-weight: 800;
+    color: #1a1a1a;
+    margin: 0;
+}
+
+.header-subtitle {
+    color: var(--text-gray);
+    font-size: 14px;
+}
+
+/* 4 TALIK STATISTIKA KARTALARI */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+    width: 100%;
+}
+
+.stat-card {
+    background: var(--white);
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    border: 1px solid #edf2f7;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.stat-card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.icon-box {
+    padding: 8px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.trend-val {
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.stat-label {
+    color: var(--text-gray);
+    font-size: 14px;
+}
+
+.stat-value {
+    font-size: 22px;
+    font-weight: 800;
+}
+
+/* GRAFIK VA STATISTIKA BLOGI */
+.content-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 20px;
+    width: 100%;
+}
+
+.white-card {
+    background: var(--white);
+    padding: 25px;
+    border-radius: 15px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    border: 1px solid #edf2f7;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+.card-title {
+    margin: 0 0 20px 0;
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.chart-box {
+    width: 100%;
+    height: 320px;
+}
+
+/* DAVRIY STATISTIKA */
+.period-box {
+    padding: 15px;
+    border-radius: 12px;
+    margin-bottom: 15px;
+}
+
+.p-blue {
+    background: #f0f7ff;
+    border: 1px solid #e0efff;
+}
+
+.p-green {
+    background: #f0fff4;
+    border: 1px solid #dfffee;
+}
+
+.data-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    margin-bottom: 5px;
+}
+
+.foida-row {
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+    padding-top: 10px;
+    font-weight: 800;
+    color: var(--green);
+}
+
+/* JADVAL */
+.table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.main-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.main-table th {
+    padding: 12px;
+    text-align: left;
+    background: #f9fafb;
+    color: var(--text-gray);
+    font-size: 12px;
+}
+
+.main-table td {
+    padding: 12px;
+    border-bottom: 1px solid #edf2f7;
+    font-size: 14px;
+}
+
+/* RANGLAR VA CHEGARALAR */
+.border-green {
+    border-left: 5px solid var(--green);
+}
+
+.border-red {
+    border-left: 5px solid var(--red);
+}
+
+.border-blue {
+    border-left: 5px solid var(--blue);
+}
+
+.border-purple {
+    border-left: 5px solid var(--purple);
+}
+
+.bg-green-soft {
+    background: #d1fae5;
+    color: var(--green);
+}
+
+.bg-red-soft {
+    background: #fee2e2;
+    color: var(--red);
+}
+
+.bg-blue-soft {
+    background: #dbeafe;
+    color: var(--blue);
+}
+
+.bg-purple-soft {
+    background: #f3e8ff;
+    color: var(--purple);
+}
+
+.text-kirim {
+    color: var(--green);
+    font-weight: 700;
+}
+
+.text-chiqim {
+    color: var(--red);
+    font-weight: 700;
+}
+
+/* RESPONSIVE */
+@media (max-width: 1024px) {
+    .content-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+
+    .sidebar-open .moliya-container,
+    .sidebar-closed .moliya-container {
+        margin-left: 70px;
+        width: calc(100% - 70px);
+        padding: 15px;
+    }
+}

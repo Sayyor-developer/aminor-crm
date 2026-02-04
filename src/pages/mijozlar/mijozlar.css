@@ -4,11 +4,16 @@
     padding: 1.5rem;
     background-color: #f9fafb;
     min-height: 100vh;
-    margin-top: 70px;
+    margin-top: 60px;
 }
 
-.sidebar-ochiq { margin-left: 260px; }
-.sidebar-yopiq { margin-left: 80px; }
+.sidebar-ochiq {
+    margin-left: 260px;
+}
+
+.sidebar-yopiq {
+    margin-left: 80px;
+}
 
 .konteyner {
     max-width: 80rem;
@@ -28,7 +33,7 @@
     width: 2.5rem;
     height: 2.5rem;
     border-radius: 50%;
-    background-color: var(--primary-color); 
+    background-color: var(--primary-color);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -45,15 +50,17 @@
 
 /* Ism statusiga qarab o'zgarishi */
 .ism-active {
-    color: var(--primary-color) !important; /* To'q qora */
+    color: var(--primary-color) !important;
+    /* To'q qora */
     cursor: pointer;
     font-weight: var(--font-weight-600);
 }
 
 .ism-inactive {
-    color: #9ca3af !important; /* Xira rang */
+    color: #9ca3af !important;
+    /* Xira rang */
     cursor: default;
-    pointer-events: none; 
+    pointer-events: none;
     opacity: 0.6;
 }
 
@@ -64,7 +71,7 @@
     padding: 1.5rem;
     margin-bottom: 1.5rem;
     border: 1px solid #f1f5f9;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .card-title {
@@ -109,7 +116,9 @@
     color: #94a3b8;
 }
 
-.pl-icon { padding-left: 40px; }
+.pl-icon {
+    padding-left: 40px;
+}
 
 /* Tugmalar */
 .btn-blue {
@@ -125,22 +134,26 @@
     font-size: 0.875rem;
 }
 
-.btn-blue:hover { 
-    background-color: var(--primary-hover-color); 
+.btn-blue:hover {
+    background-color: var(--primary-hover-color);
 }
-.btn-red { 
+
+.btn-red {
     background-color: var(--primary-color);
- }
-.btn-red:hover { 
-    background-color: var(--primary-hover-color); 
 }
-.btn-icon { 
-    padding: 5px; 
+
+.btn-red:hover {
+    background-color: var(--primary-hover-color);
 }
+
+.btn-icon {
+    padding: 5px;
+}
+
 .btn-full {
-     width: 100%; 
-     justify-content: center; 
-    }
+    width: 100%;
+    justify-content: center;
+}
 
 /* Jadval */
 .jadval-qobiq {
@@ -170,9 +183,19 @@
     border-bottom: 1px solid #f1f5f9;
 }
 
-.text-center { text-align: center; }
-.font-medium { font-weight: 500; }
-.flex-center { display: flex; justify-content: center; gap: 8px; }
+.text-center {
+    text-align: center;
+}
+
+.font-medium {
+    font-weight: 500;
+}
+
+.flex-center {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+}
 
 /* Status Switch */
 .switch {
@@ -185,8 +208,13 @@
     transition: 0.3s;
 }
 
-.switch-on { background-color: #10b981; }
-.switch-off { background-color: #cbd5e1; }
+.switch-on {
+    background-color: #10b981;
+}
+
+.switch-off {
+    background-color: #cbd5e1;
+}
 
 .knopka {
     width: 0.75rem;
@@ -198,8 +226,13 @@
     transition: 0.3s;
 }
 
-.knopka-on { left: 24px; }
-.knopka-off { left: 4px; }
+.knopka-on {
+    left: 24px;
+}
+
+.knopka-off {
+    left: 4px;
+}
 
 /* Pagination */
 .pagination {
@@ -210,7 +243,10 @@
     padding-top: 1rem;
 }
 
-.bet-btn-guruhi { display: flex; gap: 5px; }
+.bet-btn-guruhi {
+    display: flex;
+    gap: 5px;
+}
 
 .bet-btn {
     width: 2rem;
@@ -234,7 +270,7 @@
 .modal-parda {
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,0.5);
+    background: rgba(0, 0, 0, 0.5);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -265,25 +301,31 @@
     gap: 1rem;
 }
 
-.cursor-pointer { cursor: pointer; }
+.cursor-pointer {
+    cursor: pointer;
+}
 
 
 /* ... avvalgi CSS kodlari o'zgarishsiz ... */
 
 /* Inactive qator uchun uslublar */
 .inactive-row td:not(:last-child):not(:nth-last-child(2)) {
-    color: #9ca3af !important; /* Ma'lumotlar xiralashadi */
+    color: #9ca3af !important;
+    /* Ma'lumotlar xiralashadi */
     opacity: 0.6;
 }
 
 .inactive-row {
-    background-color: #f3f4f6; /* Fon biroz xiralashadi */
-    pointer-events: none; /* Qator ichidagi amallarni o'chiradi */
+    background-color: #f3f4f6;
+    /* Fon biroz xiralashadi */
+    pointer-events: none;
+    /* Qator ichidagi amallarni o'chiradi */
 }
 
 /* Status switch va amallar tugmalari hamisha ishlashi uchun */
-.switch-td, .actions-td {
-    pointer-events: auto !important; 
+.switch-td,
+.actions-td {
+    pointer-events: auto !important;
 }
 
 .ism-active {
@@ -291,8 +333,10 @@
     cursor: pointer;
     font-weight: var(--font-weight-600);
 }
+
 .nav-btn {
-    width: auto !important; /* "Oldingi/Keyingi" so'zlari sig'ishi uchun */
+    width: auto !important;
+    /* "Oldingi/Keyingi" so'zlari sig'ishi uchun */
     padding: 0 15px !important;
     font-size: var(--font-size-14);
     font-weight: var(--font-weight-500);
@@ -303,6 +347,7 @@
     background-color: #f3f4f6;
     color: #9ca3af;
 }
+
 /* O'chirish Modali Maxsus */
 .modal-delete {
     max-width: 350px !important;
@@ -357,8 +402,10 @@
 .btn-red-confirm:hover {
     background: #dc2626;
 }
+
 /* --- MIJOZLAR PAGINATION RESPONSIVE (480px) --- */
 @media (max-width: 480px) {
+
     /* Umumiy qatorni ustma-ust qilish */
     .pagination {
         flex-direction: column !important;
@@ -376,7 +423,8 @@
         align-items: center !important;
         width: 100% !important;
         gap: 6px !important;
-        flex-wrap: nowrap !important; /* Bir qatorda siqib turish */
+        flex-wrap: nowrap !important;
+        /* Bir qatorda siqib turish */
     }
 
     /* "Oldingi" va "Keyingi" yozuvlarini yashirish */
@@ -385,7 +433,8 @@
         height: 40px !important;
         min-width: 40px !important;
         padding: 0 !important;
-        font-size: 0 !important; /* Matnni o'chiradi */
+        font-size: 0 !important;
+        /* Matnni o'chiradi */
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
@@ -414,6 +463,7 @@
         font-size: 14px !important;
         text-align: center !important;
         color: #64748b !important;
-        order: -1; /* Yozuv har doim tugmalardan tepada turadi */
+        order: -1;
+        /* Yozuv har doim tugmalardan tepada turadi */
     }
 }

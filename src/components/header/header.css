@@ -1,34 +1,38 @@
+/* header.css */
+.header-container {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 100%;
+  height: 70px;
+  background: white;
+  display: flex;
+  align-items: center;
+  transition: padding-left 0.3s ease; /* Silliq surilish uchun */
+  z-index: 10;
+  border-bottom: 1px solid #ddd;
+}
+
+/* Sidebar ochiq bo'lgandagi masofa */
+
+/* Sidebar yopiq bo'lgandagi masofa */
+
+
+.page-title {
+  font-family: 'Poppins', sans-serif;
+  color: var(--primary-color);
+  margin-left: 15px; /* Sidebardan keyin qo'shimcha bo'shliq */
+}
+.page-title {
+  font-family: 'Poppins', sans-serif;
+  color: var(--primary-color);
+  font-weight: var(--font-weight-600);
+  font-size: var(--font-size-20);
+  margin: 0;
+  text-transform: capitalize;
+}
+
 .header-wrapper {
-    position: fixed; 
-    top: 0;
-    left: 60px; 
-    right: 0;
-    height: 90px; 
-    background-color: white;
-    display: flex;
-    z-index: 999;
-    flex-direction: column;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.header-wrapper.sidebar-closed {
-    left: 80px;
-}
-
-.hr {
-    width: 100%;
-    height: 1px;
-    background-image: linear-gradient(to right, transparent, #ccc, #ccc, transparent);
-    margin-top: 10px;
-}
-
-.header-title {
-    font-size: var(--font-size-40);
-    color: var(--primary-color);
-    margin: 0;
-    padding-left: 20px; 
-}
-
-.header-title b {
-    font-weight: var(--font-weight-800);
+  display: flex;
+  align-items: center;
 }
