@@ -526,16 +526,16 @@
     width: 35px;
     height: 35px;
     border-radius: 6px;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--primary-color);
     background: #fff;
     cursor: pointer;
     transition: all 0.2s;
 }
 
-.m-num-active {
-    background: #3b82f6;
+.m-num-active { 
+    background: var(--primary-color);
     color: #fff;
-    border-color: #3b82f6;
+    border-color: var(--primary-color);
 }
 
 /* 4. Skrollbarni chiroyli qilish (Chrome va Safari uchun) */

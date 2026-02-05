@@ -4,7 +4,7 @@ import {
 } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast'; 
 import { jsPDF } from 'jspdf';
-import autoTable from 'jspdf-autotable'; // Importni shu ko'rinishda o'zgartirdik
+import autoTable from 'jspdf-autotable';
 import './tovuqchiqim.css';
 
 const Tovuqchiqim = ({ open }) => {
@@ -32,34 +32,25 @@ const Tovuqchiqim = ({ open }) => {
     tovuqSoni: '', mahsulotSoni: '', taminotchi: '', sana: new Date().toISOString().split('T')[0]
   });
 
-  // PDF YUKLAB OLISH FUNKSIYASI (XATOSIZ VERSIA)
   const downloadPDF = () => {
     try {
       const doc = new jsPDF();
       doc.text("Tovuq Chiqimlari Hisoboti", 14, 15);
-      
       const tableColumn = ["Tovuq soni", "Tayyor mahsulot", "Sana", "Ta'minotchi"];
-      const tableRows = data.map(item => [
-        item.tovuqSoni,
-        item.mahsulotSoni,
-        item.sana,
-        item.taminotchi
-      ]);
+      const tableRows = data.map(item => [item.tovuqSoni, item.mahsulotSoni, item.sana, item.taminotchi]);
 
-      // doc.autoTable o'rniga to'g'ridan-to'g'ri autoTable ishlatamiz
       autoTable(doc, {
         head: [tableColumn],
         body: tableRows,
         startY: 20,
         theme: 'grid',
-        headStyles: { fillColor: [155, 28, 28] }, // Brend rangi #9b1c1c
+        headStyles: { fillColor: [155, 28, 28] },
         styles: { fontSize: 10 }
       });
 
       doc.save(`hisobot_${new Date().getTime()}.pdf`);
       toast.success("PDF saqlandi!");
     } catch (error) {
-      console.error("PDF yaratishda xato:", error);
       toast.error("PDF yaratishda xatolik yuz berdi");
     }
   };
@@ -75,9 +66,7 @@ const Tovuqchiqim = ({ open }) => {
   };
 
   const filteredData = useMemo(() => {
-    return data.filter(item => 
-      item.taminotchi.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    return data.filter(item => item.taminotchi.toLowerCase().includes(searchTerm.toLowerCase()));
   }, [data, searchTerm]);
 
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
@@ -107,7 +96,7 @@ const Tovuqchiqim = ({ open }) => {
             <p>Barcha mahsulotlar nazorati va hisoboti</p>
           </div>
           
-          <div className="tovuqchiqim-header-btns" style={{ display: 'flex', gap: '8px' }}>
+          <div className="tovuqchiqim-header-btns">
             <button className="tovuqchiqim-print-btn" onClick={downloadPDF}>
               <Download size={18} /> Chop etish
             </button>
@@ -117,7 +106,6 @@ const Tovuqchiqim = ({ open }) => {
           </div>
         </div>
 
-        {/* ... (Statistika va Kalkulyator qismi o'zgarishsiz qoladi) */}
         <div className="tovuqchiqim-stats-container">
           <div className="tovuqchiqim-stat-card">
             <div className="tovuqchiqim-info"><span>JAMI TOVUQLAR</span><h3>{data.reduce((a, b) => a + Number(b.tovuqSoni), 0).toLocaleString()}</h3></div>
@@ -198,7 +186,6 @@ const Tovuqchiqim = ({ open }) => {
         </div>
       </div>
 
-      {/* Modallar o'zgarishsiz qoladi */}
       {isModalOpen && (
         <div className="tovuqchiqim-modal">
           <div className="tovuqchiqim-modal-content">

@@ -130,7 +130,8 @@
     cursor: pointer;
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: var(--gap-10);
+    width: 100%;
     font-size: 0.875rem;
 }
 

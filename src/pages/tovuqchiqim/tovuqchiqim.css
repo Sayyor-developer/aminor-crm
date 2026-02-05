@@ -61,6 +61,7 @@
     cursor: pointer;
     display: flex;
     align-items: center;
+    width: 100%;
     gap: var(--gap-10);
 }
 
@@ -112,6 +113,7 @@
     border-radius: 12px;
     border: 1px solid var(--white);
     outline: none;
+    width: 100%;
 }
 
 .tovuqchiqim-calc-res {
@@ -120,6 +122,7 @@
     padding: 14px 25px;
     border-radius: 12px;
     font-weight: var(--font-weight-700);
+    width: 100%;
 }
 
 /* JADVAL */
@@ -192,6 +195,7 @@
     gap: var(--gap-20);
     padding: 20px;
     background: var(--white);
+    color: var(--primary-color);
 }
 
 .pag-btns {
@@ -209,6 +213,7 @@
     align-items: center;
     justify-content: center;
     cursor: pointer;
+    color: var(--primary-color);
 }
 
 /* MODAL FIX */
@@ -247,7 +252,7 @@
 .form-grid {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 15px;
+    gap: var(--gap-15);
 }
 
 .tovuqchiqim-form input {
@@ -272,18 +277,14 @@
     .tovuqchiqim-header {
         flex-direction: column;
         align-items: flex-start;
-        gap: 15px;
+        gap: var(--gap-15);
     }
 
-    .tovuqchiqim-add-btn {
-        width: 100%;
-        justify-content: center;
-        margin-left: 40px;
-    }
+  
 
     .tovuqchiqim-calc-banner {
         flex-direction: column;
-        gap: 15px;
+        gap: var(--gap-15);
         margin-left: 60px;
         padding: 20px;
     }
@@ -332,7 +333,7 @@
 
 .tovuqchiqim-actions {
     display: flex;
-    gap: 10px;
+    gap: var(--gap-10);
     justify-content: flex-end;
 }
 
@@ -425,17 +426,18 @@
 
 /* CHOP ETISH TUGMASI STILI */
 .tovuqchiqim-print-btn {
-    background: #64748b;
+    background: var(--primary-color);
     /* Kulrangroq rang dizayn buzilmasligi uchun */
     color: var(--white);
     border: none;
     padding: 12px 24px;
     border-radius: 12px;
-    font-weight: 700;
+    font-weight: var(--font-weight-700);
     cursor: pointer;
     display: flex;
     align-items: center;
     gap: var(--gap-10);
+    width: 100%;
     transition: 0.3s;
 }
 
@@ -520,52 +522,118 @@
     left: 25px; /* Aktiv bo'lganda o'ngga suriladi */
 }
 /* RESPONSIVE (Mobil qurilmalar uchun) */
+/* FAQAT TUGMALAR UCHUN TUZATISH */
+.tovuqchiqim-header-btns {
+    display: flex;
+    gap: var(--gap-15); /* Tugmalar orasidagi masofa */
+    align-items: center;
+}
+
+/* TUGMALARNI BIR XIL O'LCHAMGA KELTIRISH */
+.tovuqchiqim-header-btns {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.tovuqchiqim-print-btn, 
+.tovuqchiqim-add-btn {
+    /* Ikkala tugma bir xil kenglikda bo'lishi uchun */
+    min-width: 160px; 
+    height: 45px; /* Balandligi bir xil */
+    justify-content: center;
+    padding: 0 20px;
+    box-sizing: border-box;
+    white-space: nowrap;
+}
+
+/* RESPONSIVE (MOBIL) TUZATISH */
 @media (max-width: 480px) {
-    .tovuqchiqim-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 20px;
-    }
-
-    /* Tugmalar konteynerini ustma-ust qilish */
     .tovuqchiqim-header-btns {
-        flex-direction: column; 
-        width: 80%;
-        margin-left: auto;
-        gap: 12px;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: flex-start !important; /* Chapga tekislash */
+        padding-left: 60px; /* Sarlavha bilan bir chiziqda */
+        width: 100%;
     }
 
-    /* Har bir tugmani 100% qilish */
-    .tovuqchiqim-print-btn,
+    .tovuqchiqim-print-btn, 
     .tovuqchiqim-add-btn {
-        width: 100%;
-        justify-content: center; /* Ikonka va matn markazda turishi uchun */
-        margin-left: 0 !important;
-        box-sizing: border-box;
+        width: 100%; /* Ekran bo'ylab kenglik */
+        min-width: unset; /* Mobilda cheklovni olib tashlaymiz */
+        margin-bottom: 10px; /* Bir-biriga yopishmasligi uchun */
     }
+
 
     .tovuqchiqim-title-box h1,
     .tovuqchiqim-title-box p {
         width: 80%;
-        margin-left: auto;
     }
 
     .tovuqchiqim-calc-banner {
         flex-direction: column;
         gap: 15px;
         width: 80%;
-        margin-left: auto;
+        margin-left: 60px;
         padding: 20px;
     }
 
     .tovuqchiqim-main-card {
         width: 80%;
-        margin-left: auto;
+        margin-left: 60px;
     }
 
     .tovuqchiqim-stats-container {
         width: 80%;
-        margin-left: auto;
+        margin-left: 60px;
         grid-template-columns: 1fr; /* Stat kartalar ham ustma-ust */
+    }
+}
+/* FAQAT KALKULYATOR INPUTLARI VA BANNERI TUZATILDI */
+.tovuqchiqim-calc-banner {
+    background: var(--primary-color);
+    color: var(--white);
+    padding: 25px 35px;
+    border-radius: 20px;
+    display: flex;
+    /* Elementlar sig'maganda buzilmasligi uchun flex-wrap qo'shildi */
+    flex-wrap: wrap; 
+    width: calc(100% - 60px);
+    margin-left: 60px;
+    align-items: center;
+    gap: var(--gap-30);
+    margin-bottom: 30px;
+    box-sizing: border-box;
+}
+
+.tovuqchiqim-calc-banner input {
+    /* flex: 1 o'rniga aniqroq boshqaruv */
+    padding: 14px;
+    border-radius: 12px;
+    border: 1px solid var(--white);
+    outline: none;
+    width: 100%;
+    min-width: 150px; /* Kompyuterda juda kichrayib ketmasligi uchun */
+}
+
+.tovuqchiqim-calc-res {
+    /* flex: 1 o'rniga aniqroq boshqaruv */
+    background: var(--white);
+    color: var(--primary-color);
+    padding: 14px 25px;
+    border-radius: 12px;
+    font-weight: var(--font-weight-700);
+    text-align: center;
+    min-width: 150px;
+    white-space: nowrap; /* Matn sinib ketmasligi uchun */
+}
+
+/* Mobilda (480px) sizning mavjud dizayningiz saqlandi */
+@media (max-width: 480px) {
+    .tovuqchiqim-calc-banner {
+        flex-direction: column;
+        gap: 15px;
+        margin-left: 60px;
+        padding: 20px;
     }
 }

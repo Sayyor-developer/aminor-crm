@@ -223,15 +223,17 @@ input:checked+.toggle-slider:before {
 .nav-controls {
     display: flex;
     align-items: center;
-    gap: 15px;
+    gap: var(--gap-10);
+    color: var(--primary-color);
 }
 
 .nav-controls button {
-    background: white;
-    border: 1px solid #e2e8f0;
+    background: var(--white);
+    border: 1px solid var(--primary-color);
     border-radius: 6px;
     padding: 6px;
     cursor: pointer;
+    color: var(--primary-color);
 }
 
 /* MODALS */

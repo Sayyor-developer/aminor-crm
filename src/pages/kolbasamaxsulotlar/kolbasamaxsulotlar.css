@@ -565,7 +565,7 @@
 
 
 .btn-export.pdf {
-  background: #ef4444;
+  background: var(--primary-color);
   margin-left: 8px;
 }
 

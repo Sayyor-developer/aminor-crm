@@ -177,11 +177,11 @@ export default function Kolbasamaxsulotlar({ open }) {
                       style={{
                           padding: '5px 12px',
                           borderRadius: '4px',
-                          border: '1px solid #ddd',
-                          backgroundColor: currentPage === index + 1 ? '#3b82f6' : '#fff',
-                          color: currentPage === index + 1 ? '#fff' : '#000',
+                          border: '1px solid var(--light-gray)',
+                          backgroundColor: currentPage === index + 1 ? 'var(--primary-color)' : 'var(--white)',
+                          color: currentPage === index + 1 ? 'var(--white)' : '#000',
                           cursor: 'pointer',
-                          fontWeight: '600'
+                          fontWeight: 'var(--font-weight-600)'
                       }}
                   >
                       {index + 1}
