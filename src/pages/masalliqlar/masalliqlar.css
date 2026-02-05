@@ -111,6 +111,7 @@
     gap: 0.5rem;
     font-weight: var(--font-weight-600);
     transition: 0.2s;
+    width: 100%;
 }
 
 .m-add-btn:hover {
@@ -457,14 +458,14 @@
     .m-nav-btn svg {
         width: 20px !important;
         height: 20px !important;
-        margin: 0 !important;
+        color: var(--primary-color);
     }
 
     /* Sahifa raqamlari */
     .m-num-btn {
         width: 34px !important;
         height: 34px !important;
-        font-size: 14px !important;
+        font-size: var(--font-size-14) !important;
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
@@ -478,8 +479,8 @@
     /* "Jami: 6 xil" yozuvini markazga olish */
     .m-total-count {
         margin: 0 !important;
-        font-size: 14px !important;
-        font-weight: 500 !important;
+        font-size: var(--font-size-14) !important;
+        font-weight: var(--font-weight-500) !important;
     }
 }
 
@@ -532,7 +533,7 @@
 
 .m-num-active { 
     background: var(--primary-color);
-    color: #fff;
+    color: var(--white);
     border-color: var(--primary-color);
 }
 
