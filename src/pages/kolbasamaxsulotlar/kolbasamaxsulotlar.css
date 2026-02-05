@@ -635,3 +635,57 @@
      width: 100%; 
      justify-content: center; 
     }
+/* EDIT VA DELETE TUGMALARINI TO'G'IRLASH */
+.action-btns {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px; /* Ikonkalar orasidagi masofa */
+}
+
+/* Tugmalarni semiz bo'lib ketishidan saqlash */
+.icon-red, .icon-blue {
+    background-color: var(--primary-color) !important;
+    color: var(--white) !important;
+    width: 32px !important;  /* Kvadrat shakl */
+    height: 32px !important; /* Kvadrat shakl */
+    padding: 6px !important; /* Ichki bo'shliq */
+    border-radius: 6px !important;
+    cursor: pointer;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    flex: none !important; /* width: 100% ni bekor qiladi */
+}
+
+/* O'chirish tugmasi qizil bo'lishi uchun */
+.icon-red {
+    background-color: #ef4444 !important;
+}
+
+.icon-red:hover {
+    background-color: #dc2626 !important;
+}
+
+.icon-blue:hover {
+    background-color: var(--primary-hover-color) !important;
+}
+
+/* RESPONSIVE (MOBIL) UCHUN MAXSUS */
+@media (max-width: 480px) {
+    .action-btns {
+        justify-content: center;
+        gap: 5px;
+    }
+
+    .icon-red, .icon-blue {
+        width: 30px !important;
+        height: 30px !important;
+        padding: 5px !important;
+    }
+    
+    /* Jadval katakchasidagi ortiqcha paddingni kamaytiramiz */
+    .mijoz-table td {
+        padding: 8px 4px !important;
+    }
+}
