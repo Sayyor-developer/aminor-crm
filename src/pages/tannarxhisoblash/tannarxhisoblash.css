@@ -43,14 +43,14 @@
 .t-circle-icon {
     width: 48px;
     height: 48px;
-    background: #b91c1c;
-    color: white;
+    background: var(--primary-color);
+    color: var(--white);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: 800;
-    font-size: 24px;
+    font-weight: var(--font-weight-800);
+    font-size: var(--font-size-25);
     box-shadow: 0 4px 10px rgba(185, 28, 28, 0.3);
 }
 
@@ -61,8 +61,8 @@
 }
 
 .add-main-btn {
-    background: #b91c1c;
-    color: white;
+    background: var(--primary-color);
+    color: var(--white);
     border: none;
     padding: 12px 24px;
     border-radius: 10px;

@@ -54,7 +54,7 @@
 
 .header-title {
     font-size: 24px;
-    font-weight: 800;
+    font-weight: var(--font-weight-800);
     color: #1a1a1a;
     margin: 0;
 }
@@ -69,7 +69,7 @@
 .stats-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 20px;
+    gap: var(--gap-20);
     width: 100%;
 }
 
@@ -99,25 +99,25 @@
 }
 
 .trend-val {
-    font-size: 12px;
+    font-size: var(--font-size-12);
     font-weight: bold;
 }
 
 .stat-label {
     color: var(--text-gray);
-    font-size: 14px;
+    font-size: var(--font-size-14);
 }
 
 .stat-value {
-    font-size: 22px;
-    font-weight: 800;
+    font-size: var(--font-size-20);
+    font-weight: var(--font-weight-800);
 }
 
 /* GRAFIK VA STATISTIKA BLOGI */
 .content-grid {
     display: grid;
     grid-template-columns: 2fr 1fr;
-    gap: 20px;
+    gap: var(--gap-20);
     width: 100%;
 }
 
@@ -133,8 +133,8 @@
 
 .card-title {
     margin: 0 0 20px 0;
-    font-size: 18px;
-    font-weight: 700;
+    font-size: var(--font-size-18);
+    font-weight: var(--font-weight-700);
 }
 
 .chart-box {
@@ -162,14 +162,14 @@
 .data-row {
     display: flex;
     justify-content: space-between;
-    font-size: 14px;
+    font-size: var(--font-size-14);
     margin-bottom: 5px;
 }
 
 .foida-row {
     border-top: 1px solid rgba(0, 0, 0, 0.05);
     padding-top: 10px;
-    font-weight: 800;
+    font-weight: var(--font-weight-800);
     color: var(--green);
 }
 
@@ -189,7 +189,7 @@
     text-align: left;
     background: #f9fafb;
     color: var(--text-gray);
-    font-size: 12px;
+    font-size: var(--font-size-12);
 }
 
 .main-table td {
@@ -222,7 +222,7 @@
 
 .bg-red-soft {
     background: #fee2e2;
-    color: var(--red);
+    color: var(--primary-color);
 }
 
 .bg-blue-soft {
@@ -241,7 +241,7 @@
 }
 
 .text-chiqim {
-    color: var(--red);
+    color: var(--primary-color);
     font-weight: 700;
 }
 
