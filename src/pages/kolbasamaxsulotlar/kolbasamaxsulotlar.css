@@ -663,11 +663,11 @@
 
 /* O'chirish tugmasi qizil bo'lishi uchun */
 .icon-red {
-    background-color: #ef4444 !important;
+    background-color: var(--primary-color) !important;
 }
 
 .icon-red:hover {
-    background-color: #dc2626 !important;
+    background-color: var(--primary-hover-color) !important;
 }
 
 .icon-blue:hover {
