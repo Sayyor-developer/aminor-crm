@@ -119,7 +119,7 @@ const Foydalanuvchilar = ({ open }) => {
                     onChange={e => handlePhoneInput(e.target.value)} 
                 />
             </div>
-            <div className="input-group"><Send className="input-icon" size={16}/><input type="text" placeholder="Telegram" className="form-input" value={addFormData.telegram} onChange={e => setAddFormData({...addFormData, telegram: e.target.value})} /></div>
+            <div className="input-group qq"><Send className="input-icon" size={16}/><input type="text" placeholder="Telegram" className="form-input" value={addFormData.telegram} onChange={e => setAddFormData({...addFormData, telegram: e.target.value})} /></div>
             <div className="input-group"><MapPin className="input-icon" size={16}/><input type="text" placeholder="Manzil" className="form-input" value={addFormData.address} onChange={e => setAddFormData({...addFormData, address: e.target.value})} /></div>
             <button type="submit" className="submit-btn"><UserPlus size={18}/> Qo'shish</button>
           </form>
