@@ -443,7 +443,7 @@
 }
 
 .tovuqchiqim-print-btn:hover {
-    background: var(--light-gray);
+    background: var(--primary-hover-color);
 }
 
 /* PDF CHOP ETILAYOTGANDA KERAKSIZLARNI YASHIRISH */
