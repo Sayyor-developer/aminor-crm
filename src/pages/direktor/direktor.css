@@ -1,0 +1,365 @@
+/* --- Asosiy Page Konteyneri --- */
+.direktor-page {
+    min-height: 100vh;
+    background-color: #F8F9FA;
+    padding: 24px;
+    margin-top: 70px;
+    /* Header balandligi */
+    transition: all 0.3s ease-in-out;
+}
+
+/* Sidebar holatiga qarab surilishi */
+.direktor-page.shifted {
+    margin-left: 260px;
+}
+
+.direktor-page.collapsed {
+    margin-left: 80px;
+}
+
+.direktor-wrapper {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+/* --- Breadcrumb --- */
+.breadcrumb-nav {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-10);
+    color: var(--light-gray);
+    font-size: var(--font-size-20);
+    width: 80%;
+    margin-left: 75px;
+}
+
+.active-link {
+    color: var(--primary-color);
+    font-weight: var(--font-weight-600);
+}
+
+/* --- Statistik Kartochkalar --- */
+.stats-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 16px;
+}
+
+.mini-card {
+    background: var(--white);
+    padding: 20px;
+    border-radius: 16px;
+    border: 1px solid #f1f5f9;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+    width: 80%;
+    margin-left: 75px;
+}
+
+.mini-icon {
+    padding: var(--font-size-12);
+    border-radius: var(--font-size-12);
+}
+
+.mini-icon.emerald {
+    background: #ecfdf5;
+    color: #10b981;
+}
+
+.mini-icon.blue {
+    background: #eff6ff;
+    color: #3b82f6;
+}
+
+.mini-icon.amber {
+    background: #fffbeb;
+    color: #f59e0b;
+}
+
+.mini-icon.purple {
+    background: #f5f3ff;
+    color: #8b5cf6;
+}
+
+.mini-info p {
+    font-size: var(--font-size-12);
+    color: var(--light-gray);
+    margin: 0;
+    font-weight: var(--font-weight-500);
+}
+
+.mini-info h4 {
+    font-size: var(--font-size-20);
+    font-weight: var(--font-weight-700);
+    color: #1f2937;
+    margin: 0;
+}
+
+/* --- Grid Layout --- */
+.direktor-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 24px;
+}
+
+/* --- Asosiy Card Dizayni --- */
+.main-card {
+    background: var(--white);
+    border-radius: 16px;
+    border: 1px solid #f1f5f9;
+    overflow: hidden;
+    margin-bottom: 24px;
+    width: 80%;
+    margin-left: 75px;
+}
+
+.card-top {
+    background: #fafafa;
+    padding: 16px 24px;
+    border-bottom: 1px solid #f1f5f9;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.title-box {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-10);
+}
+
+.title-box h3 {
+    font-size: var(--font-size-16);
+    font-weight: var(--font-weight-700);
+    color: #1f2937;
+    margin: 0;
+}
+
+.red-icon {
+    color: var(--primary-color);
+}
+
+.card-content {
+    padding: 24px;
+}
+
+/* --- Inputlar va Tugmalar --- */
+.field-label {
+    font-size: var(--font-size-12);
+    font-weight: var(--font-weight-700);
+    color: var(--light-gray);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+}
+
+.name-input {
+    width: 100%;
+    padding: var(--font-size-12);
+    border: 1px solid #e2e8f0;
+    border-radius: var(--font-size-12);
+    outline: none;
+    background: #f8fafc;
+}
+
+.name-input:focus {
+    border-color: var(--primary-color);
+}
+
+.action-btn {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: var(--gap-10);
+    font-size: var(--font-size-14);
+    font-weight: var(--font-weight-600);
+    display: flex;
+    align-items: center;
+    gap: var(--gap-10);
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.action-btn:active {
+    transform: scale(0.96);
+}
+
+/* --- Profile Section --- */
+.profile-info {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.avatar-circle {
+    width: 56px;
+    height: 56px;
+    background: rgba(155, 34, 38, 0.1);
+    color: var(--primary-color);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--font-size-25);
+    font-weight: var(--font-weight-800);
+}
+
+.fullname-text {
+    font-size: var(--font-size-25);
+    font-weight: var(--font-weight-800);
+    color: #111827;
+}
+
+.sub-text {
+    margin-top: var(--font-size-12);
+    font-size: var(--font-size-14);
+    color: var(--light-gray);
+}
+
+/* --- Chart --- */
+.chart-box {
+    height: 280px;
+    width: 100%;
+}
+
+/* --- Security Form --- */
+.security-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.input-item label {
+    display: block;
+    font-size: var(--font-size-12);
+    font-weight: var(--font-weight-700);
+    color: var(--light-gray);
+    margin-bottom: 6px;
+}
+
+.input-item input {
+    width: 100%;
+    padding: var(--font-size-12);
+    border: 1px solid #e2e8f0;
+    border-radius: var(--gap-10);
+    background: #f8fafc;
+    outline: none;
+}
+
+.save-code-btn {
+    background: var(--primary-color);
+    color: var(--white);
+    border: none;
+    padding: 14px;
+    border-radius: var(--font-size-12);
+    font-weight: var(--font-weight-700);
+    cursor: pointer;
+    margin-top: 8px;
+}
+
+/* --- Red Banner --- */
+.red-banner {
+    background: var(--primary-color);
+    border-radius: 16px;
+    padding: 24px;
+    color: var(--white);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+    width: 80%;
+    margin-left: 75px;
+}
+
+.banner-txt h4 {
+    margin: 0 0 4px 0;
+    font-size: var(--font-size-18);
+    font-weight: var(--font-weight-700);
+}
+
+.banner-txt p {
+    margin: 0;
+    font-size: var(--font-size-14);
+    opacity: 0.8;
+}
+
+.banner-icon {
+    position: absolute;
+    right: -var(--gap-10);
+    bottom: -var(--gap-10);
+    opacity: 0.1;
+}
+
+/* ======================================================
+   RESPONSIVE QISMI (Faqat shu qism qo'shildi)
+   ====================================================== */
+
+@media (max-width: 1024px) {
+
+    .direktor-page.shifted,
+    .direktor-page.collapsed {
+        margin-left: 0 !important;
+        padding: 16px;
+    }
+
+    .direktor-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .stats-container {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .stats-container {
+        grid-template-columns: 1fr;
+    }
+
+    .card-top {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--gap-10);
+    }
+
+    .action-btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .profile-info {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+}
+
+/* 380px gacha bo'lgan ekranlar uchun */
+@media (max-width: 380px) {
+    .direktor-page {
+        padding: 10px;
+    }
+
+    .card-content {
+        padding: 16px;
+    }
+
+    .fullname-text {
+        font-size: var(--font-size-20);
+    }
+
+    .mini-info h4 {
+        font-size: var(--font-size-18);
+    }
+
+    .chart-box {
+        height: 220px;
+    }
+}

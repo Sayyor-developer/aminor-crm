@@ -59,8 +59,8 @@ const SideBar = ({ open, setOpen }) => {
           </NavLink>
         </li>
         <li>
-          <NavLink to="/user" className={({ isActive }) => isActive ? "side active" : "side"}>
-            <IoMdPerson /> <span className="link-text">User</span>
+          <NavLink to="/direktor" className={({ isActive }) => isActive ? "side active" : "side"}>
+            <IoMdPerson /> <span className="link-text">Direktor</span>
           </NavLink>
         </li>
       </ul>

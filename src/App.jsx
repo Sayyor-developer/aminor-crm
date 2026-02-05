@@ -15,7 +15,7 @@ import Tannarxhisoblash from './pages/tannarxhisoblash/Tannarxhisoblash';
 import Moliya from './pages/moliya/Moliya';
 import Tovuqchiqim from './pages/tovuqchiqim/Tovuqchiqim';
 import Foydalanuvchilar from './pages/foydalanuvchilar/Foydalanuvchilar';
-import User from './pages/user/User';
+import Direktor from './pages/direktor/Direktor';
 import Loading from './Loading';
 
 function App() {
@@ -32,7 +32,7 @@ function App() {
     '/moliya': 'Moliya',
     '/tovuqchiqim': 'Tovuq Chiqimlari',
     '/foydalanuvchilar': 'Foydalanuvchilar',
-    '/user': 'User'
+    '/direktor': 'Direktor'
   };
 
   const currentTitle = pageTitles[location.pathname] || "Aminor";
@@ -69,7 +69,7 @@ function App() {
             <Route path='/moliya' element={<Moliya open={open} />}/>
             <Route path='/tovuqchiqim' element={<Tovuqchiqim open={open} />}/>
             <Route path='/foydalanuvchilar' element={<Foydalanuvchilar open={open} />}/>
-            <Route path='/user' element={<User open={open} />}/>
+            <Route path='/direktor' element={<Direktor open={open} />}/>
           </Routes>
         )}
       </main>
