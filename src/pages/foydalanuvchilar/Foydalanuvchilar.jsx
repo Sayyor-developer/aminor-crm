@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, /* useEffect */ } from 'react';
 import { 
   Search, UserPlus, Pencil, Trash2, ShieldCheck, 
   User, Phone, Send, MapPin, X, Check, AlertTriangle,
