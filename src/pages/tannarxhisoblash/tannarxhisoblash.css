@@ -100,9 +100,10 @@
 .search-input-box input {
     width: 100%;
     padding: 12px 15px 12px 50px;
-    border: 1px solid #e2e8f0;
+    border: 1px solid var(--primary-color);
     border-radius: 10px;
-    outline-color: #b91c1c;
+    outline-color: var(--primary-color);
+    background-color: var(--white);
 }
 
 /* JADVAL */
