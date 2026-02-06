@@ -20,7 +20,8 @@ import {
   AreaChart,
   Area
 } from 'recharts';
-import { toast } from 'react-toastify';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import './direktor.css';
 
 const data = [
@@ -40,22 +41,33 @@ const Direktor = ({ open }) => {
   const [newCode, setNewCode] = useState('');
   const [confirmCode, setConfirmCode] = useState('');
 
+  // Toast xabarnomasi parametrlari
+  const toastOptions = {
+    position: "top-right",
+    autoClose: 3000,
+    hideProgressBar: false,
+    closeOnClick: true,
+    pauseOnHover: true,
+    draggable: true,
+    progress: undefined,
+  };
+
   const handleSaveName = () => {
     setIsEditingName(false);
-    toast.success('F.I.O muvaffaqiyatli o\'zgartirildi');
+    toast.success("Ma'lumotlar o'zgartirildi", toastOptions);
   };
 
   const handleChangeCode = (e) => {
     e.preventDefault();
     if (!currentCode || !newCode || !confirmCode) {
-      toast.error('Barcha maydonlarni to\'ldiring');
+      toast.error('Barcha maydonlarni to\'ldiring', toastOptions);
       return;
     }
     if (newCode !== confirmCode) {
-      toast.error('Yangi kodlar mos kelmadi');
+      toast.error('Yangi kodlar mos kelmadi', toastOptions);
       return;
     }
-    toast.success('Kirish kodi muvaffaqiyatli yangilandi');
+    toast.success("Ma'lumotlar o'zgartirildi", toastOptions);
     setCurrentCode('');
     setNewCode('');
     setConfirmCode('');
@@ -63,6 +75,7 @@ const Direktor = ({ open }) => {
 
   return (
     <div className={`direktor-page ${open ? 'shifted' : 'collapsed'}`}>
+      <ToastContainer />
       <div className="direktor-wrapper">
         
         {/* Breadcrumb Section */}
