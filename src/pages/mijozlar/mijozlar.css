@@ -38,7 +38,6 @@
     align-items: center;
     justify-content: center;
     color: white;
-
 }
 
 .header h1 {
@@ -51,14 +50,12 @@
 /* Ism statusiga qarab o'zgarishi */
 .ism-active {
     color: var(--primary-color) !important;
-    /* To'q qora */
     cursor: pointer;
     font-weight: var(--font-weight-600);
 }
 
 .ism-inactive {
     color: #9ca3af !important;
-    /* Xira rang */
     cursor: default;
     pointer-events: none;
     opacity: 0.6;
@@ -306,21 +303,15 @@
     cursor: pointer;
 }
 
-
-/* ... avvalgi CSS kodlari o'zgarishsiz ... */
-
 /* Inactive qator uchun uslublar */
 .inactive-row td:not(:last-child):not(:nth-last-child(2)) {
     color: #9ca3af !important;
-    /* Ma'lumotlar xiralashadi */
     opacity: 0.6;
 }
 
 .inactive-row {
     background-color: #f3f4f6;
-    /* Fon biroz xiralashadi */
     pointer-events: none;
-    /* Qator ichidagi amallarni o'chiradi */
 }
 
 /* Status switch va amallar tugmalari hamisha ishlashi uchun */
@@ -329,15 +320,8 @@
     pointer-events: auto !important;
 }
 
-.ism-active {
-    color: #111827 !important;
-    cursor: pointer;
-    font-weight: var(--font-weight-600);
-}
-
 .nav-btn {
     width: auto !important;
-    /* "Oldingi/Keyingi" so'zlari sig'ishi uchun */
     padding: 0 15px !important;
     font-size: var(--font-size-14);
     font-weight: var(--font-weight-500);
@@ -365,13 +349,6 @@
     font-size: var(--font-size-20);
     color: #1f2937;
     margin-bottom: 10px;
-}
-
-.delete-text {
-    font-size: var(--font-size-14);
-    color: #6b7280;
-    margin-bottom: 25px;
-    line-height: 1.5;
 }
 
 .delete-btns {
@@ -404,67 +381,147 @@
     background: #dc2626;
 }
 
-/* --- MIJOZLAR PAGINATION RESPONSIVE (480px) --- */
+/* RESPONSIVE (480px) */
 @media (max-width: 480px) {
-
-    /* Umumiy qatorni ustma-ust qilish */
     .pagination {
         flex-direction: column !important;
         align-items: center !important;
         gap: 12px !important;
-        width: 100% !important;
-        padding: 10px 0 !important;
     }
 
-    /* Tugmalar guruhini markazlash */
     .bet-btn-guruhi {
-        display: flex !important;
-        flex-direction: row !important;
-        justify-content: center !important;
-        align-items: center !important;
         width: 100% !important;
-        gap: 6px !important;
-        flex-wrap: nowrap !important;
-        /* Bir qatorda siqib turish */
+        justify-content: center !important;
     }
 
-    /* "Oldingi" va "Keyingi" yozuvlarini yashirish */
     .nav-btn {
         width: 40px !important;
-        height: 40px !important;
-        min-width: 40px !important;
         padding: 0 !important;
         font-size: 0 !important;
-        /* Matnni o'chiradi */
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
     }
 
-    /* Ikonkalarni tugma ichida markazlash */
-    .nav-btn svg {
-        width: 20px !important;
-        height: 20px !important;
-        margin: 0 !important;
-    }
-
-    /* Raqamli tugmalarni ixchamlashtirish */
-    .bet-btn:not(.nav-btn) {
-        width: 36px !important;
-        height: 36px !important;
-        font-size: 14px !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-    }
-
-    /* "Jami: 6 ta mijoz" yozuvini to'g'irlash */
     .jami-text {
-        margin: 0 !important;
-        font-size: 14px !important;
-        text-align: center !important;
-        color: #64748b !important;
         order: -1;
-        /* Yozuv har doim tugmalardan tepada turadi */
     }
+}
+
+/* Filtr qismi */
+.filtr-wrapper {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.filtr-wrapper .qidiruv-blok {
+    flex: 1;
+    margin-bottom: 0;
+}
+
+.select-filtr {
+    width: 250px !important;
+    background-color: #fff;
+    cursor: pointer;
+    border: 1px solid #d1d5db;
+    height: 38px;
+}
+
+.text-red {
+    color: var(--primary-color);
+    font-weight: var(--font-weight-600);
+}
+
+.jadval-qobiq {
+    max-height: 600px;
+    overflow-y: auto;
+}
+
+/* PROFIL VA TO'LOVLAR TARIXI */
+.profil-modal {
+    max-width: 750px !important;
+}
+
+.profil-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: 1.5rem;
+}
+
+.profil-info-card,
+.profil-history-card {
+    background: #f8fafc;
+    padding: 1.25rem;
+    border-radius: 0.75rem;
+    border: 1px solid #e2e8f0;
+}
+
+.total-box {
+    background: #fff1f1;
+    color: var(--primary-color);
+    padding: 1rem;
+    border-radius: 0.5rem;
+    font-size: 1.4rem;
+    font-weight: 800;
+    text-align: center;
+    margin: 1rem 0;
+    border: 2px dashed var(--primary-color);
+}
+
+.history-list {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.history-item {
+    background: white;
+    padding: 0.75rem 1rem;
+    margin-bottom: 0.75rem;
+    border-radius: 0.5rem;
+    border-left: 4px solid var(--primary-color);
+}
+
+.flex-between {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.text-green {
+    color: #10b981;
+    font-weight: 600;
+}
+
+.text-gray {
+    color: #6b7280;
+    font-size: 0.8rem;
+}
+
+@media (max-width: 768px) {
+    .profil-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.flex-col {
+    display: flex;
+    flex-direction: column;
+}
+
+.font-bold {
+    font-weight: 700;
+}
+
+.text-blue {
+    color: #3b82f6;
+}
+
+/* SOTUV SELECT UCHUN QO'SHILDI */
+.select-sotuv {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 16px;
+    cursor: pointer;
 }

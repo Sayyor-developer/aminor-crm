@@ -19,6 +19,7 @@
     "antd": "^5.27.1",
     "aos": "^2.3.4",
     "axios": "^1.11.0",
+    "html2pdf.js": "^0.14.0",
     "jspdf": "^4.1.0",
     "jspdf-autotable": "^5.0.7",
     "lucide-react": "^0.563.0",

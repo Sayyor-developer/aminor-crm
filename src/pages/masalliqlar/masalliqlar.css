@@ -384,7 +384,7 @@
     width: 70px;
     height: 70px;
     background: #fee2e2;
-    color: #ef4444;
+    color: var(--primary-color);
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -412,9 +412,15 @@
     padding: 0.75rem;
     border-radius: 8px;
     border: none;
-    background: #ef4444;
+    background: var(--primary-color);
     color: var(--white);
     cursor: pointer;
+}
+
+@media (max-width: 665px) {
+    .m-add-btn {
+        width: 100% !important;
+    }
 }
 
 /* --- PAGINATION RESPONSIVE FIX --- */
@@ -422,46 +428,43 @@
     .m-pagination-row {
         display: flex !important;
         flex-direction: column !important;
-        /* Jami: 6 xil va tugmalarni ustma-ust qo'yadi */
         align-items: center !important;
         gap: 12px !important;
         width: 100% !important;
         padding: 10px 0 !important;
     }
 
+    .m-add-btn {
+        width: 100% !important;
+    }
+
     .m-page-btns {
         display: flex !important;
         flex-direction: row !important;
-        /* Tugmalar yonma-yon turishi shart */
         justify-content: center !important;
         align-items: center !important;
         width: 100% !important;
         gap: 5px !important;
         flex-wrap: nowrap !important;
-        /* Siqilib bo'lsa ham bir qatorda turadi */
     }
 
-    /* "Oldingi" va "Keyingi" so'zlarini butunlay o'chiramiz */
     .m-nav-btn {
         width: 38px !important;
         height: 38px !important;
         padding: 0 !important;
         font-size: 0 !important;
-        /* Matnni yashirish */
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
         min-width: 38px !important;
     }
 
-    /* Ikonkalarni tugma markazida chiqarish */
     .m-nav-btn svg {
         width: 20px !important;
         height: 20px !important;
         color: var(--primary-color);
     }
 
-    /* Sahifa raqamlari */
     .m-num-btn {
         width: 34px !important;
         height: 34px !important;
@@ -476,7 +479,6 @@
         gap: 4px !important;
     }
 
-    /* "Jami: 6 xil" yozuvini markazga olish */
     .m-total-count {
         margin: 0 !important;
         font-size: var(--font-size-14) !important;
@@ -484,29 +486,22 @@
     }
 }
 
-/* 1. Jadvalni o'rab turgan qism - balandlikni cheklaymiz */
 .m-table-wrapper {
     max-height: 600px;
-    /* 15 ta qator uchun ideal balandlik */
     overflow-y: auto;
-    /* Faqat vertikal skroll */
     border: 1px solid #e2e8f0;
     border-radius: 8px;
     background: #fff;
 }
 
-/* 2. Skroll bo'lganda jadval tepasi (header) qotib turishi uchun */
 .m-data-table thead th {
     position: sticky;
     top: 0;
     background-color: #f8fafc;
-    /* Orqa fon rangi */
     z-index: 5;
     box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1);
-    /* Header ajralib turishi uchun */
 }
 
-/* 3. Pagination tugmalari qismi (pastda chiroyli turishi uchun) */
 .m-pagination-row {
     display: flex;
     justify-content: space-between;
@@ -531,13 +526,12 @@
     transition: all 0.2s;
 }
 
-.m-num-active { 
+.m-num-active {
     background: var(--primary-color);
     color: var(--white);
     border-color: var(--primary-color);
 }
 
-/* 4. Skrollbarni chiroyli qilish (Chrome va Safari uchun) */
 .m-table-wrapper::-webkit-scrollbar {
     width: 6px;
 }

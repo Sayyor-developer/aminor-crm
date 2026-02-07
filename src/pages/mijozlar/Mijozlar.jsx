@@ -1,145 +1,197 @@
 import React, { useState, useMemo } from 'react';
 import { 
-  Search, UserPlus, Edit, Trash2, 
-  ChevronLeft, ChevronRight, X, AlertTriangle 
+  Search, UserPlus, Edit, Trash2, X, AlertTriangle, 
+  Printer, History, ShoppingCart, TrendingDown, TrendingUp, CheckCircle2 
 } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast'; 
+import html2pdf from 'html2pdf.js'; // PDF uchun kutubxona
+import { useData } from '../../DataContext';
 import './mijozlar.css';
 
 const Mijozlar = ({ open }) => {
-  const [mijozlar, setMijozlar] = useState([
-    { id: 1, ism: 'Alisher Valiyev', telefon: '+998901234567', telegram: '@alisher_v', manzil: 'Toshkent', status: true },
-    { id: 2, ism: 'Dilnoza Karimova', telefon: '+998912345678', telegram: '@dilnoza_k', manzil: 'Samarqand', status: true },
-    { id: 3, ism: 'Jamshid Tursunov', telefon: '+998933456789', telegram: '@jamshid_t', manzil: 'Buxoro', status: false },
-    { id: 4, ism: 'Sevara Rahimova', telefon: '+998944567890', telegram: '@sevara_r', manzil: 'Andijon', status: true },
-    { id: 5, ism: 'Bekzod Azimov', telefon: '+998955678901', telegram: '@bekzod_a', manzil: 'Namangan', status: true },
-    { id: 6, ism: 'Nodira Sharipova', telefon: '+998976789012', telegram: '@nodira_sh', manzil: 'Fargona', status: false },
-    { id: 7, ism: 'Jasur Mavlonov', telefon: '+998991231122', telegram: '@jasur_m', manzil: 'Xorazm', status: true },
-    { id: 8, ism: 'Gulnoza Toirova', telefon: '+998905554433', telegram: '@gulnoza_t', manzil: 'Jizzax', status: true },
-    { id: 9, ism: 'Sardor Ikromov', telefon: '+998917778899', telegram: '@sardor_i', manzil: 'Qarshi', status: true },
-    { id: 10, ism: 'Malika Ergasheva', telefon: '+998934442211', telegram: '@malika_e', manzil: 'Termiz', status: false },
-    { id: 11, ism: 'Farrux Zokirov', telefon: '+998941110022', telegram: '@farrux_z', manzil: 'Guliston', status: true },
-    { id: 12, ism: 'Zilola Ahmedova', telefon: '+998958887766', telegram: '@zilola_a', manzil: 'Navoiy', status: true },
-    { id: 13, ism: 'Oybek Qodirov', telefon: '+998972223344', telegram: '@oybek_q', manzil: 'Toshkent', status: true },
-    { id: 14, ism: 'Lola Orifova', telefon: '+998993334455', telegram: '@lola_o', manzil: 'Buxoro', status: false },
-    { id: 15, ism: 'Rustam Sobirov', telefon: '+998901112233', telegram: '@rustam_s', manzil: 'Samarqand', status: true },
-  ]);
+  const { mijozlar, mijozQoshish, mijozOchirish, mijozYangilash } = useData();
 
+  // --- STATE-LAR ---
   const [qidiruvMatni, setQidiruvMatni] = useState('');
-  const [joriyBet, setJoriyBet] = useState(1);
+  const [filtrStatus, setFiltrStatus] = useState('all');
+  const [tanlangan, setTanlangan] = useState(null);
+
+  // Modallar holati
   const [tahrirlashModalOchiq, setTahrirlashModalOchiq] = useState(false);
   const [ochirishModalOchiq, setOchirishModalOchiq] = useState(false);
-  const [tanlangan, setTanlangan] = useState(null);
-  const [yangiMijoz, setYangiMijoz] = useState({ ism: '', telefon: '+998', telegram: '', manzil: '', status: true });
+  const [profilModalOchiq, setProfilModalOchiq] = useState(false);
+  const [sotishModalOchiq, setSotishModalOchiq] = useState(false);
 
-  const betdagiSoni = 15;
+  // Sotuv va Yangi mijoz uchun state-lar
+  const [sotuvData, setSotuvData] = useState({ mahsulot: '', miqdor: '', narx: '' });
+  const [yangiMijozState, setYangiMijozState] = useState({ 
+    ism: '', telefon: '+998', qarzdorlik: '', oxirgiXarid: '', status: true 
+  });
 
-  const telefonValidatsiya = (tel) => {
-    if (!tel.startsWith('+998')) return "Telefon +998 bilan boshlanishi shart!";
-    if (tel.length !== 13) return "Telefon raqami 13 ta belgi bo'lsin!";
-    return null;
+  // --- PDF EXPORT FUNKSIYASI ---
+  const handleDownloadPDF = () => {
+    const element = document.getElementById('pdf-content');
+    const opt = {
+      margin: 10,
+      filename: `${tanlangan.ism}_hisobot.pdf`,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2 },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+    html2pdf().set(opt).from(element).save();
+    toast.success("PDF yuklab olinmoqda...");
+  };
+
+  // --- FUNKSIYALAR ---
+  
+
+  const handleToggleStatus = (e, m) => {
+    e.stopPropagation(); 
+    mijozYangilash({ ...m, status: !m.status });
+    toast.success(m.status ? "Mijoz nofaol qilindi" : "Mijoz faollashtirildi");
+  };
+
+  const handleMijozQoshish = () => {
+    // TEKSHIRUV (VALIDATION)
+    if (!yangiMijozState.ism.trim()) {
+        return toast.error("Ismni kiriting!");
+    }
+    if (yangiMijozState.telefon.length < 13) {
+        return toast.error("Telefon raqamini to'liq kiriting!");
+    }
+    if (yangiMijozState.qarzdorlik === '') {
+        return toast.error("Qarzdorlikni kiriting (0 bo'lsa ham)!");
+    }
+
+    const yangi = { 
+        ...yangiMijozState, 
+        id: Date.now(), 
+        qarzdorlik: Number(yangiMijozState.qarzdorlik), 
+        tolovTarixi: [] 
+    };
+    
+    mijozQoshish(yangi);
+    setYangiMijozState({ ism: '', telefon: '+998', qarzdorlik: '', oxirgiXarid: '', status: true });
+    toast.success("Mijoz qo'shildi!");
+  };
+
+  const handleMijozYangilash = () => {
+    if (!tanlangan.ism.trim()) return toast.error("Ism bo'sh bo'lmasin");
+    mijozYangilash({ ...tanlangan, qarzdorlik: Number(tanlangan.qarzdorlik) });
+    setTahrirlashModalOchiq(false);
+    toast.success("Ma'lumotlar yangilandi");
+  };
+
+  const handleSotuvBajarish = () => {
+    if (!sotuvData.mahsulot || !sotuvData.miqdor || !sotuvData.narx) {
+      return toast.error("Ma'lumotlarni to'liq kiriting!");
+    }
+    
+    const jamiSumma = Number(sotuvData.miqdor) * Number(sotuvData.narx);
+    const yangilanganMijoz = {
+      ...tanlangan,
+      qarzdorlik: tanlangan.qarzdorlik + jamiSumma,
+      oxirgiXarid: new Date().toISOString().split('T')[0],
+      tolovTarixi: [
+        { sana: new Date().toLocaleDateString(), miqdor: `+${jamiSumma.toLocaleString()} (${sotuvData.mahsulot})` },
+        ...(tanlangan.tolovTarixi || [])
+      ]
+    };
+    
+    mijozYangilash(yangilanganMijoz);
+    setSotishModalOchiq(false);
+    setSotuvData({ mahsulot: '', miqdor: '', narx: '' });
+    toast.success("Sotuv muvaffaqiyatli saqlandi!");
+  };
+
+  // Balans yordamchilari
+  const getBalansHolati = (miqdor) => {
+    const val = Number(miqdor);
+    if (val > 0) return { tekst: "Qarzdor (-)", rang: "text-red", icon: <TrendingDown size={16}/> };
+    if (val < 0) return { tekst: "Haqdor (+)", rang: "text-green", icon: <TrendingUp size={16}/> };
+    return { tekst: "0 (Qarzsiz)", rang: "text-blue", icon: <CheckCircle2 size={16}/> };
+  };
+
+  const formatBalans = (miqdor) => {
+    const val = Number(miqdor);
+    if (val > 0) return `-${val.toLocaleString()}`;
+    if (val < 0) return `+${Math.abs(val).toLocaleString()}`;
+    return "0";
   };
 
   const filtrlangan = useMemo(() => {
-    return mijozlar.filter(m => 
-      m.ism.toLowerCase().includes(qidiruvMatni.toLowerCase()) || 
-      m.telefon.includes(qidiruvMatni)
-    );
-  }, [mijozlar, qidiruvMatni]);
-
-  const jamiBetlar = Math.ceil(filtrlangan.length / betdagiSoni);
-  const joriyMijozlar = filtrlangan.slice((joriyBet - 1) * betdagiSoni, joriyBet * betdagiSoni);
-
-  const statusniOzgartirish = (id) => {
-    setMijozlar(mijozlar.map(m => m.id === id ? { ...m, status: !m.status } : m));
-    toast.success("Status yangilandi");
-  };
-
-  const tasdiqlanganOchirish = () => {
-    setMijozlar(mijozlar.filter(m => m.id !== tanlangan.id));
-    setOchirishModalOchiq(false);
-    toast.error("Mijoz o'chirildi");
-  };
-
-  const mijozniYangilash = () => {
-    const telXato = telefonValidatsiya(tanlangan.telefon);
-    if (telXato) { toast.error(telXato); return; }
-    setMijozlar(mijozlar.map(m => m.id === tanlangan.id ? tanlangan : m));
-    setTahrirlashModalOchiq(false);
-    toast.success("Muvaffaqiyatli saqlandi!");
-  };
-
-  const mijozQoshish = () => {
-    if (!yangiMijoz.ism.trim()) { toast.error("Ismni kiriting!"); return; }
-    const telXato = telefonValidatsiya(yangiMijoz.telefon);
-    if (telXato) { toast.error(telXato); return; }
-
-    const id = Date.now();
-    const yangiRuyxat = [...mijozlar, { ...yangiMijoz, id }];
-    setMijozlar(yangiRuyxat);
-    
-    const yangiJamiBetlar = Math.ceil(yangiRuyxat.length / betdagiSoni);
-    setYangiMijoz({ ism: '', telefon: '+998', telegram: '', manzil: '', status: true });
-    setJoriyBet(yangiJamiBetlar); 
-    toast.success("Yangi sahifaga qo'shildi!");
-  };
+    return mijozlar.filter(m => {
+      const qidiruvMos = m.ism.toLowerCase().includes(qidiruvMatni.toLowerCase()) || m.telefon.includes(qidiruvMatni);
+      if (filtrStatus === 'debt') return qidiruvMos && m.qarzdorlik > 0;
+      return qidiruvMos;
+    });
+  }, [mijozlar, qidiruvMatni, filtrStatus]);
 
   return (
     <div className={`mijozlar-sahifa ${open ? 'sidebar-ochiq' : 'sidebar-yopiq'}`}>
       <Toaster position="top-right" />
-      
       <div className="konteyner">
         <div className="header">
           <div className="header-icon"><UserPlus size={20} /></div>
           <h1>Mijozlar Bazasi</h1>
         </div>
 
+        {/* QO'SHISH CARD */}
         <div className="card">
-          <div className="card-title">Mijoz Qo'shish</div>
+          <div className="card-title">Yangi mijoz qo'shish</div>
           <div className="input-guruhi">
-            <input className="input-style" placeholder="Ism" value={yangiMijoz.ism} onChange={e => setYangiMijoz({...yangiMijoz, ism: e.target.value})} />
-            <input className="input-style" placeholder="Telefon" value={yangiMijoz.telefon} onChange={e => setYangiMijoz({...yangiMijoz, telefon: e.target.value})} />
-            <input className="input-style" placeholder="Telegram" value={yangiMijoz.telegram} onChange={e => setYangiMijoz({...yangiMijoz, telegram: e.target.value})} />
-            <input className="input-style" placeholder="Manzil" value={yangiMijoz.manzil} onChange={e => setYangiMijoz({...yangiMijoz, manzil: e.target.value})} />
+            <input className="input-style" placeholder="F.I.O" value={yangiMijozState.ism} onChange={e => setYangiMijozState({...yangiMijozState, ism: e.target.value})} />
+            <input className="input-style" placeholder="Telefon" value={yangiMijozState.telefon} onChange={e => setYangiMijozState({...yangiMijozState, telefon: e.target.value})} />
+            <input className="input-style" type="number" placeholder="Boshlang'ich qarz" value={yangiMijozState.qarzdorlik} onChange={e => setYangiMijozState({...yangiMijozState, qarzdorlik: e.target.value})} />
+            <input className="input-style" type="date" value={yangiMijozState.oxirgiXarid} onChange={e => setYangiMijozState({...yangiMijozState, oxirgiXarid: e.target.value})} />
           </div>
-          <button className="btn-blue" onClick={mijozQoshish}>Qo'shish</button>
+          <button className="btn-blue btn-full" onClick={handleMijozQoshish}>Qo'shish</button>
         </div>
 
+        {/* FILTR VA JADVAL */}
         <div className="card">
-          <div className="qidiruv-blok">
-            <Search className="qidiruv-icon" size={18} />
-            <input className="input-style pl-icon" placeholder="Qidirish..." onChange={e => {setQidiruvMatni(e.target.value); setJoriyBet(1);}} />
+          <div className="filtr-wrapper">
+            <div className="qidiruv-blok">
+              <Search className="qidiruv-icon" size={18} />
+              <input className="input-style pl-icon" placeholder="Qidiruv..." onChange={e => setQidiruvMatni(e.target.value)} />
+            </div>
+            <select className="input-style select-filtr" value={filtrStatus} onChange={(e) => setFiltrStatus(e.target.value)}>
+              <option value="all">Hammasi</option>
+              <option value="debt">Qarzdorlar</option>
+            </select>
           </div>
 
-          <div className="jadval-qobiq" style={{maxHeight: '580px', overflowY: 'auto'}}>
+          <div className="jadval-qobiq">
             <table className="mijoz-table">
-              <thead style={{position: 'sticky', top: 0, background: '#fff', zIndex: 5}}>
+              <thead>
                 <tr>
-                  <th>F.I.O</th>
-                  <th>Telefon</th>
-                  <th>Telegram</th>
-                  <th>Manzil</th>
-                  <th className="text-center">Holat</th>
-                  <th className="text-center">Amallar</th>
+                  <th>F.I.O</th><th>Telefon</th><th>Balans / Holat</th><th>Oxirgi xarid</th><th className="text-center">Status</th><th className="text-center">Amallar</th>
                 </tr>
               </thead>
               <tbody>
-                {joriyMijozlar.map(m => (
+                {filtrlangan.map(m => (
                   <tr key={m.id} className={m.status ? '' : 'inactive-row'}>
-                    <td className={`font-medium ${m.status ? 'ism-active' : 'ism-inactive'}`}>{m.ism}</td>
+                    <td className={`font-medium ${m.status ? 'ism-active' : ''}`} onClick={() => { if(m.status){ setTanlangan(m); setProfilModalOchiq(true); }}}>
+                      {m.ism}
+                    </td>
                     <td>{m.telefon}</td>
-                    <td>{m.telegram}</td>
-                    <td>{m.manzil}</td>
-                    {/* CSS KLASSLARINGGA TO'LIQ MOSLANDI */}
+                    <td>
+                      <div className={`flex-col ${getBalansHolati(m.qarzdorlik).rang}`}>
+                        <span className="font-bold">{formatBalans(m.qarzdorlik)} so'm</span>
+                        <small className="flex-center" style={{gap: '4px'}}>{getBalansHolati(m.qarzdorlik).icon} {getBalansHolati(m.qarzdorlik).tekst}</small>
+                      </div>
+                    </td>
+                    <td>{m.oxirgiXarid || '---'}</td>
                     <td className="text-center switch-td">
-                      <button className={`switch ${m.status ? 'switch-on' : 'switch-off'}`} onClick={() => statusniOzgartirish(m.id)}>
+                      <button className={`switch ${m.status ? 'switch-on' : 'switch-off'}`} onClick={(e) => handleToggleStatus(e, m)}>
                         <span className={`knopka ${m.status ? 'knopka-on' : 'knopka-off'}`} />
                       </button>
                     </td>
                     <td className="text-center actions-td">
                       <div className="flex-center">
-                        <button className="btn-blue btn-icon" onClick={() => {setTanlangan(m); setTahrirlashModalOchiq(true);}}><Edit size={14} /></button>
-                        <button className="btn-blue btn-red btn-icon" onClick={() => {setTanlangan(m); setOchirishModalOchiq(true);}}><Trash2 size={14} /></button>
+                        <button className="btn-blue btn-icon" onClick={() => {setTanlangan(m); setSotishModalOchiq(true);}}><ShoppingCart size={14}/></button>
+                        <button className="btn-blue btn-icon" onClick={() => {setTanlangan(m); setTahrirlashModalOchiq(true);}}><Edit size={14}/></button>
+                        <button className="btn-blue btn-red btn-icon" onClick={() => {setTanlangan(m); setOchirishModalOchiq(true);}}><Trash2 size={14}/></button>
                       </div>
                     </td>
                   </tr>
@@ -147,57 +199,124 @@ const Mijozlar = ({ open }) => {
               </tbody>
             </table>
           </div>
-
-          <div className="pagination">
-            <span className="jami-text">Jami: {filtrlangan.length} ta mijoz</span>
-            <div className="bet-btn-guruhi">
-              <button className="bet-btn nav-btn" disabled={joriyBet === 1} onClick={() => setJoriyBet(v => v - 1)}>
-                <ChevronLeft size={16} /> Oldingi
-              </button>
-              {Array.from({length: jamiBetlar}, (_, i) => (
-                <button key={i} className={`bet-btn ${joriyBet === i+1 ? 'bet-btn-active' : ''}`} onClick={() => setJoriyBet(i+1)}>{i+1}</button>
-              ))}
-              <button className="bet-btn nav-btn" disabled={joriyBet === jamiBetlar || jamiBetlar === 0} onClick={() => setJoriyBet(v => v + 1)}>
-                Keyingi <ChevronRight size={16} />
-              </button>
-            </div>
-          </div>
         </div>
       </div>
 
-      {/* TAHRIRLASH MODALI */}
+      {/* --- MODALLAR --- */}
+
+      {/* 1. TAHRIRLASH */}
       {tahrirlashModalOchiq && tanlangan && (
         <div className="modal-parda">
           <div className="modal-oyna">
-            <div className="modal-header">
-              <span>Mijozni Tahrirlash</span>
-              <X className="cursor-pointer" size={18} onClick={() => setTahrirlashModalOchiq(false)} />
-            </div>
+            <div className="modal-header"><span>Mijozni Tahrirlash</span><X className="cursor-pointer" onClick={() => setTahrirlashModalOchiq(false)} /></div>
             <div className="modal-body">
-              <input className="input-style" value={tanlangan.ism} onChange={e => setTanlangan({...tanlangan, ism: e.target.value})} />
-              <input className="input-style" value={tanlangan.telefon} onChange={e => setTanlangan({...tanlangan, telefon: e.target.value})} />
-              <input className="input-style" value={tanlangan.telegram} onChange={e => setTanlangan({...tanlangan, telegram: e.target.value})} />
-              <input className="input-style" value={tanlangan.manzil} onChange={e => setTanlangan({...tanlangan, manzil: e.target.value})} />
-              <button className="btn-blue btn-full" onClick={mijozniYangilash}>Saqlash</button>
+              <label className="text-gray">Ism sharifi</label>
+              <input className="input-style mb-2" value={tanlangan.ism} onChange={e => setTanlangan({...tanlangan, ism: e.target.value})} />
+              <label className="text-gray">Telefon</label>
+              <input className="input-style mb-2" value={tanlangan.telefon} onChange={e => setTanlangan({...tanlangan, telefon: e.target.value})} />
+              <label className="text-gray">Joriy Qarz (so'm)</label>
+              <input className="input-style mb-4" type="number" value={tanlangan.qarzdorlik} onChange={e => setTanlangan({...tanlangan, qarzdorlik: e.target.value})} />
+              <button className="btn-blue btn-full" onClick={handleMijozYangilash}>O'zgarishlarni Saqlash</button>
             </div>
           </div>
         </div>
       )}
 
-      {/* O'CHIRISH MODALI */}
-      {ochirishModalOchiq && (
+      {/* 2. O'CHIRISH */}
+      {ochirishModalOchiq && tanlangan && (
         <div className="modal-parda">
           <div className="modal-oyna modal-delete">
             <div className="modal-body text-center">
-              <div className="delete-icon-box">
-                <AlertTriangle size={40} color="#ef4444" />
+              <AlertTriangle size={48} color="#ef4444" style={{margin: '0 auto 15px'}} />
+              <h3>O'chirishni tasdiqlaysizmi?</h3>
+              <p><b>{tanlangan.ism}</b> bazadan o'chiriladi.</p>
+              <div className="flex-center delete-btns" style={{marginTop: '20px', gap: '10px'}}>
+                <button className="btn-cancel" onClick={() => setOchirishModalOchiq(false)}>Bekor qilish</button>
+                <button className="btn-red-confirm" onClick={() => {mijozOchirish(tanlangan.id); setOchirishModalOchiq(false); toast.error("Mijoz o'chirildi");}}>Ha, o'chirilsin</button>
               </div>
-              <h3 className="delete-title">O'chirilsinmi?</h3>
-              <p className="delete-text">Bu amalni ortga qaytarib bo'lmaydi.</p>
-              <div className="flex-center delete-btns">
-                <button className="btn-cancel" onClick={() => setOchirishModalOchiq(false)}>Yo'q</button>
-                <button className="btn-red-confirm" onClick={tasdiqlanganOchirish}>Ha</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 3. SOTUV */}
+      {sotishModalOchiq && tanlangan && (
+        <div className="modal-parda">
+          <div className="modal-oyna">
+            <div className="modal-header"><span>Yangi Sotuv: {tanlangan.ism}</span><X className="cursor-pointer" onClick={() => setSotishModalOchiq(false)} /></div>
+            <div className="modal-body">
+              <label className="text-gray">Mahsulot</label>
+              <select className="input-style mb-2 select-sotuv" value={sotuvData.mahsulot} onChange={e => setSotuvData({...sotuvData, mahsulot: e.target.value})}>
+                <option value="">Tanlang...</option>
+                <option value="Mol go'shti">Mol go'shti</option>
+                <option value="Qo'y go'shti">Qo'y go'shti</option>
+                <option value="Kolbasa">Kolbasa</option>
+              </select>
+              <div className="input-guruhi">
+                <div>
+                   <label className="text-gray">Miqdori (kg)</label>
+                   <input type="number" className="input-style" placeholder="0.0" value={sotuvData.miqdor} onChange={e => setSotuvData({...sotuvData, miqdor: e.target.value})} />
+                </div>
+                <div>
+                   <label className="text-gray">Narxi (1kg)</label>
+                   <input type="number" className="input-style" placeholder="0" value={sotuvData.narx} onChange={e => setSotuvData({...sotuvData, narx: e.target.value})} />
+                </div>
               </div>
+              <div className="total-box">
+                Jami: {(Number(sotuvData.miqdor) * Number(sotuvData.narx)).toLocaleString()} so'm
+              </div>
+              <button className="btn-blue btn-full" onClick={handleSotuvBajarish}>Sotuvni yakunlash</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 4. PROFIL (PDF chiqarish qo'shildi) */}
+      {profilModalOchiq && tanlangan && (
+        <div className="modal-parda" onClick={() => setProfilModalOchiq(false)}>
+          <div className="modal-oyna profil-modal" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <span>Mijoz Ma'lumotlari</span>
+              <X className="cursor-pointer" onClick={() => setProfilModalOchiq(false)} />
+            </div>
+            <div className="modal-body">
+              <div id="pdf-content">
+                <div className="profil-grid">
+                  <div className="profil-info-card text-center">
+                    <div className="avatar-big" style={{margin: '0 auto 15px'}}>{tanlangan.ism[0]}</div>
+                    <h2 style={{fontSize: '1.4rem'}}>{tanlangan.ism}</h2>
+                    <p className="text-gray">{tanlangan.telefon}</p>
+                    <div className={`total-box ${getBalansHolati(tanlangan.qarzdorlik).rang}`} style={{fontSize: '1.3rem', marginTop: '15px'}}>
+                      {formatBalans(tanlangan.qarzdorlik)} so'm
+                    </div>
+                  </div>
+                  
+                  <div className="profil-history-card">
+                    <h4 style={{display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '15px'}}>
+                      <History size={18}/> Oxirgi amallar tarixi
+                    </h4>
+                    <div className="history-list">
+                      {tanlangan.tolovTarixi && tanlangan.tolovTarixi.length > 0 ? (
+                        tanlangan.tolovTarixi.map((t, i) => (
+                          <div key={i} className="history-item flex-between" style={{borderLeft: '3px solid #2563eb'}}>
+                            <div className="flex-col">
+                              <span style={{fontWeight: '600'}}>{t.sana}</span>
+                              <small className="text-gray">Xarid bajarildi</small>
+                            </div>
+                            <b className="text-red">{t.miqdor}</b>
+                          </div>
+                        ))
+                      ) : (
+                        <p className="no-data">Hozircha amallar mavjud emas</p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              {/* PDF Tugmasi */}
+              <button className="btn-blue btn-full" style={{marginTop: '20px', gap: '8px'}} onClick={handleDownloadPDF}>
+                <Printer size={16}/> PDF variantda yuklab olish
+              </button>
             </div>
           </div>
         </div>

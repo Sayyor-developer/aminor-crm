@@ -1,19 +1,17 @@
-/* --- ASOSIY DIZAYN (O'ZGARISHSIZ) --- */
+/* ASOSIY STRUKTURA */
 .home-page {
-    position: absolute;
-    top: 70px;
-    left: 260px;
-    /* Sidebar ochiq holati */
-    right: 0;
+    /* Positionni absolute-dan margin-ga o'zgartirdik, sidebar qotib turishi uchun */
+    margin-top: 70px;
+    margin-left: 260px;
     padding: 20px;
     background-color: #f4f6f9;
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-    min-height: calc(100vh - 100px);
+    min-height: calc(100vh - 70px);
+    box-sizing: border-box;
 }
 
 .home-page.sidebar-h-closed {
-    
-    left: 80px;
+    margin-left: 80px;
 }
 
 .main-wrapper {
@@ -32,27 +30,20 @@
 }
 
 .stat-card {
-    background: var(--white);
-    border: 1px solid var(--light-gray);
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
     border-radius: 12px;
     padding: 16px;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    box-shadow: 0 1px 3px var(--white-smoke);
-    transition: transform 0.2s ease;
-}
-
-.stat-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 4px 12px var(--white-smoke);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .stat-header {
     display: flex;
     align-items: center;
     gap: 12px;
-    margin-bottom: 10px;
 }
 
 .icon-box {
@@ -62,100 +53,94 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    flex-shrink: 0;
-}
-
-.icon-svg {
-    font-size: var(--font-size-20);
 }
 
 .blue-bg {
-    background:
-var(--white-smoke);
+    background: #f1f5f9;
     color: #4338ca;
 }
 
 .red-bg {
-    background:
-var(--white-smoke);
+    background: #f1f5f9;
     color: #e11d48;
 }
 
 .purple-bg {
-    background:
-var(--white-smoke);
+    background: #f1f5f9;
     color: #7c3aed;
 }
 
 .orange-bg {
-    background:
-var(--white-smoke);
+    background: #f1f5f9;
     color: #ea580c;
 }
 
 .stat-label {
-    font-size: var(--font-size-16);
-    color: var(--black);
-    font-weight: var(--font-weight-500);
+    font-size: 16px;
+    color: #1e293b;
+    font-weight: 500;
 }
 
 .stat-value {
-    font-size: var(--font-size-20);
-    font-weight: var(--font-weight-700);
-    color: var(--black);
+    font-size: 20px;
+    font-weight: 700;
+    color: #1e293b;
     margin: 10px 0;
     display: flex;
     align-items: baseline;
-    gap: var(--gap-10);
+    gap: 8px;
 }
 
 .unit {
-    font-size: var(--font-size-14);
-    color: var(--white);
-    font-weight: var(--font-weight-400);
+    font-size: 14px;
+    color: #94a3b8;
 }
 
 .stat-footer {
-    font-size: var(--font-size-14);
+    font-size: 14px;
     color: #94a3b8;
-    margin-top: auto;
     padding-top: 10px;
     border-top: 1px solid #f1f5f9;
 }
 
+/* LIST QATORLARI */
+.list-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid #f1f5f9;
+    font-size: 14px;
+}
+
+.list-row:last-child {
+    border-bottom: none;
+}
+
+/* GRAFIK */
 .chart-section {
-    background: var(--white);
+    background: #fff;
     border: 1px solid #e0e6ed;
     border-radius: 12px;
     padding: 15px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .chart-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    flex-wrap: wrap
-    ;
     margin-bottom: 25px;
 }
 
 .section-title {
-    font-size: var(--font-size-18);
-    font-weight: var(--font-weight-600);
+    font-size: 18px;
+    font-weight: 600;
     color: #1e293b;
-    margin: 0;
 }
 
 .period-select {
     padding: 8px 16px;
-    border: 1px solid var(white);
+    border: 1px solid #e2e8f0;
     border-radius: 8px;
-    background-color: var(--white);
-    color: #475569;
-    font-size: var(--font-size-14);
-    font-weight: var(--font-weight-500);
-    cursor: pointer;
 }
 
 .chart-wrapper {
@@ -163,92 +148,42 @@ var(--white-smoke);
     height: 320px;
 }
 
-/* --- MANASHU QISMI RASMDAGIDEK QILIB TO'G'IRLANDI --- */
-
+/* RESPONSIVE 480PX va 380PX */
 @media (max-width: 480px) {
     .home-page {
-        /* Sidebar yonida bo'sh joy qoldirish */
-        left: 80px !important;
-        padding: 20px !important;
-        position: relative !important;
-        top: 10 !important;
+        margin-left: 80px !important;
         width: calc(100% - 80px) !important;
-        /* Ekran kengligidan sidebar kengligini ayiramiz */
-        box-sizing: border-box;
-    }
-
-    .main-wrapper {
-        display: flex !important;
-        flex-direction: column !important;
-        align-items: center !important;
-        /* Barcha elementlarni o'rtaga tekislaydi */
-        justify-content: center !important;
-        width: 100% !important;
-        margin: 0 auto !important;
+        padding: 15px !important;
+        margin-top: 60px !important;
     }
 
     .stats-container {
         display: flex !important;
         flex-direction: column !important;
         align-items: center !important;
-        /* Kartochkalarni o'rtaga markazlaydi */
-        width: 100% !important;
-        gap: 15px !important;
-        max-width: 350px;
-        /* Kartochkalar haddan tashqari kengayib ketmasligi uchun */
-        margin: 0 auto !important;
     }
 
     .stat-card {
         width: 100% !important;
-        /* stats-container ichida to'liq eni bo'yicha markazda turadi */
         max-width: 320px !important;
-        /* Rasmdagi kabi ixcham ko'rinish uchun */
-        margin: 0 auto !important;
         border-radius: 16px !important;
-        /* Burchaklarni yanada yumshoqroq qilish */
-        padding: 15px !important;
-    }
-
-    /* Diagramma qismi ham o'rtada turishi uchun */
-    .chart-section {
-        width: 100% !important;
-        max-width: 340px !important;
-        margin: 0 auto !important;
-        box-sizing: border-box;
     }
 }
 
-/* 380px va undan kichik ekranlar uchun qo'shimcha aniqlik */
 @media (max-width: 380px) {
     .home-page {
-        left: 70px !important;
+        margin-left: 70px !important;
         width: calc(100% - 70px) !important;
     }
 
-    .stats-container {
-        max-width: 290px;
+    .stat-card {
+        max-width: 280px !important;
     }
-}
-
-/* .clickable-card { */
-/* cursor: pointer; */
-/* transition: all 0.3s ease !important; */
-/* } */
-
-
-.clickable-card {
-    cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
 }
 
 .clickable-card:hover {
     transform: scale(1.02);
     border-color: #6366f1;
-    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.03);
-    background-color: var(white);
-}
-
-.clickable-card:active {
-    transform: translateY(-2px) scale(0.98);
+    cursor: pointer;
+    transition: 0.2s;
 }

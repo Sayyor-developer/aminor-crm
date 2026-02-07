@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { 
   User, 
   Settings, 
@@ -22,39 +22,53 @@ import {
 } from 'recharts';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { useData } from '../../DataContext'; // Markaziy bazani ulaymiz
 import './direktor.css';
 
-const data = [
-  { name: 'Dush', sales: 4000, prod: 2400 },
-  { name: 'Sesh', sales: 3000, prod: 1398 },
-  { name: 'Chor', sales: 2000, prod: 9800 },
-  { name: 'Pay', sales: 2780, prod: 3908 },
-  { name: 'Jum', sales: 1890, prod: 4800 },
-  { name: 'Shan', sales: 2390, prod: 3800 },
-  { name: 'Yak', sales: 3490, prod: 4300 },
-];
-
 const Direktor = ({ open }) => {
+  const { mijozlar, sotuvlar } = useData(); // Real ma'lumotlarni olish
+
   const [fullname, setFullname] = useState('Alisher Valiyev');
   const [isEditingName, setIsEditingName] = useState(false);
   const [currentCode, setCurrentCode] = useState('');
   const [newCode, setNewCode] = useState('');
   const [confirmCode, setConfirmCode] = useState('');
 
-  // Toast xabarnomasi parametrlari
+  // --- DINAMIK STATISTIKANI HISOBLASH ---
+  const stats = useMemo(() => {
+    const jamiDaromad = sotuvlar.reduce((sum, s) => sum + s.summa, 0);
+    const jamiMijozlar = mijozlar.length;
+    const jamiQarz = mijozlar.reduce((sum, m) => sum + Number(m.qarzdorlik), 0);
+    
+    // Grafik uchun oxirgi 7 ta sotuvni tayyorlash (namuna sifatida)
+    const chartData = sotuvlar.slice(-7).map((s, index) => ({
+      name: new Date(s.sana).toLocaleDateString('uz-UZ', { weekday: 'short' }),
+      sales: s.summa
+    }));
+
+    return {
+      daromad: jamiDaromad.toLocaleString(),
+      mijozlar: jamiMijozlar.toLocaleString(),
+      qarz: jamiQarz.toLocaleString(),
+      grafik: chartData.length > 0 ? chartData : [
+        { name: 'Dush', sales: 4000 },
+        { name: 'Sesh', sales: 3000 },
+        { name: 'Chor', sales: 2000 },
+        { name: 'Pay', sales: 2780 },
+        { name: 'Jum', sales: 1890 },
+      ]
+    };
+  }, [sotuvlar, mijozlar]);
+
   const toastOptions = {
     position: "top-right",
     autoClose: 3000,
-    hideProgressBar: false,
-    closeOnClick: true,
-    pauseOnHover: true,
-    draggable: true,
-    progress: undefined,
+    theme: "colored"
   };
 
   const handleSaveName = () => {
     setIsEditingName(false);
-    toast.success("Ma'lumotlar o'zgartirildi", toastOptions);
+    toast.success("Direktor nomi o'zgartirildi", toastOptions);
   };
 
   const handleChangeCode = (e) => {
@@ -67,10 +81,8 @@ const Direktor = ({ open }) => {
       toast.error('Yangi kodlar mos kelmadi', toastOptions);
       return;
     }
-    toast.success("Ma'lumotlar o'zgartirildi", toastOptions);
-    setCurrentCode('');
-    setNewCode('');
-    setConfirmCode('');
+    toast.success("Xavfsizlik kodi muvaffaqiyatli yangilandi", toastOptions);
+    setCurrentCode(''); setNewCode(''); setConfirmCode('');
   };
 
   return (
@@ -78,20 +90,20 @@ const Direktor = ({ open }) => {
       <ToastContainer />
       <div className="direktor-wrapper">
         
-        {/* Breadcrumb Section */}
+        {/* Breadcrumb */}
         <div className="breadcrumb-nav">
-          <span>Dashboard</span>
+          <span>Admin Panel</span>
           <ChevronRight size={14} />
           <span className="active-link">Direktor Sozlamalari</span>
         </div>
 
-        {/* Statistik Kartochkalar */}
+        {/* Dinamik Statistik Kartochkalar */}
         <div className="stats-container">
           {[
-            { label: 'Oylik Daromad', value: '$124,500', icon: DollarSign, color: 'emerald' },
-            { label: 'Faol Mijozlar', value: '1,240', icon: Users, color: 'blue' },
-            { label: 'Mahsulotlar', value: '850', icon: Package, color: 'amber' },
-            { label: 'Samaradorlik', value: '94%', icon: TrendingUp, color: 'purple' },
+            { label: 'Umumiy Savdo', value: `${stats.daromad} so'm`, icon: DollarSign, color: 'emerald' },
+            { label: 'Jami Mijozlar', value: stats.mijozlar, icon: Users, color: 'blue' },
+            { label: 'Kutilayotgan Qarz', value: `${stats.qarz} so'm`, icon: Package, color: 'amber' },
+            { label: 'Tizim Holati', value: 'Faol', icon: TrendingUp, color: 'purple' },
           ].map((stat, i) => (
             <div key={i} className="mini-card">
               <div className={`mini-icon ${stat.color}`}>
@@ -106,32 +118,32 @@ const Direktor = ({ open }) => {
         </div>
 
         <div className="direktor-grid">
-          {/* Chap tomondagi asosiy qism */}
+          {/* Chap ustun */}
           <div className="left-column">
             
-            {/* Ismni tahrirlash */}
             <div className="main-card">
               <div className="card-top">
                 <div className="title-box">
                   <User size={20} className="red-icon" />
-                  <h3>Direktor Ma'lumotlari</h3>
+                  <h3>Direktor Profili</h3>
                 </div>
                 <button 
                   className="action-btn"
                   onClick={() => isEditingName ? handleSaveName() : setIsEditingName(true)}
                 >
                   {isEditingName ? <Save size={16} /> : <Settings size={16} />}
-                  {isEditingName ? "Saqlash" : "O'zgartirish"}
+                  {isEditingName ? "Saqlash" : "Tahrirlash"}
                 </button>
               </div>
               <div className="card-content">
-                <p className="field-label">To'liq ism (Fullname)</p>
+                <p className="field-label">Direktor F.I.O</p>
                 {isEditingName ? (
                   <input 
                     type="text" 
                     className="name-input"
                     value={fullname}
                     onChange={(e) => setFullname(e.target.value)}
+                    autoFocus
                   />
                 ) : (
                   <div className="profile-info">
@@ -139,38 +151,38 @@ const Direktor = ({ open }) => {
                     <span className="fullname-text">{fullname}</span>
                   </div>
                 )}
-                <p className="sub-text">Ushbu ism tizimdagi barcha hisobotlarda aks etadi.</p>
+                <p className="sub-text">Bu ism tizimdagi barcha rasmiy hujjatlarda direktor sifatida ko'rinadi.</p>
               </div>
             </div>
 
-            {/* Grafika/Analitika */}
+            {/* Dinamik Grafik */}
             <div className="main-card">
               <div className="card-top">
                 <div className="title-box">
                   <BarChart3 size={20} className="red-icon" />
-                  <h3>Sotuvlar Tahlili</h3>
+                  <h3>Sotuvlar Dinamikasi</h3>
                 </div>
               </div>
               <div className="card-content">
                 <div className="chart-box">
                   <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={data}>
+                    <AreaChart data={stats.grafik}>
                       <defs>
                         <linearGradient id="colorSales" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#9B2226" stopOpacity={0.1}/>
-                          <stop offset="95%" stopColor="#9B2226" stopOpacity={0}/>
+                          <stop offset="5%" stopColor="#ef4444" stopOpacity={0.2}/>
+                          <stop offset="95%" stopColor="#ef4444" stopOpacity={0}/>
                         </linearGradient>
                       </defs>
                       <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                       <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 12}} />
                       <YAxis axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 12}} />
                       <Tooltip 
-                        contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+                        contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }}
                       />
                       <Area 
                         type="monotone" 
                         dataKey="sales" 
-                        stroke="#9B2226" 
+                        stroke="#ef4444" 
                         strokeWidth={3} 
                         fill="url(#colorSales)" 
                       />
@@ -181,18 +193,18 @@ const Direktor = ({ open }) => {
             </div>
           </div>
 
-          {/* O'ng tomondagi xavfsizlik qismi */}
+          {/* O'ng ustun - Xavfsizlik */}
           <div className="right-column">
             <div className="main-card">
               <div className="card-top">
                 <div className="title-box">
                   <Lock size={20} className="red-icon" />
-                  <h3>Kod o'zgartirish</h3>
+                  <h3>Xavfsizlik Sozlamalari</h3>
                 </div>
               </div>
               <form className="card-content security-form" onSubmit={handleChangeCode}>
                 <div className="input-item">
-                  <label>Joriy kod</label>
+                  <label>Hozirgi Parol</label>
                   <input 
                     type="password" 
                     placeholder="••••••"
@@ -201,7 +213,7 @@ const Direktor = ({ open }) => {
                   />
                 </div>
                 <div className="input-item">
-                  <label>Yangi kod</label>
+                  <label>Yangi Parol</label>
                   <input 
                     type="password" 
                     placeholder="••••••"
@@ -210,7 +222,7 @@ const Direktor = ({ open }) => {
                   />
                 </div>
                 <div className="input-item">
-                  <label>Tasdiqlash</label>
+                  <label>Parolni tasdiqlash</label>
                   <input 
                     type="password" 
                     placeholder="••••••"
@@ -219,16 +231,15 @@ const Direktor = ({ open }) => {
                   />
                 </div>
                 <button type="submit" className="save-code-btn">
-                  Kodni yangilash
+                  Yangi parolni saqlash
                 </button>
               </form>
             </div>
 
-            {/* Pastki banner */}
             <div className="red-banner">
               <div className="banner-txt">
-                <h4>Xavfsizlik!</h4>
-                <p>Kodni doimiy yangilab turishni tavsiya qilamiz.</p>
+                <h4>Eslatma!</h4>
+                <p>Parolni xavfsizlik maqsadida har 30 kunda yangilab turish tavsiya etiladi.</p>
               </div>
               <Lock className="banner-icon" size={80} />
             </div>

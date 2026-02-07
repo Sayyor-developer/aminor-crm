@@ -4,9 +4,13 @@ import { toast, ToastContainer } from 'react-toastify';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import 'react-toastify/dist/ReactToastify.css';
+import { useData } from '../../DataContext'; // Markaziy bazani ulaymiz
 import './kolbasamaxsulotlar.css';
 
 export default function Kolbasamaxsulotlar({ open }) {
+  // DataContext'dan sotuvQoshish funksiyasini olamiz
+  const { sotuvQoshish } = useData();
+
   const [products, setProducts] = useState([
     { id: 1, name: 'Doktor Kolbasa (Oliy)', unit: 'kg', stock: 120, price: 45000, active: true },
     { id: 2, name: 'Sosiska Sutli', unit: 'kg', stock: 85, price: 32000, active: true },
@@ -55,24 +59,35 @@ export default function Kolbasamaxsulotlar({ open }) {
       toast.error("Ma'lumotlar to'liq emas!");
       return;
     }
+    
+    const productPrice = Number(newProduct.price);
+    const productStock = Number(newProduct.stock);
+    const jamiSumma = productPrice * productStock;
+
     const item = { 
       ...newProduct, 
       id: Date.now(), 
       active: true, 
-      price: Number(newProduct.price), 
-      stock: Number(newProduct.stock) 
+      price: productPrice, 
+      stock: productStock 
     };
     
-    // Yangi ro'yxatni hisoblaymiz (oxiriga qo'shish)
     const updatedProducts = [...products, item];
     setProducts(updatedProducts);
-    setNewProduct({ name: '', unit: 'kg', price: '', stock: '' });
 
-    // Yangi mahsulot oxirgi sahifada bo'lishi uchun oxirgi sahifaga o'tamiz
+    // --- HOME KARDLARINI YANGILASH UCHUN ---
+    sotuvQoshish({
+      id: Date.now(),
+      summa: jamiSumma,
+      miqdor: productStock,
+      sana: new Date().toISOString()
+    });
+
+    setNewProduct({ name: '', unit: 'kg', price: '', stock: '' });
     const nextTotalPages = Math.ceil(updatedProducts.length / itemsPerPage);
     setCurrentPage(nextTotalPages);
     
-    toast.success("Mahsulot ro'yxat oxiriga qo'shildi");
+    toast.success("Mahsulot qo'shildi va statistikaga kiritildi");
   };
 
   const handleExportPDF = () => {
@@ -91,17 +106,17 @@ export default function Kolbasamaxsulotlar({ open }) {
       <ToastContainer position="top-right" autoClose={1500} limit={1} theme="colored" />
 
       <div className="konteyner">
-       <div className="header-main">
-  <div className="header-left">
-    <div className="header-icon"><Plus size={24} /></div>
-    <h1>Kolbasa Mahsulotlari</h1>
-  </div>
-  <div className="header-actions">
-    <button className="btn-export pdf" onClick={handleExportPDF}>
-      <FileText size={16} /> PDF Export
-    </button>
-  </div>
-</div>
+        <div className="header-main">
+          <div className="header-left">
+            <div className="header-icon"><Plus size={24} /></div>
+            <h1>Kolbasa Mahsulotlari</h1>
+          </div>
+          <div className="header-actions">
+            <button className="btn-export pdf" onClick={handleExportPDF}>
+              <FileText size={16} /> PDF Export
+            </button>
+          </div>
+        </div>
 
         <div className="card">
           <div className="input-guruhi">
@@ -158,7 +173,6 @@ export default function Kolbasamaxsulotlar({ open }) {
             </table>
           </div>
 
-          {/* O'NG BURCHAKKA SURILGAN PAGINATION */}
           <div className="pagination-container" style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '20px' }}>
             <div className="pagination-wrapper" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <button 
@@ -201,7 +215,6 @@ export default function Kolbasamaxsulotlar({ open }) {
         </div>
       </div>
 
-      {/* MODALLAR (Tahrirlash/O'chirish) SHU YERDAN DAVOM ETADI... */}
       {isEditModalOpen && selectedProduct && (
         <div className="modal-parda" onClick={() => setIsEditModalOpen(false)}>
           <div className="modal-oyna" onClick={e => e.stopPropagation()}>
@@ -213,7 +226,7 @@ export default function Kolbasamaxsulotlar({ open }) {
               <input className="input-style w-full mb-3" value={selectedProduct.name} onChange={e => setSelectedProduct({ ...selectedProduct, name: e.target.value })} />
               <input className="input-style w-full mb-3" type="number" value={selectedProduct.stock} onChange={e => setSelectedProduct({ ...selectedProduct, stock: e.target.value })} />
               <input className="input-style w-full mb-3" type="number" value={selectedProduct.price} onChange={e => setSelectedProduct({ ...selectedProduct, price: e.target.value })} />
-              <div className="modal-footer  ">
+              <div className="modal-footer">
                 <button className="btn-cancel" onClick={() => setIsEditModalOpen(false)}>Bekor</button>
                 <button className="btn-blue" onClick={() => { 
                   setProducts(products.map(p => p.id === selectedProduct.id ? selectedProduct : p)); 
@@ -226,11 +239,10 @@ export default function Kolbasamaxsulotlar({ open }) {
         </div>
       )}
 
-      {/* --- O'CHIRISH MODALI --- */}
       {isDeleteModalOpen && selectedProduct && (
         <div className="modal-parda" onClick={() => setIsDeleteModalOpen(false)}>
           <div className="modal-oyna modal-delete" onClick={e => e.stopPropagation()}>
-            <AlertTriangle size={48} color="#ef4444" />
+            <AlertTriangle size={48} color="var(--primary-color)" />
             <h3 style={{margin: '15px 0'}}>O'chirilsinmi?</h3>
             <p style={{marginBottom: '20px'}}>{selectedProduct.name}</p>
             <div className="modal-footer" style={{display: 'flex', gap: '10px', width: '100%'}}>

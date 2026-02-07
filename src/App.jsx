@@ -4,6 +4,9 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import './App.css';
 
+// CONTEXT PROVIDERNI IMPORT QILAMIZ
+import { DataProvider } from './DataContext'; 
+
 import Header from './components/header/Header';
 import SideBar from './components/sidebar/SideBar';
 
@@ -41,39 +44,41 @@ function App() {
     setLoading(true);
     const timer = setTimeout(() => {
       setLoading(false);
-    }, 800); // 1 sekunddan sal kamaytirdik, tezroq ko'rinishi uchun
+    }, 800);
     return () => clearTimeout(timer);
-  }, [location.pathname]); // Faqat pathname o'zgarganda loading bo'ladi
+  }, [location.pathname]);
 
   return (
-    <div className="App">
-      <ToastContainer />
-      
-      {/* Sidebar va Header doim ko'rinib turadi */}
-      <SideBar open={open} setOpen={setOpen} />
-      <Header open={open} title={currentTitle} />
+    // 1. DATA PROVIDER BILAN BUTUN APP'NI O'RAYMIZ
+    <DataProvider>
+      <div className="App">
+        <ToastContainer />
+        
+        <SideBar open={open} setOpen={setOpen} />
+        <Header open={open} title={currentTitle} />
 
-      {/* Faqat kontent qismi loading bo'ladi */}
-      <main className={`main-content ${open ? 'shifted' : 'full'}`}>
-        {loading ? (
-          <div className="loading-wrapper">
-            <Loading />
-          </div>
-        ) : (
-          <Routes>
-            <Route path='/' element={<Home open={open} />}/>
-            <Route path='/kolbasamaxsulotlar' element={<Kolbasamaxsulotlar open={open} />}/>
-            <Route path='/mijozlar' element={<Mijozlar open={open} />}/>
-            <Route path='/masalliqlar' element={<Masalliqlar open={open} />}/>
-            <Route path='/tannarxhisoblash' element={<Tannarxhisoblash open={open} />}/>
-            <Route path='/moliya' element={<Moliya open={open} />}/>
-            <Route path='/tovuqchiqim' element={<Tovuqchiqim open={open} />}/>
-            <Route path='/foydalanuvchilar' element={<Foydalanuvchilar open={open} />}/>
-            <Route path='/direktor' element={<Direktor open={open} />}/>
-          </Routes>
-        )}
-      </main>
-    </div>
+        <main className={`main-content ${open ? 'shifted' : 'full'}`}>
+          {loading ? (
+            <div className="loading-wrapper">
+              <Loading />
+            </div>
+          ) : (
+            <Routes>
+              {/* Barcha componentlar endi context'dan ma'lumot olishi mumkin */}
+              <Route path='/' element={<Home open={open} />}/>
+              <Route path='/kolbasamaxsulotlar' element={<Kolbasamaxsulotlar open={open} />}/>
+              <Route path='/mijozlar' element={<Mijozlar open={open} />}/>
+              <Route path='/masalliqlar' element={<Masalliqlar open={open} />}/>
+              <Route path='/tannarxhisoblash' element={<Tannarxhisoblash open={open} />}/>
+              <Route path='/moliya' element={<Moliya open={open} />}/>
+              <Route path='/tovuqchiqim' element={<Tovuqchiqim open={open} />}/>
+              <Route path='/foydalanuvchilar' element={<Foydalanuvchilar open={open} />}/>
+              <Route path='/direktor' element={<Direktor open={open} />}/>
+            </Routes>
+          )}
+        </main>
+      </div>
+    </DataProvider>
   );
 }
 
