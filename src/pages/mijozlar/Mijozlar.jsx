@@ -4,31 +4,29 @@ import {
   Printer, History, ShoppingCart, TrendingDown, TrendingUp, CheckCircle2 
 } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast'; 
-import html2pdf from 'html2pdf.js'; // PDF uchun kutubxona
+import html2pdf from 'html2pdf.js';
 import { useData } from '../../DataContext';
 import './mijozlar.css';
 
 const Mijozlar = ({ open }) => {
-  const { mijozlar, mijozQoshish, mijozOchirish, mijozYangilash } = useData();
+  const { mijozlar, mijozQoshish, mijozOchirish, mijozYangilash, sotuvQoshish } = useData();
 
   // --- STATE-LAR ---
   const [qidiruvMatni, setQidiruvMatni] = useState('');
   const [filtrStatus, setFiltrStatus] = useState('all');
   const [tanlangan, setTanlangan] = useState(null);
 
-  // Modallar holati
   const [tahrirlashModalOchiq, setTahrirlashModalOchiq] = useState(false);
   const [ochirishModalOchiq, setOchirishModalOchiq] = useState(false);
   const [profilModalOchiq, setProfilModalOchiq] = useState(false);
   const [sotishModalOchiq, setSotishModalOchiq] = useState(false);
 
-  // Sotuv va Yangi mijoz uchun state-lar
   const [sotuvData, setSotuvData] = useState({ mahsulot: '', miqdor: '', narx: '' });
   const [yangiMijozState, setYangiMijozState] = useState({ 
     ism: '', telefon: '+998', qarzdorlik: '', oxirgiXarid: '', status: true 
   });
 
-  // --- PDF EXPORT FUNKSIYASI ---
+  // --- PDF EXPORT ---
   const handleDownloadPDF = () => {
     const element = document.getElementById('pdf-content');
     const opt = {
@@ -43,7 +41,6 @@ const Mijozlar = ({ open }) => {
   };
 
   // --- FUNKSIYALAR ---
-  
 
   const handleToggleStatus = (e, m) => {
     e.stopPropagation(); 
@@ -52,21 +49,29 @@ const Mijozlar = ({ open }) => {
   };
 
   const handleMijozQoshish = () => {
-    // TEKSHIRUV (VALIDATION)
-    if (!yangiMijozState.ism.trim()) {
-        return toast.error("Ismni kiriting!");
+    const ism = yangiMijozState.ism.trim();
+    const tel = yangiMijozState.telefon.trim();
+
+    // 1. Ism tekshiruvi
+    if (!ism) {
+      return toast.error("Ismni kiriting!");
     }
-    if (yangiMijozState.telefon.length < 13) {
-        return toast.error("Telefon raqamini to'liq kiriting!");
+    // 2. Raqam +998 bilan boshlanishi tekshiruvi
+    if (!tel.startsWith('+998')) {
+      return toast.error("Raqam +998 bilan boshlanishi shart!");
     }
-    if (yangiMijozState.qarzdorlik === '') {
-        return toast.error("Qarzdorlikni kiriting (0 bo'lsa ham)!");
+    // 3. Uzunlik tekshiruvi
+    if (tel.length !== 13) {
+      return toast.error("Raqam 13 ta belgidan iborat bo'lishi shart!");
     }
+
+    const qarz = yangiMijozState.qarzdorlik === '' ? 0 : Number(yangiMijozState.qarzdorlik);
 
     const yangi = { 
         ...yangiMijozState, 
         id: Date.now(), 
-        qarzdorlik: Number(yangiMijozState.qarzdorlik), 
+        ism: ism,
+        qarzdorlik: qarz, 
         tolovTarixi: [] 
     };
     
@@ -88,23 +93,38 @@ const Mijozlar = ({ open }) => {
     }
     
     const jamiSumma = Number(sotuvData.miqdor) * Number(sotuvData.narx);
+    const joriySana = new Date().toISOString().split('T')[0];
+
     const yangilanganMijoz = {
       ...tanlangan,
-      qarzdorlik: tanlangan.qarzdorlik + jamiSumma,
-      oxirgiXarid: new Date().toISOString().split('T')[0],
+      qarzdorlik: Number(tanlangan.qarzdorlik) + jamiSumma,
+      oxirgiXarid: joriySana,
       tolovTarixi: [
-        { sana: new Date().toLocaleDateString(), miqdor: `+${jamiSumma.toLocaleString()} (${sotuvData.mahsulot})` },
+        { 
+          sana: new Date().toLocaleDateString(), 
+          miqdor: `+${jamiSumma.toLocaleString()} so'm`,
+          izoh: `${sotuvData.mahsulot} (${sotuvData.miqdor} kg)`
+        },
         ...(tanlangan.tolovTarixi || [])
       ]
     };
     
+    // Global moliya/sotuv bazasiga ham qo'shamiz
+    sotuvQoshish({
+      id: Date.now(),
+      mijozId: tanlangan.id,
+      mijozIsmi: tanlangan.ism,
+      mahsulot: sotuvData.mahsulot,
+      summa: jamiSumma,
+      sana: joriySana
+    });
+
     mijozYangilash(yangilanganMijoz);
     setSotishModalOchiq(false);
     setSotuvData({ mahsulot: '', miqdor: '', narx: '' });
     toast.success("Sotuv muvaffaqiyatli saqlandi!");
   };
 
-  // Balans yordamchilari
   const getBalansHolati = (miqdor) => {
     const val = Number(miqdor);
     if (val > 0) return { tekst: "Qarzdor (-)", rang: "text-red", icon: <TrendingDown size={16}/> };
@@ -141,7 +161,7 @@ const Mijozlar = ({ open }) => {
           <div className="card-title">Yangi mijoz qo'shish</div>
           <div className="input-guruhi">
             <input className="input-style" placeholder="F.I.O" value={yangiMijozState.ism} onChange={e => setYangiMijozState({...yangiMijozState, ism: e.target.value})} />
-            <input className="input-style" placeholder="Telefon" value={yangiMijozState.telefon} onChange={e => setYangiMijozState({...yangiMijozState, telefon: e.target.value})} />
+            <input className="input-style" placeholder="Telefon (+998XXXXXXXXX)" maxLength={13} value={yangiMijozState.telefon} onChange={e => setYangiMijozState({...yangiMijozState, telefon: e.target.value})} />
             <input className="input-style" type="number" placeholder="Boshlang'ich qarz" value={yangiMijozState.qarzdorlik} onChange={e => setYangiMijozState({...yangiMijozState, qarzdorlik: e.target.value})} />
             <input className="input-style" type="date" value={yangiMijozState.oxirgiXarid} onChange={e => setYangiMijozState({...yangiMijozState, oxirgiXarid: e.target.value})} />
           </div>
@@ -271,7 +291,7 @@ const Mijozlar = ({ open }) => {
         </div>
       )}
 
-      {/* 4. PROFIL (PDF chiqarish qo'shildi) */}
+      {/* 4. PROFIL */}
       {profilModalOchiq && tanlangan && (
         <div className="modal-parda" onClick={() => setProfilModalOchiq(false)}>
           <div className="modal-oyna profil-modal" onClick={e => e.stopPropagation()}>
@@ -293,15 +313,15 @@ const Mijozlar = ({ open }) => {
                   
                   <div className="profil-history-card">
                     <h4 style={{display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '15px'}}>
-                      <History size={18}/> Oxirgi amallar tarixi
+                      <History size={18}/> Amallar tarixi
                     </h4>
                     <div className="history-list">
                       {tanlangan.tolovTarixi && tanlangan.tolovTarixi.length > 0 ? (
                         tanlangan.tolovTarixi.map((t, i) => (
-                          <div key={i} className="history-item flex-between" style={{borderLeft: '3px solid #2563eb'}}>
+                          <div key={i} className="history-item flex-between" style={{borderLeft: '3px solid #2563eb', padding: '10px', marginBottom: '8px', background: '#f8fafc'}}>
                             <div className="flex-col">
                               <span style={{fontWeight: '600'}}>{t.sana}</span>
-                              <small className="text-gray">Xarid bajarildi</small>
+                              <small className="text-gray">{t.izoh}</small>
                             </div>
                             <b className="text-red">{t.miqdor}</b>
                           </div>
@@ -313,7 +333,6 @@ const Mijozlar = ({ open }) => {
                   </div>
                 </div>
               </div>
-              {/* PDF Tugmasi */}
               <button className="btn-blue btn-full" style={{marginTop: '20px', gap: '8px'}} onClick={handleDownloadPDF}>
                 <Printer size={16}/> PDF variantda yuklab olish
               </button>

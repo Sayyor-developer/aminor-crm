@@ -5,16 +5,18 @@ import {
 import toast, { Toaster } from 'react-hot-toast'; 
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
+import { useData } from '../../DataContext'; // Markaziy bazani ulaymiz
 import './tovuqchiqim.css';
 
 const Tovuqchiqim = ({ open }) => {
+  // DataContext'dan ma'lumotlarni va funksiyani olamiz
+  // Eslatma: DataContext'da 'chiqimQoshish' funksiyasi bo'lishi kerak
+  const { /* chiqimlar, */ chiqimQoshish } = useData();
+
   const [data, setData] = useState([
     { id: 1, tovuqSoni: 500, mahsulotSoni: 425, sana: '2024-02-01', taminotchi: 'Toshkent Parranda', holat: true },
     { id: 2, tovuqSoni: 320, mahsulotSoni: 272, sana: '2024-02-02', taminotchi: 'Xorazm Tovuq', holat: true },
     { id: 3, tovuqSoni: 150, mahsulotSoni: 120, sana: '2024-02-03', taminotchi: 'Farg\'ona Parranda', holat: false },
-    { id: 4, tovuqSoni: 500, mahsulotSoni: 425, sana: '2024-02-01', taminotchi: 'Toshkent Parranda', holat: true },
-    { id: 5, tovuqSoni: 320, mahsulotSoni: 272, sana: '2024-02-02', taminotchi: 'Xorazm Tovuq', holat: true },
-    { id: 6, tovuqSoni: 150, mahsulotSoni: 120, sana: '2024-02-03', taminotchi: 'Farg\'ona Parranda', holat: false }
   ]);
 
   const [searchTerm, setSearchTerm] = useState('');
@@ -80,7 +82,22 @@ const Tovuqchiqim = ({ open }) => {
     } else {
       const newData = { id: Date.now(), ...formData, holat: true };
       setData([...data, newData]); 
-      toast.success("Muvaffaqiyatli qo'shildi");
+
+      // --- MOLIYA VA DIREKTOR UCHUN CHIQIMNI QAYD ETISH ---
+      // Faraz qilaylik, har bir tovuq o'rtacha 25,000 so'm turadi
+      const xarajatSummasi = Number(formData.tovuqSoni) * 25000;
+      
+      if(chiqimQoshish) {
+        chiqimQoshish({
+          id: Date.now(),
+          turi: "Tovuq xaridi",
+          manbaa: formData.taminotchi,
+          summa: xarajatSummasi,
+          sana: formData.sana
+        });
+      }
+
+      toast.success("Muvaffaqiyatli qo'shildi va xarajat qayd etildi");
     }
     setIsModalOpen(false);
   };
@@ -93,7 +110,7 @@ const Tovuqchiqim = ({ open }) => {
         <div className="tovuqchiqim-header">
           <div className="tovuqchiqim-title-box">
             <h1>Tovuq Chiqimlari</h1>
-            <p>Barcha mahsulotlar nazorati va hisoboti</p>
+            <p>Xomashyo nazorati va mahsulot unumdorligi</p>
           </div>
           
           <div className="tovuqchiqim-header-btns">
@@ -114,7 +131,7 @@ const Tovuqchiqim = ({ open }) => {
             <div className="tovuqchiqim-info"><span>TAYYOR MAHSULOT</span><h3>{data.reduce((a, b) => a + Number(b.mahsulotSoni), 0).toLocaleString()}</h3></div>
           </div>
           <div className="tovuqchiqim-stat-card">
-            <div className="tovuqchiqim-info"><span>O'RTACHA CHIQIM</span><h3>85%</h3></div>
+            <div className="tovuqchiqim-info"><span>O'RTACHA UNUMDORLIK</span><h3>{((data.reduce((a, b) => a + Number(b.mahsulotSoni), 0) / data.reduce((a, b) => a + Number(b.tovuqSoni), 1)) * 100).toFixed(1)}%</h3></div>
           </div>
         </div>
 
@@ -123,7 +140,7 @@ const Tovuqchiqim = ({ open }) => {
             <Calculator size={24} />
             <div>
               <h4>Tezkor Kalkulyator</h4>
-              <p>Prognoz chiqim miqdori</p>
+              <p>Prognoz chiqim miqdori (Standart: 85%)</p>
             </div>
           </div>
           <input type="number" placeholder="Tovuq sonini kiriting..." value={calcInput} onChange={(e) => setCalcInput(e.target.value)} />
@@ -186,6 +203,7 @@ const Tovuqchiqim = ({ open }) => {
         </div>
       </div>
 
+      {/* MODALLAR AVVALGI HOLATDEK QOLADI */}
       {isModalOpen && (
         <div className="tovuqchiqim-modal">
           <div className="tovuqchiqim-modal-content">

@@ -6,34 +6,20 @@ import {
 import toast, { Toaster } from 'react-hot-toast';
 import { jsPDF } from "jspdf";
 import autoTable from 'jspdf-autotable';
+import { useData } from '../../DataContext'; // Markaziy bazani ulaymiz
 import './masalliqlar.css';
 
 const Masalliqlar = ({ open }) => {
-  // --- BAZA (Masalliqlar va Tarix) ---
-  const [masalliqlar, setMasalliqlar] = useState([
-    { id: 1, nomi: 'Bug\'doy uni', miqdori: 500, birligi: 'kg', narxi: 5000, zavod: 'Toshkent Un Zavodi', status: true },
-    { id: 2, nomi: 'Shakar (Oq)', miqdori: 300, birligi: 'kg', narxi: 8500, zavod: 'Xorazm Shakar', status: true },
-    { id: 3, nomi: 'Paxta yog\'i', miqdori: 150, birligi: 'litr', narxi: 16000, zavod: 'Farg\'ona Yog\'', status: false },
-    { id: 4, nomi: 'Tuxum (S1)', miqdori: 2000, birligi: 'dona', narxi: 1200, zavod: 'Parranda Sanoat', status: true },
-    { id: 5, nomi: 'Sut 3.2%', miqdori: 200, birligi: 'litr', narxi: 7000, zavod: 'Namangan Sut', status: true },
-    { id: 16, nomi: 'Vanilin', miqdori: 10, birligi: 'kg', narxi: 100000, zavod: 'Pishiriq Zavod', status: true },
-    // Sinab ko'rish uchun qo'shimcha ma'lumotlar
-    { id: 6, nomi: 'Margarin', miqdori: 50, birligi: 'kg', narxi: 22000, zavod: 'Zavod 1', status: true },
-    { id: 7, nomi: 'Tuz', miqdori: 100, birligi: 'kg', narxi: 2000, zavod: 'Zavod 2', status: true },
-    { id: 8, nomi: 'Xamirturush', miqdori: 20, birligi: 'kg', narxi: 45000, zavod: 'Zavod 3', status: true },
-    { id: 9, nomi: 'Kunjut', miqdori: 15, birligi: 'kg', narxi: 60000, zavod: 'Zavod 4', status: true },
-    { id: 10, nomi: 'Asal', miqdori: 10, birligi: 'kg', narxi: 80000, zavod: 'Zavod 5', status: true },
-    { id: 11, nomi: 'Yong\'oq', miqdori: 30, birligi: 'kg', narxi: 95000, zavod: 'Zavod 6', status: true },
-  ]);
-
-  const [tarix, setTarix] = useState([
-    { id: 101, sana: '2026-02-07', nomi: 'Bug\'doy uni', miqdor: 100, summa: 500000, xodim: 'Admin' }
-  ]);
+  // --- DATA CONTEXT ULanishi ---
+  const { 
+    masalliqlar, setMasalliqlar, 
+    chiqimQoshish, masalliqMiqdoriniYangilash 
+  } = useData();
 
   // --- INTERFEYS VA PAGINATION HOLATLARI ---
   const [qidiruvMatni, setQidiruvMatni] = useState('');
   const [joriyBet, setJoriyBet] = useState(1);
-  const betdagiSoni = 10; // HAR BIR SAHIFADA 10 TA MAHSULOT
+  const betdagiSoni = 10;
 
   const [tahrirlashModalOchiq, setTahrirlashModalOchiq] = useState(false);
   const [ochirishModalOchiq, setOchirishModalOchiq] = useState(false);
@@ -45,6 +31,8 @@ const Masalliqlar = ({ open }) => {
     nomi: '', miqdori: '', birligi: 'kg', narxi: '', zavod: '', status: true 
   });
 
+  const [tarix, setTarix] = useState([]); // Lokal kirim tarixi uchun
+
   // --- FILTRLASH MANTIQI ---
   const filtrlangan = useMemo(() => {
     return masalliqlar.filter(m =>
@@ -55,7 +43,6 @@ const Masalliqlar = ({ open }) => {
 
   // --- PAGINATION HISOB-KITOBI ---
   const jamiBetlar = Math.ceil(filtrlangan.length / betdagiSoni);
-  
   const joriyMasalliqlar = useMemo(() => {
     const boshlanishIndeksi = (joriyBet - 1) * betdagiSoni;
     return filtrlangan.slice(boshlanishIndeksi, boshlanishIndeksi + betdagiSoni);
@@ -81,22 +68,34 @@ const Masalliqlar = ({ open }) => {
       toast.error("Miqdorni kiriting!");
       return;
     }
-    const jamiSumma = tanlangan.yangiMiqdor * tanlangan.narxi;
-    const yangiKirim = {
+    const jamiSumma = Number(tanlangan.yangiMiqdor) * Number(tanlangan.narxi);
+    const joriySana = new Date().toISOString().split('T')[0];
+
+    // 1. Markaziy moliya bazasiga chiqim (xarajat) sifatida yuborish
+    chiqimQoshish({
       id: Date.now(),
-      sana: new Date().toISOString().split('T')[0],
+      turi: "Masalliq xaridi",
+      manbaa: `${tanlangan.nomi} (${tanlangan.zavod})`,
+      summa: jamiSumma,
+      sana: joriySana
+    });
+
+    // 2. Markaziy ombordagi miqdorni yangilash
+    masalliqMiqdoriniYangilash(tanlangan.id, tanlangan.yangiMiqdor);
+
+    // 3. Lokal tarixga qo'shish
+    const yangiKirim = {
+      id: Date.now() + 1,
+      sana: joriySana,
       nomi: tanlangan.nomi,
       miqdor: Number(tanlangan.yangiMiqdor),
       summa: jamiSumma,
       xodim: "Admin"
     };
-
     setTarix([yangiKirim, ...tarix]);
-    setMasalliqlar(masalliqlar.map(m => 
-      m.id === tanlangan.id ? { ...m, miqdori: m.miqdori + Number(tanlangan.yangiMiqdor) } : m
-    ));
+
     setBuyurtmaModalOchiq(false);
-    toast.success("Kirim qilindi!");
+    toast.success(`Kirim qilindi: -${jamiSumma.toLocaleString()} so'm`);
   };
 
   const tarixExportPDF = () => {
@@ -184,7 +183,7 @@ const Masalliqlar = ({ open }) => {
                   <tr key={m.id} className={m.status ? 'm-row-active' : 'm-row-disabled'}>
                     <td className="m-font-bold">{m.nomi}</td>
                     <td>{m.miqdori} <span className="m-tag">{m.birligi}</span></td>
-                    <td className="m-price-col">{m.narxi.toLocaleString()}</td>
+                    <td className="m-price-col">{Number(m.narxi).toLocaleString()}</td>
                     <td>{m.zavod}</td>
                     <td className="text-center">
                       <div className={`m-toggle ${m.status ? 'm-toggle-on' : 'm-toggle-off'}`} onClick={() => statusniOzgartirish(m.id)}>
@@ -210,7 +209,7 @@ const Masalliqlar = ({ open }) => {
             </table>
           </div>
 
-          {/* --- MANA PAGINATION QISMI (TO'LIQ) --- */}
+          {/* Pagination */}
           {jamiBetlar > 1 && (
             <div className="m-pagination-row" style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '15px'}}>
               <span className="m-total-count" style={{color: '#64748b', fontSize: '14px'}}>
@@ -258,7 +257,8 @@ const Masalliqlar = ({ open }) => {
         </div>
       </div>
 
-      {/* --- MODALLAR QISMI (O'ZGARISSIZ) --- */}
+      {/* MODALLAR QISMI */}
+      
       {/* 1. Sotib olish modali */}
       {buyurtmaModalOchiq && tanlangan && (
         <div className="m-overlay">
@@ -272,7 +272,7 @@ const Masalliqlar = ({ open }) => {
                 <label>Miqdorni kiriting ({tanlangan.birligi})</label>
                 <input className="m-custom-input" type="number" value={tanlangan.yangiMiqdor} onChange={e => setTanlangan({...tanlangan, yangiMiqdor: e.target.value})} />
               </div>
-              <div style={{marginBottom: '10px'}}>Umumiy summa: {(tanlangan.yangiMiqdor * tanlangan.narxi).toLocaleString()} so'm</div>
+              <div style={{marginBottom: '10px'}}>Umumiy summa: {(Number(tanlangan.yangiMiqdor) * tanlangan.narxi).toLocaleString()} so'm</div>
               <button className="m-save-btn" onClick={buyurtmaBerish}>Tasdiqlash</button>
             </div>
           </div>
