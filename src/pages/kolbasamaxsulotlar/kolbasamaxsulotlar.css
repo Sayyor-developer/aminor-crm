@@ -583,7 +583,7 @@
 }
 
 .btn-red {
-  background: #ef4444;
+  background: var(--primary-color);
   color: var(--white);
   border: none;
   padding: 10px 20px;
@@ -600,7 +600,7 @@
 }
 
 .input-style:focus {
-  border-color: #3b82f6;
+  border-color: var(--primary-color);
 }
 
 .w-full {
