@@ -11,7 +11,6 @@ import './home.css';
 const Home = ({ open }) => {
   const navigate = useNavigate();
   
-  // DataContext'dan ma'lumotlarni xavfsiz qabul qilamiz
   const { 
     mijozlar = [], 
     sotuvlar = [], 
@@ -34,11 +33,9 @@ const Home = ({ open }) => {
     }));
   }, [dinamika]);
 
-  // --- BUGUNGI STATISTIKA (WARNING TO'G'IRLANDI) ---
- const bugungiStatistika = useMemo(() => {
+  // --- BUGUNGI STATISTIKA (FOYDALANILDI) ---
+  const bugungiStatistika = useMemo(() => {
     const bugun = new Date().toISOString().split('T')[0];
-    
-    // sotuvlar mavjudligini va har bir elementni tekshiramiz (s?.sana xavfsizroq)
     const bugungiSotuvlar = (sotuvlar || []).filter(s => s && s.sana && s.sana.startsWith(bugun));
     
     return {
@@ -68,7 +65,7 @@ const Home = ({ open }) => {
       <div className="main-wrapper">
         
         <div className="stats-container">
-          {/* 1. Umumiy Kirim */}
+          {/* 1. Umumiy Kirim - Footerda bugungi tushum ko'rsatildi (Warningni yo'qotish uchun) */}
           <div className="stat-card clickable-card" onClick={() => handleCardClick('/kolbasamaxsulotlar')}>
             <div className="stat-info">
               <div className="stat-header">
@@ -77,10 +74,10 @@ const Home = ({ open }) => {
               </div>
               <h2 className="stat-value">{(jamiKirim || 0).toLocaleString()} <span className="unit">so'm</span></h2>
             </div>
-            <p className="stat-footer">Jami tushgan mablag'</p>
+            <p className="stat-footer">Bugun: {bugungiStatistika.tushum.toLocaleString()} so'm</p>
           </div>
 
-          {/* 2. Ishlab chiqarish */}
+          {/* 2. Ishlab chiqarish - Footerda bugungi hajm ko'rsatildi */}
           <div className="stat-card clickable-card" onClick={() => handleCardClick('/tovuqchiqim')}>
             <div className="stat-info">
               <div className="stat-header">
@@ -89,10 +86,9 @@ const Home = ({ open }) => {
               </div>
               <h2 className="stat-value">{(jamiTayyor || 0).toLocaleString()} <span className="unit">dona</span></h2>
             </div>
-            <p className="stat-footer">Jami tayyor mahsulot</p>
+            <p className="stat-footer">Bugun: {bugungiStatistika.hajm.toLocaleString()} dona</p>
           </div>
 
-          {/* 3. Jami Mijozlar */}
           <div className="stat-card clickable-card" onClick={() => handleCardClick('/mijozlar')}>
             <div className="stat-info">
               <div className="stat-header">
@@ -104,7 +100,6 @@ const Home = ({ open }) => {
             <p className="stat-footer">Bazada mavjud mijozlar</p>
           </div>
 
-          {/* 4. Qarzdorlar soni */}
           <div className="stat-card clickable-card" onClick={() => handleCardClick('/mijozlar')}>
             <div className="stat-info">
               <div className="stat-header">
@@ -116,7 +111,6 @@ const Home = ({ open }) => {
             <p className="stat-footer">Hozirda qarzi borlar</p>
           </div>
 
-          {/* 5. Umumiy Qarz */}
           <div className="stat-card clickable-card" onClick={() => handleCardClick('/mijozlar')}>
             <div className="stat-info">
               <div className="stat-header">
