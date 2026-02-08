@@ -6,10 +6,8 @@ import { useData } from '../../DataContext';
 import './kolbasamaxsulotlar.css';
 
 export default function Kolbasamaxsulotlar({ open }) {
-  // DataContext'dan sotuvQoshish va sotuvOchirish funksiyalarini chaqiramiz
   const { sotuvQoshish, sotuvOchirish } = useData();
 
-  // --- LOCALSTORAGE'DAN MAHSULOTLARNI YUKLASH ---
   const [products, setProducts] = useState(() => {
     const saqlangan = localStorage.getItem('kolbasa_bazasi');
     return saqlangan ? JSON.parse(saqlangan) : [];
@@ -23,36 +21,49 @@ export default function Kolbasamaxsulotlar({ open }) {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  // Ma'lumotlar o'zgarganda LocalStorage'ga yozish
   useEffect(() => {
     localStorage.setItem('kolbasa_bazasi', JSON.stringify(products));
   }, [products]);
 
-  // Qidiruv filtri
   const filteredItems = useMemo(() => {
     return products.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()));
   }, [products, searchQuery]);
 
-  // Pagination hisob-kitobi
   const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
   const currentItems = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage;
     return filteredItems.slice(startIndex, startIndex + itemsPerPage);
   }, [filteredItems, currentPage]);
 
-  // Holatni (active/inactive) o'zgartirish
+  // --- TOAST MUAMMOSI TO'G'IRLANGAN QISM ---
   const toggleStatus = useCallback((id) => {
-    setProducts(prev => prev.map(p => (p.id === id ? { ...p, active: !p.active } : p)));
+    setProducts(prev => prev.map(p => {
+      if (p.id === id) {
+        const yangiHolat = !p.active;
+        
+        // setTimeout orqali React render siklidan chiqariladi va 1 marta chiqishi ta'minlanadi
+        setTimeout(() => {
+          toast.dismiss(); // Oldingi ochiq toastlarni yopadi
+          if (yangiHolat) {
+            toast.success(`${p.name} faollashtirildi`);
+          } else {
+            toast.warn(`${p.name} nofaol holatga o'tkazildi`);
+          }
+        }, 0);
+
+        return { ...p, active: yangiHolat };
+      }
+      return p;
+    }));
   }, []);
 
-  // --- MAHSULOT QO'SHISH (HOMEGA FAQAT SHU YERDAN MA'LUMOT BORADI) ---
   const handleAddProduct = () => {
     if (!newProduct.name.trim() || !newProduct.price || !newProduct.stock) {
       toast.error("Ma'lumotlarni to'liq kiriting!");
       return;
     }
     
-    const commonId = Date.now(); // Ikkala joy (Ombor va Home) uchun bitta umumiy ID
+    const commonId = Date.now(); 
     const productPrice = Number(newProduct.price);
     const productStock = Number(newProduct.stock);
 
@@ -65,11 +76,8 @@ export default function Kolbasamaxsulotlar({ open }) {
       stock: productStock 
     };
     
-    // Ombordagi ro'yxatga qo'shish
     setProducts(prev => [...prev, item]);
 
-    // Home (Bosh sahifa) statistikasiga yuborish
-    // Shunda kirganda 0 bo'ladi, qo'shsangiz ko'payadi
     sotuvQoshish({
       id: commonId,
       summa: productPrice * productStock,
@@ -81,15 +89,10 @@ export default function Kolbasamaxsulotlar({ open }) {
     toast.success("Muvaffaqiyatli qo'shildi!");
   };
 
-  // --- MAHSULOTNI O'CHIRISH (HOMEDAN HAM O'CHIRADI) ---
   const handleConfirmDelete = () => {
     if (selectedProduct) {
-      // Ombordan o'chirish
       setProducts(prev => prev.filter(p => p.id !== selectedProduct.id));
-      
-      // Home sahifasidan ham o'chirib tashlash (Zanjirvariy o'chirish)
       sotuvOchirish(selectedProduct.id); 
-
       setIsDeleteModalOpen(false);
       setSelectedProduct(null);
       toast.error("O'chirildi");
@@ -113,7 +116,6 @@ export default function Kolbasamaxsulotlar({ open }) {
           </div>
         </div>
 
-        {/* INPUT QISMI */}
         <div className="card">
           <h3 className="card-title">Yangi mahsulot kirimi</h3>
           <div className="input-guruhi">
@@ -128,7 +130,6 @@ export default function Kolbasamaxsulotlar({ open }) {
           </div>
         </div>
 
-        {/* JADVAL QISMI */}
         <div className="card">
           <div className="flex-center" style={{marginBottom: '15px'}}>
             <Search size={18} color="#64748b" />
@@ -178,7 +179,6 @@ export default function Kolbasamaxsulotlar({ open }) {
             </table>
           </div>
 
-          {/* PAGINATION */}
           {totalPages > 1 && (
             <div className="pagination-wrapper">
               <span className="total-count">Jami: {filteredItems.length} ta</span>
@@ -192,7 +192,6 @@ export default function Kolbasamaxsulotlar({ open }) {
         </div>
       </div>
 
-      {/* TAHRIRLASH MODALI */}
       {isEditModalOpen && selectedProduct && (
         <div className="modal-parda" onClick={() => setIsEditModalOpen(false)}>
           <div className="modal-oyna" onClick={e => e.stopPropagation()}>
@@ -217,7 +216,6 @@ export default function Kolbasamaxsulotlar({ open }) {
         </div>
       )}
 
-      {/* O'CHIRISH MODALI */}
       {isDeleteModalOpen && selectedProduct && (
         <div className="modal-parda" onClick={() => setIsDeleteModalOpen(false)}>
           <div className="modal-oyna modal-delete" onClick={e => e.stopPropagation()}>

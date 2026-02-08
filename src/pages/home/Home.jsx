@@ -8,57 +8,58 @@ import {
 import { useData } from '../../DataContext'; 
 import './home.css';
 
-const CHART_DATA = {
-  month: [
-    { label: '01 Fev', value: 45 }, { label: '10 Fev', value: 48 },
-    { label: '20 Fev', value: 65 }, { label: '28 Fev', value: 85 },
-  ],
-  year: [
-    { label: 'Yan', value: 1200 }, { label: 'Mar', value: 1100 },
-    { label: 'May', value: 2100 }, { label: 'Iyul', value: 1700 },
-  ]
-};
-
 const Home = ({ open }) => {
   const navigate = useNavigate();
-  const { mijozlar, sotuvlar } = useData(); 
+  
+  // DataContext'dan ma'lumotlarni xavfsiz qabul qilamiz
+  const { 
+    mijozlar = [], 
+    sotuvlar = [], 
+    dinamika = [], 
+    jamiQarzlar = 0, 
+    jamiKirim = 0, 
+    jamiTayyor = 0 
+  } = useData(); 
+
   const [period, setPeriod] = useState('month');
   
-  const currentData = useMemo(() => CHART_DATA[period], [period]);
+  // --- DINAMIK GRAFIK MA'LUMOTI ---
+  const currentData = useMemo(() => {
+    if (!dinamika || dinamika.length === 0) {
+      return [{ label: 'Ma\'lumot yo\'q', value: 0 }];
+    }
+    return [...dinamika].reverse().slice(-7).map((item, index) => ({
+      label: item.sana ? item.sana.substring(5) : `Kun ${index + 1}`, 
+      value: Number(item.tayyor || 0)
+    }));
+  }, [dinamika]);
 
-  // --- DINAMIK HISOBLASH TIZIMI ---
-
-  // 1. Bugungi sanani formatlash (YYYY-MM-DD formatida)
-  const bugunStr = useMemo(() => new Date().toISOString().split('T')[0], []);
-
-  // 2. Bugungi Sotuvlar (Summa va KG)
-  const bugungiStatistika = useMemo(() => {
-    // Har bir sotuvning sanasini bizning formatimiz bilan solishtiramiz
-    const bugungiSotuvlar = sotuvlar.filter(s => {
-      if (!s.sana) return false;
-      return s.sana.startsWith(bugunStr);
-    });
-
+  // --- BUGUNGI STATISTIKA (WARNING TO'G'IRLANDI) ---
+ const bugungiStatistika = useMemo(() => {
+    const bugun = new Date().toISOString().split('T')[0];
+    
+    // sotuvlar mavjudligini va har bir elementni tekshiramiz (s?.sana xavfsizroq)
+    const bugungiSotuvlar = (sotuvlar || []).filter(s => s && s.sana && s.sana.startsWith(bugun));
+    
     return {
       tushum: bugungiSotuvlar.reduce((sum, s) => sum + Number(s.summa || 0), 0),
       hajm: bugungiSotuvlar.reduce((sum, s) => sum + Number(s.miqdor || 0), 0)
     };
-  }, [sotuvlar, bugunStr]); // sotuvlar o'zgarganda (o'chirilganda) bu qayta hisoblanadi
+  }, [sotuvlar]);
 
-  // 3. Mijozlar va Qarzlar
+  // --- MIJOZLAR VA QARZLAR ---
   const stats = useMemo(() => {
-    const qarzdorlar = mijozlar.filter(m => Number(m.qarzdorlik) > 0);
-    const jamiQarz = qarzdorlar.reduce((sum, m) => sum + Number(m.qarzdorlik), 0);
-    const qarzsizlar = mijozlar.filter(m => Number(m.qarzdorlik) <= 0);
+    const qarzdorlar = (mijozlar || []).filter(m => Number(m.qarzdorlik || 0) > 0);
+    const qarzsizlar = (mijozlar || []).filter(m => Number(m.qarzdorlik || 0) <= 0);
 
     return {
       jamiMijozlar: mijozlar.length,
       qarzdorlarSoni: qarzdorlar.length,
-      jamiQarzSumma: jamiQarz,
-      topQarzdorlar: [...qarzdorlar].sort((a, b) => b.qarzdorlik - a.qarzdorlik).slice(0, 5),
+      jamiQarzSumma: jamiQarzlar, 
+      topQarzdorlar: [...qarzdorlar].sort((a, b) => (b.qarzdorlik || 0) - (a.qarzdorlik || 0)).slice(0, 5),
       qarzsizlar: qarzsizlar.slice(0, 5)
     };
-  }, [mijozlar]);
+  }, [mijozlar, jamiQarzlar]);
 
   const handleCardClick = (path) => { navigate(path); };
 
@@ -67,28 +68,28 @@ const Home = ({ open }) => {
       <div className="main-wrapper">
         
         <div className="stats-container">
-          {/* 1. Bugungi Sotuv */}
+          {/* 1. Umumiy Kirim */}
           <div className="stat-card clickable-card" onClick={() => handleCardClick('/kolbasamaxsulotlar')}>
             <div className="stat-info">
               <div className="stat-header">
                 <div className="icon-box blue-bg"><TbMoneybag className="icon-svg" /></div>
-                <span className="stat-label">Bugungi Sotuv</span>
+                <span className="stat-label">Umumiy Kirim</span>
               </div>
-              <h2 className="stat-value">{bugungiStatistika.tushum.toLocaleString()} <span className="unit" style={{fontSize: 'var(--font-size-14)'}}>so'm</span></h2>
+              <h2 className="stat-value">{(jamiKirim || 0).toLocaleString()} <span className="unit">so'm</span></h2>
             </div>
-            <p className="stat-footer">Bugungi tushum hajmi</p>
+            <p className="stat-footer">Jami tushgan mablag'</p>
           </div>
 
-          {/* 2. Bugun Sotilgan (kg) */}
-          <div className="stat-card clickable-card" onClick={() => handleCardClick('/kolbasamaxsulotlar')}>
+          {/* 2. Ishlab chiqarish */}
+          <div className="stat-card clickable-card" onClick={() => handleCardClick('/tovuqchiqim')}>
             <div className="stat-info">
               <div className="stat-header">
                 <div className="icon-box red-bg"><TbMeat className="icon-svg" /></div>
-                <span className="stat-label">Bugun Sotilgan</span>
+                <span className="stat-label">Ishlab chiqarish</span>
               </div>
-              <h2 className="stat-value">{bugungiStatistika.hajm.toLocaleString()} <span className="unit">kg</span></h2>
+              <h2 className="stat-value">{(jamiTayyor || 0).toLocaleString()} <span className="unit">dona</span></h2>
             </div>
-            <p className="stat-footer">Tayyor mahsulot chiqishi</p>
+            <p className="stat-footer">Jami tayyor mahsulot</p>
           </div>
 
           {/* 3. Jami Mijozlar */}
@@ -115,14 +116,14 @@ const Home = ({ open }) => {
             <p className="stat-footer">Hozirda qarzi borlar</p>
           </div>
 
-          {/* 5. Umumiy Qarz Summasi */}
+          {/* 5. Umumiy Qarz */}
           <div className="stat-card clickable-card" onClick={() => handleCardClick('/mijozlar')}>
             <div className="stat-info">
               <div className="stat-header">
                 <div className="icon-box orange-bg"><TbUserExclamation className="icon-svg" /></div>
                 <span className="stat-label">Umumiy Qarz</span>
               </div>
-              <h2 className="stat-value">{stats.jamiQarzSumma.toLocaleString()} <span className="unit" style={{fontSize: '14px'}}>so'm</span></h2>
+              <h2 className="stat-value">{(stats.jamiQarzSumma || 0).toLocaleString()} <span className="unit">so'm</span></h2>
             </div>
             <p className="stat-footer">Kutilayotgan jami summa</p>
           </div>
@@ -133,12 +134,11 @@ const Home = ({ open }) => {
           <div className="chart-header">
             <h3 className="section-title">Ishlab chiqarish dinamikasi</h3>
             <select className="period-select" value={period} onChange={(e) => setPeriod(e.target.value)}>
-              <option value="month">Oylik hisobot</option>
-              <option value="year">Yillik hisobot</option>
+              <option value="month">Haqiqiy o'sish</option>
             </select>
           </div>
           <div className="chart-wrapper">
-            <ResponsiveContainer width="100%" height={300}>
+            <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={currentData}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
                 <XAxis dataKey="label" axisLine={false} tickLine={false} />
@@ -151,19 +151,19 @@ const Home = ({ open }) => {
         </div>
 
         {/* PASTKI LISTLAR */}
-        <div className="lists-grid" style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginTop: '20px'}}>
+        <div className="lists-grid" style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px'}}>
             <div className="stat-card">
                 <div className="stat-header">
                     <div className="icon-box blue-bg"><TbUsers className="icon-svg" /></div>
-                    <span className="stat-label">Top mijozlar (Qarzsiz)</span>
+                    <span className="stat-label">Mijozlar (Qarzsiz)</span>
                 </div>
-                <div className="list-content" style={{marginTop: '15px'}}>
-                    {stats.qarzsizlar.length > 0 ? stats.qarzsizlar.map(customer => (
-                        <div key={customer.id} className="list-row" style={{display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid #f0f0f0'}}>
-                            <span>{customer.ism}</span> 
-                            <strong>{customer.totalXarid?.toLocaleString() || 0}</strong>
+                <div className="list-content">
+                    {stats.qarzsizlar.length > 0 ? stats.qarzsizlar.map((customer, idx) => (
+                        <div key={customer.id || `q-sz-${idx}`} className="list-row">
+                            <span>{customer.ism || 'Nomsiz mijoz'}</span> 
+                            <strong>Active</strong>
                         </div>
-                    )) : <p style={{opacity: 0.5, textAlign: 'center'}}>Mijozlar yo'q</p>}
+                    )) : <p className="unit" style={{textAlign: 'center', padding: '10px'}}>Mijozlar yo'q</p>}
                 </div>
             </div>
 
@@ -172,13 +172,13 @@ const Home = ({ open }) => {
                     <div className="icon-box orange-bg"><TbUserExclamation className="icon-svg" /></div>
                     <span className="stat-label">Eng ko'p qarzdorlar</span>
                 </div>
-                <div className="list-content" style={{marginTop: '15px'}}>
-                    {stats.topQarzdorlar.length > 0 ? stats.topQarzdorlar.map(debtor => (
-                        <div key={debtor.id} className="list-row" style={{display: 'flex', justifyContent: 'space-between', padding: '8px 0', borderBottom: '1px solid #f0f0f0'}}>
-                            <span>{debtor.ism}</span> 
-                            <strong style={{color: '#ef4444'}}>{debtor.qarzdorlik.toLocaleString()}</strong>
+                <div className="list-content">
+                    {stats.topQarzdorlar.length > 0 ? stats.topQarzdorlar.map((debtor, idx) => (
+                        <div key={debtor.id || `q-li-${idx}`} className="list-row">
+                            <span>{debtor.ism || 'Nomsiz'}</span> 
+                            <strong style={{color: '#ef4444'}}>{Number(debtor.qarzdorlik || 0).toLocaleString()}</strong>
                         </div>
-                    )) : <p style={{opacity: 0.5, textAlign: 'center'}}>Qarzdorlar yo'q</p>}
+                    )) : <p className="unit" style={{textAlign: 'center', padding: '10px'}}>Qarzdorlar yo'q</p>}
                 </div>
             </div>
         </div>

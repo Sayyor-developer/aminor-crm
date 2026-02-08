@@ -1,23 +1,24 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { 
   Search, Plus, Trash2, Edit, ChevronLeft, ChevronRight, X, Calculator, AlertTriangle, Download 
 } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast'; 
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import { useData } from '../../DataContext'; // Markaziy bazani ulaymiz
+import { useData } from '../../DataContext'; 
 import './tovuqchiqim.css';
 
 const Tovuqchiqim = ({ open }) => {
-  // DataContext'dan ma'lumotlarni va funksiyani olamiz
-  // Eslatma: DataContext'da 'chiqimQoshish' funksiyasi bo'lishi kerak
-  const { /* chiqimlar, */ chiqimQoshish } = useData();
+  // DataContext'dan kerakli funksiyalarni olamiz
+  const { chiqimQoshish, chiqimOchirish } = useData();
 
-  const [data, setData] = useState([
-    { id: 1, tovuqSoni: 500, mahsulotSoni: 425, sana: '2024-02-01', taminotchi: 'Toshkent Parranda', holat: true },
-    { id: 2, tovuqSoni: 320, mahsulotSoni: 272, sana: '2024-02-02', taminotchi: 'Xorazm Tovuq', holat: true },
-    { id: 3, tovuqSoni: 150, mahsulotSoni: 120, sana: '2024-02-03', taminotchi: 'Farg\'ona Parranda', holat: false },
-  ]);
+  // Lokal bazani ham LocalStorage orqali boshqaramiz
+  const [data, setData] = useState(() => {
+    const saved = localStorage.getItem('tovuq_bazasi');
+    return saved ? JSON.parse(saved) : [
+      { id: 1, tovuqSoni: 500, mahsulotSoni: 425, sana: '2024-02-01', taminotchi: 'Toshkent Parranda', holat: true },
+    ];
+  });
 
   const [searchTerm, setSearchTerm] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -33,6 +34,11 @@ const Tovuqchiqim = ({ open }) => {
   const [formData, setFormData] = useState({
     tovuqSoni: '', mahsulotSoni: '', taminotchi: '', sana: new Date().toISOString().split('T')[0]
   });
+
+  // Ma'lumot o'zgarganda LocalStorage'ga saqlash
+  useEffect(() => {
+    localStorage.setItem('tovuq_bazasi', JSON.stringify(data));
+  }, [data]);
 
   const downloadPDF = () => {
     try {
@@ -76,35 +82,59 @@ const Tovuqchiqim = ({ open }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    const xarajatSummasi = Number(formData.tovuqSoni) * 25000; // 1 ta tovuq narxi taxminan
+
     if (editingItem) {
-      setData(data.map(item => item.id === editingItem.id ? { ...item, ...formData } : item));
+      // Tahrirlashda: avval eskisini DataContext (Home) dan o'chiramiz, keyin yangisini qo'shamiz
+      chiqimOchirish(editingItem.id);
+      
+      const updatedItem = { ...editingItem, ...formData };
+      setData(data.map(item => item.id === editingItem.id ? updatedItem : item));
+
+      chiqimQoshish({
+        id: editingItem.id,
+        turi: "Tovuq xaridi (Tahrirlangan)",
+        manbaa: formData.taminotchi,
+        summa: xarajatSummasi,
+        sana: formData.sana
+      });
+
       toast.success("O'zgarish saqlandi");
     } else {
-      const newData = { id: Date.now(), ...formData, holat: true };
+      const commonId = Date.now();
+      const newData = { id: commonId, ...formData, holat: true };
       setData([...data, newData]); 
 
-      // --- MOLIYA VA DIREKTOR UCHUN CHIQIMNI QAYD ETISH ---
-      // Faraz qilaylik, har bir tovuq o'rtacha 25,000 so'm turadi
-      const xarajatSummasi = Number(formData.tovuqSoni) * 25000;
-      
-      if(chiqimQoshish) {
-        chiqimQoshish({
-          id: Date.now(),
-          turi: "Tovuq xaridi",
-          manbaa: formData.taminotchi,
-          summa: xarajatSummasi,
-          sana: formData.sana
-        });
-      }
+      // --- HOME UCHUN CHIQIMNI QAYD ETISH ---
+      chiqimQoshish({
+        id: commonId,
+        turi: "Tovuq xaridi",
+        manbaa: formData.taminotchi,
+        summa: xarajatSummasi,
+        sana: formData.sana
+      });
 
       toast.success("Muvaffaqiyatli qo'shildi va xarajat qayd etildi");
     }
     setIsModalOpen(false);
   };
 
+  const handleConfirmDelete = () => {
+    if (itemToDelete) {
+      // 1. Lokal bazadan o'chirish
+      setData(data.filter(i => i.id !== itemToDelete.id));
+      // 2. DataContext (Home) dan o'chirish
+      chiqimOchirish(itemToDelete.id);
+      
+      setIsDeleteModalOpen(false);
+      setItemToDelete(null);
+      toast.error("Ma'lumot o'chirildi");
+    }
+  };
+
   return (
     <div className={`tovuqchiqim-page ${open ? 'sidebar-open' : 'sidebar-closed'}`}>
-      <Toaster position="top-right" reverseOrder={false} />
+      <Toaster position="top-right" />
       <div className="tovuqchiqim-content">
         
         <div className="tovuqchiqim-header">
@@ -123,6 +153,7 @@ const Tovuqchiqim = ({ open }) => {
           </div>
         </div>
 
+        {/* STATS */}
         <div className="tovuqchiqim-stats-container">
           <div className="tovuqchiqim-stat-card">
             <div className="tovuqchiqim-info"><span>JAMI TOVUQLAR</span><h3>{data.reduce((a, b) => a + Number(b.tovuqSoni), 0).toLocaleString()}</h3></div>
@@ -135,6 +166,7 @@ const Tovuqchiqim = ({ open }) => {
           </div>
         </div>
 
+        {/* CALCULATOR */}
         <div className="tovuqchiqim-calc-banner">
           <div className="tovuqchiqim-calc-info">
             <Calculator size={24} />
@@ -149,6 +181,7 @@ const Tovuqchiqim = ({ open }) => {
           </div>
         </div>
 
+        {/* TABLE */}
         <div className="tovuqchiqim-main-card">
           <div className="tovuqchiqim-table-tools">
             <div className="tovuqchiqim-search">
@@ -182,7 +215,7 @@ const Tovuqchiqim = ({ open }) => {
                       </div>
                     </td>
                     <td className="tovuqchiqim-text-right">
-                      <div className="tovuqchiqim-actions">
+                      <div className="action-btns">
                         <button className="tovuqchiqim-edit" onClick={() => {setEditingItem(item); setFormData(item); setIsModalOpen(true)}}><Edit size={16}/></button>
                         <button className="tovuqchiqim-del" onClick={() => {setItemToDelete(item); setIsDeleteModalOpen(true)}}><Trash2 size={16}/></button>
                       </div>
@@ -203,39 +236,42 @@ const Tovuqchiqim = ({ open }) => {
         </div>
       </div>
 
-      {/* MODALLAR AVVALGI HOLATDEK QOLADI */}
+      {/* ADD/EDIT MODAL */}
       {isModalOpen && (
-        <div className="tovuqchiqim-modal">
-          <div className="tovuqchiqim-modal-content">
-            <div className="tovuqchiqim-modal-head">
-              <h3>{editingItem ? 'Ma\'lumotni tahrirlash' : 'Yangi ma\'lumot qo\'shish'}</h3>
-              <button className="close-x" onClick={() => setIsModalOpen(false)}><X /></button>
+        <div className="modal-parda" onClick={() => setIsModalOpen(false)}>
+          <div className="modal-oyna" onClick={e => e.stopPropagation()}>
+            <div className="modal-header">
+              <h3>{editingItem ? 'Tahrirlash' : 'Yangi qo\'shish'}</h3>
+              <X className="cursor-pointer" onClick={() => setIsModalOpen(false)} />
             </div>
-            <form onSubmit={handleSubmit} className="tovuqchiqim-form">
-              <div className="form-grid">
-                <input type="number" placeholder="Tovuq soni" value={formData.tovuqSoni} onChange={e => setFormData({...formData, tovuqSoni: e.target.value})} required />
-                <input type="number" placeholder="Mahsulot soni" value={formData.mahsulotSoni} onChange={e => setFormData({...formData, mahsulotSoni: e.target.value})} required />
+            <form onSubmit={handleSubmit} className="modal-body">
+              <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '10px'}}>
+                <input className="input-style" type="number" placeholder="Tovuq soni" value={formData.tovuqSoni} onChange={e => setFormData({...formData, tovuqSoni: e.target.value})} required />
+                <input className="input-style" type="number" placeholder="Mahsulot soni" value={formData.mahsulotSoni} onChange={e => setFormData({...formData, mahsulotSoni: e.target.value})} required />
               </div>
-              <input type="text" placeholder="Ta'minotchi nomi" value={formData.taminotchi} onChange={e => setFormData({...formData, taminotchi: e.target.value})} required />
-              <input type="date" value={formData.sana} onChange={e => setFormData({...formData, sana: e.target.value})} required />
-              <div className="tovuqchiqim-form-btns">
+              <input className="input-style w-full mb-3" type="text" placeholder="Ta'minotchi nomi" value={formData.taminotchi} onChange={e => setFormData({...formData, taminotchi: e.target.value})} required />
+              <input className="input-style w-full mb-3" type="date" value={formData.sana} onChange={e => setFormData({...formData, sana: e.target.value})} required />
+              <div className="modal-footer">
                 <button type="button" className="btn-cancel" onClick={() => setIsModalOpen(false)}>Bekor qilish</button>
-                <button type="submit" className="tovuqchiqim-save">Saqlash</button>
+                <button type="submit" className="btn-blue">Saqlash</button>
               </div>
             </form>
           </div>
         </div>
       )}
 
+      {/* DELETE CONFIRM MODAL */}
       {isDeleteModalOpen && (
-        <div className="tovuqchiqim-modal">
-          <div className="tovuqchiqim-confirm-box">
-            <AlertTriangle size={48} color="#9b1c1c" />
-            <h3>O'chirishni tasdiqlaysizmi?</h3>
-            <p>Ushbu amalni ortga qaytarib bo'lmaydi.</p>
-            <div className="tovuqchiqim-form-btns">
-              <button className="btn-cancel" onClick={() => setIsDeleteModalOpen(false)}>Yo'q, qolsin</button>
-              <button className="tovuqchiqim-save" onClick={() => {setData(data.filter(i => i.id !== itemToDelete.id)); setIsDeleteModalOpen(false); toast.error("Ma'lumot o'chirildi")}}>Ha, o'chirilsin</button>
+        <div className="modal-parda" onClick={() => setIsDeleteModalOpen(false)}>
+          <div className="modal-oyna modal-delete" onClick={e => e.stopPropagation()}>
+            <div className="delete-icon-center">
+              <AlertTriangle size={48} color="#ef4444" />
+            </div>
+            <h3 className="delete-title">O'chirilsinmi?</h3>
+            <p className="delete-text">Bu xarajat Home sahifasidan ham o'chib ketadi.</p>
+            <div className="modal-footer-btns">
+              <button className="btn-cancel" onClick={() => setIsDeleteModalOpen(false)}>Yo'q</button>
+              <button className="btn-red-confirm" onClick={handleConfirmDelete}>O'chirish</button>
             </div>
           </div>
         </div>
