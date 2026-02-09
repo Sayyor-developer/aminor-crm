@@ -2,6 +2,7 @@ import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { Search, Edit, Trash2, Plus, ChevronRight, ChevronLeft, X, AlertTriangle, FileText, PackageOpen } from 'lucide-react';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import html2pdf from 'html2pdf.js'; // PDF kutubxonasi
 import { useData } from '../../DataContext'; 
 import './kolbasamaxsulotlar.css';
 
@@ -24,6 +25,20 @@ export default function Kolbasamaxsulotlar({ open }) {
   useEffect(() => {
     localStorage.setItem('kolbasa_bazasi', JSON.stringify(products));
   }, [products]);
+
+  // --- PDF YUKLASH FUNKSIYASI ---
+  const handleDownloadPDF = () => {
+    const element = document.getElementById('kolbasa-table-pdf');
+    const opt = {
+      margin: 10,
+      filename: 'kolbasa_ombori.pdf',
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2 },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+    html2pdf().set(opt).from(element).save();
+    toast.info("PDF yuklanmoqda...");
+  };
 
   const filteredItems = useMemo(() => {
     return products.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()));
@@ -110,7 +125,11 @@ export default function Kolbasamaxsulotlar({ open }) {
             <h1>Kolbasa Ombori</h1>
           </div>
           <div className="header-actions">
-            <button className="btn-export pdf" style={{width: '100%', background: 'var(--primary-color)'}}>
+            <button 
+              className="btn-export pdf" 
+              onClick={handleDownloadPDF}
+              style={{width: '100%', background: 'var(--primary-color)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', color: 'white', border: 'none', padding: '10px', borderRadius: '8px'}}
+            >
               <FileText size={16} /> PDF Export
             </button>
           </div>
@@ -130,7 +149,7 @@ export default function Kolbasamaxsulotlar({ open }) {
           </div>
         </div>
 
-        <div className="card">
+        <div className="card" id="kolbasa-table-pdf">
           <div className="flex-center" style={{marginBottom: '15px'}}>
             <Search size={18} color="#64748b" />
             <input className="input-style w-full" placeholder="Qidirish..." onChange={e => { setSearchQuery(e.target.value); setCurrentPage(1); }} />
@@ -219,7 +238,7 @@ export default function Kolbasamaxsulotlar({ open }) {
       {isDeleteModalOpen && selectedProduct && (
         <div className="modal-parda" onClick={() => setIsDeleteModalOpen(false)}>
           <div className="modal-oyna modal-delete" onClick={e => e.stopPropagation()}>
-            <div className="delete-icon-center"><AlertTriangle size={48} color="#ef4444" /></div>
+            <div className="delete-icon-center"><AlertTriangle size={48} color="var(--primary-color)" /></div>
             <h3 className="delete-title">Diqqat!</h3>
             <p className="delete-text"><b>{selectedProduct.name}</b> o'chirilsinmi? Bu statistikaga ham ta'sir qiladi.</p>
             <div className="modal-footer-btns">
