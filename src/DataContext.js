@@ -1,27 +1,39 @@
-import React, { createContext, useState, useContext, useEffect } from 'react';
+import React, { createContext, useState, useContext, useEffect, useMemo } from 'react';
 
 const DataContext = createContext();
 
 export const DataProvider = ({ children }) => {
   const getLocal = (key, initial) => {
     const saved = localStorage.getItem(key);
-    return saved ? JSON.parse(saved) : initial;
+    try {
+      return saved ? JSON.parse(saved) : initial;
+    } catch (e) {
+      return initial;
+    }
   };
 
   // --- STATELAR (LocalStorage - Doimiy) ---
   const [mijozlar, setMijozlar] = useState(getLocal('mijozlar', []));
-  const [masalliqlar, setMasalliqlar] = useState(getLocal('masalliqlar', []));
-
-  // --- STATELAR (Session - Sahifa yangilanganda 0 bo'ladi) ---
-  const [sotuvlar, setSotuvlar] = useState([]); 
-  const [chiqimlar, setChiqimlar] = useState([]); 
-  const [dinamika, setDinamika] = useState([]); 
+  const [products, setProducts] = useState(getLocal('products', []));
+  const [sotuvlar, setSotuvlar] = useState(getLocal('sotuvlar', [])); 
+  const [chiqimlar, setChiqimlar] = useState(getLocal('chiqimlar', [])); 
+  const [dinamika, setDinamika] = useState(getLocal('dinamika', [])); 
 
   // Ma'lumotlarni doimiy xotirada saqlash
   useEffect(() => {
     localStorage.setItem('mijozlar', JSON.stringify(mijozlar));
-    localStorage.setItem('masalliqlar', JSON.stringify(masalliqlar));
-  }, [mijozlar, masalliqlar]);
+    localStorage.setItem('products', JSON.stringify(products));
+    localStorage.setItem('sotuvlar', JSON.stringify(sotuvlar));
+    localStorage.setItem('chiqimlar', JSON.stringify(chiqimlar));
+    localStorage.setItem('dinamika', JSON.stringify(dinamika));
+  }, [mijozlar, products, sotuvlar, chiqimlar, dinamika]);
+
+  // --- MASALLIQ/MAHSULOT MIQDORINI YANGILASH ---
+  const masalliqMiqdoriniYangilash = (id, miqdor) => {
+    setProducts(prev => prev.map(p => 
+      p.id === id ? { ...p, stock: Number(p.stock || 0) + Number(miqdor) } : p
+    ));
+  };
 
   // --- MIJOZLAR FUNKSIYALARI ---
   const mijozQoshish = (yangi) => setMijozlar(prev => [yangi, ...prev]);
@@ -31,10 +43,9 @@ export const DataProvider = ({ children }) => {
   // --- SOTUV VA KIRIM FUNKSIYALARI ---
   const sotuvQoshish = (yangiSotuv) => {
     setSotuvlar(prev => [yangiSotuv, ...prev]);
-    // Agar qarzga sotilgan bo'lsa, mijozning qarziga avtomatik qo'shish
     if(yangiSotuv.mijozId) {
       setMijozlar(prev => prev.map(m => 
-        m.id === yangiSotuv.mijozId ? { ...m, qarzdorlik: m.qarzdorlik + Number(yangiSotuv.summa) } : m
+        m.id === yangiSotuv.mijozId ? { ...m, qarzdorlik: Number(m.qarzdorlik || 0) + Number(yangiSotuv.summa) } : m
       ));
     }
   };
@@ -43,7 +54,7 @@ export const DataProvider = ({ children }) => {
     const ochilganSotuv = sotuvlar.find(s => s.id === id);
     if (ochilganSotuv && ochilganSotuv.mijozId) {
       setMijozlar(prev => prev.map(m => 
-        m.id === ochilganSotuv.mijozId ? { ...m, qarzdorlik: Math.max(0, m.qarzdorlik - ochilganSotuv.summa) } : m
+        m.id === ochilganSotuv.mijozId ? { ...m, qarzdorlik: Math.max(0, Number(m.qarzdorlik || 0) - Number(ochilganSotuv.summa)) } : m
       ));
     }
     setSotuvlar(prev => prev.filter(s => s.id !== id));
@@ -57,45 +68,33 @@ export const DataProvider = ({ children }) => {
   const dinamikaQoshish = (yangi) => setDinamika(prev => [yangi, ...prev]);
   const dinamikaOchirish = (id) => setDinamika(prev => prev.filter(d => d.id !== id));
 
-  // --- GLOBAL STATISTIKA VA O'LCHOVLAR (DINAMIKA) ---
-  
-  // 1. Moliya o'lchovi
-  const jamiKirim = sotuvlar.reduce((sum, s) => sum + Number(s.summa || 0), 0);
-  const jamiChiqim = chiqimlar.reduce((sum, c) => sum + Number(c.summa || 0), 0);
-  const jamiQarzlar = mijozlar.reduce((sum, m) => sum + Number(m.qarzdorlik || 0), 0);
-  
-  // 2. Ishlab chiqarish o'lchovi (Miqdoriy)
-  const jamiXomashyo = dinamika.reduce((sum, d) => sum + Number(d.tovuq || 0), 0);
-  const jamiTayyor = dinamika.reduce((sum, d) => sum + Number(d.tayyor || 0), 0);
-  const jamiSotilganKg = sotuvlar.reduce((sum, s) => sum + Number(s.miqdor || 0), 0);
+  // --- DINAMIK STATISTIKA (useMemo bilan bog'landi) ---
+  const kolbasaJamiNarx = useMemo(() => {
+    return products.reduce((sum, p) => sum + (Number(p.price || 0) * Number(p.stock || 0)), 0);
+  }, [products]);
 
-  // 3. Samaradorlik o'lchovi (%)
-  const samaradorlikFoiz = jamiXomashyo > 0 ? ((jamiTayyor / jamiXomashyo) * 100).toFixed(1) : 0;
+  const kolbasaJamiSoni = useMemo(() => {
+    return products.reduce((sum, p) => sum + Number(p.stock || 0), 0);
+  }, [products]);
 
-  // 4. Balans (Sof foyda kutilayotgan qarzlar bilan birga)
-  const sofFoida = jamiKirim - jamiChiqim;
-  const umumiyBalans = (jamiKirim + jamiQarzlar) - jamiChiqim;
+  const jamiKirim = useMemo(() => sotuvlar.reduce((sum, s) => sum + Number(s.summa || 0), 0), [sotuvlar]);
+  const jamiChiqim = useMemo(() => chiqimlar.reduce((sum, c) => sum + Number(c.summa || 0), 0), [chiqimlar]);
+  const jamiQarzlar = useMemo(() => mijozlar.reduce((sum, m) => sum + Number(m.qarzdorlik || 0), 0), [mijozlar]);
+  const jamiTayyor = useMemo(() => dinamika.reduce((sum, d) => sum + Number(d.tayyor || 0), 0), [dinamika]);
 
   return (
     <DataContext.Provider value={{ 
-      // Ma'lumotlar
-      mijozlar, sotuvlar, chiqimlar, dinamika, masalliqlar,
-      // Funksiyalar
+      mijozlar, sotuvlar, chiqimlar, dinamika, products, 
+      masalliqlar: products, 
       mijozQoshish, mijozOchirish, mijozYangilash,
       sotuvQoshish, sotuvOchirish,
       chiqimQoshish, chiqimOchirish,
       dinamikaQoshish, dinamikaOchirish,
-      setMasalliqlar,
-      // Dinamika o'lchovlari (Home uchun)
-      jamiKirim, 
-      jamiChiqim, 
-      jamiQarzlar, 
-      sofFoida, 
-      umumiyBalans,
-      jamiXomashyo, 
-      jamiTayyor, 
-      jamiSotilganKg,
-      samaradorlikFoiz
+      setProducts, 
+      setMasalliqlar: setProducts, 
+      masalliqMiqdoriniYangilash,
+      jamiKirim, jamiChiqim, jamiQarzlar, jamiTayyor,
+      kolbasaJamiSoni, kolbasaJamiNarx
     }}>
       {children}
     </DataContext.Provider>

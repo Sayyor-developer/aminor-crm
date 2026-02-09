@@ -16,7 +16,7 @@
 .main-wrapper {
     display: flex;
     flex-direction: column;
-    gap: 30px;
+    gap: var(--gap-30);
     max-width: 1600px;
     margin: 0 auto;
 }
@@ -29,7 +29,7 @@
 }
 
 .stat-card {
-    background: #ffffff;
+    background: var(--white);
     border: 1px solid #e2e8f0;
     border-radius: 12px;
     padding: 16px;
@@ -42,7 +42,7 @@
 .stat-header {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: var(--gap-10);
 }
 
 .icon-box {
@@ -75,14 +75,14 @@
 }
 
 .stat-label {
-    font-size: 16px;
+    font-size: var(--font-size-16);
     color: #1e293b;
-    font-weight: 500;
+    font-weight: var(--font-weight-500);
 }
 
 .stat-value {
-    font-size: 20px;
-    font-weight: 700;
+    font-size: var(--font-size-20);
+    font-weight: var(--font-weight-700);
     color: #1e293b;
     margin: 10px 0;
     display: flex;
@@ -91,7 +91,7 @@
 }
 
 .unit {
-    font-size: 14px;
+    font-size: var(--font-size-14);
     color: #94a3b8;
 }
 
@@ -108,7 +108,7 @@
     justify-content: space-between;
     padding: 10px 0;
     border-bottom: 1px solid #f1f5f9;
-    font-size: 14px;
+    font-size: var(--font-size-14);
 }
 
 .list-row:last-child {
@@ -117,7 +117,7 @@
 
 /* GRAFIK */
 .chart-section {
-    background: #fff;
+    background: var(--white);
     border: 1px solid #e0e6ed;
     border-radius: 12px;
     padding: 15px;
@@ -131,8 +131,8 @@
 }
 
 .section-title {
-    font-size: 18px;
-    font-weight: 600;
+    font-size: var(--font-size-18);
+    font-weight: var(--font-weight-600);
     color: #1e293b;
 }
 
@@ -176,7 +176,7 @@
 /* --- FAQAT SHU YER O'ZGARDI --- */
 .home-page .clickable-card:hover {
     transform: scale(1.02);
-    border-color: #ef4444;
+    border-color: var(--primary-color);
     /* QIZIL */
     cursor: pointer;
     transition: 0.2s;

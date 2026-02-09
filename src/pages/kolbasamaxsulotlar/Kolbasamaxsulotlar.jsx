@@ -1,18 +1,16 @@
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { Search, Edit, Trash2, Plus, ChevronRight, ChevronLeft, X, AlertTriangle, FileText, PackageOpen } from 'lucide-react';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import html2pdf from 'html2pdf.js'; // PDF kutubxonasi
 import { useData } from '../../DataContext'; 
 import './kolbasamaxsulotlar.css';
 
-export default function Kolbasamaxsulotlar({ open }) {
-  const { sotuvQoshish, sotuvOchirish } = useData();
+// PDF kutubxonalarini to'g'ri tartibda import qilamiz
+import jsPDF from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
-  const [products, setProducts] = useState(() => {
-    const saqlangan = localStorage.getItem('kolbasa_bazasi');
-    return saqlangan ? JSON.parse(saqlangan) : [];
-  });
+export default function Kolbasamaxsulotlar({ open }) {
+  const { sotuvQoshish, sotuvOchirish, products = [], setProducts } = useData(); // products default [] qilindi
 
   const [searchQuery, setSearchQuery] = useState('');
   const [newProduct, setNewProduct] = useState({ name: '', unit: 'kg', price: '', stock: '' });
@@ -22,55 +20,86 @@ export default function Kolbasamaxsulotlar({ open }) {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  useEffect(() => {
-    localStorage.setItem('kolbasa_bazasi', JSON.stringify(products));
-  }, [products]);
-
-  // --- PDF YUKLASH FUNKSIYASI ---
-  const handleDownloadPDF = () => {
-    const element = document.getElementById('kolbasa-table-pdf');
-    const opt = {
-      margin: 10,
-      filename: 'kolbasa_ombori.pdf',
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2 },
-      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-    };
-    html2pdf().set(opt).from(element).save();
-    toast.info("PDF yuklanmoqda...");
-  };
-
+  // --- 100% XAVFSIZ FILTRLASH ---
   const filteredItems = useMemo(() => {
-    return products.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()));
+    return (products || []).filter(p => {
+      // Agar p.name mavjud bo'lmasa, uni bo'sh string deb hisoblaymiz
+      const productName = p && p.name ? String(p.name).toLowerCase() : "";
+      const search = searchQuery ? searchQuery.toLowerCase() : "";
+      return productName.includes(search);
+    });
   }, [products, searchQuery]);
 
   const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
+  
   const currentItems = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage;
     return filteredItems.slice(startIndex, startIndex + itemsPerPage);
   }, [filteredItems, currentPage]);
 
-  // --- TOAST MUAMMOSI TO'G'IRLANGAN QISM ---
+  // --- 100% ISHLOVCHI PDF EKSPORT FUNKSIYASI ---
+  const exportToPDF = () => {
+    try {
+      if (filteredItems.length === 0) {
+        toast.error("Eksport qilish uchun mahsulot yo'q!");
+        return;
+      }
+
+      const doc = new jsPDF();
+      const tableColumn = ["Nomi", "Birlik", "Qoldiq", "Narxi (so'm)", "Holat"];
+      const tableRows = [];
+
+      filteredItems.forEach(p => {
+        const productData = [
+          p.name || "Nomsiz",
+          p.unit || "kg",
+          Number(p.stock || 0).toLocaleString(),
+          Number(p.price || 0).toLocaleString(),
+          p.active ? "Faol" : "Nofaol"
+        ];
+        tableRows.push(productData);
+      });
+
+      doc.setFontSize(18);
+      doc.text("Kolbasa Ombori Hisoboti", 14, 20);
+      doc.setFontSize(11);
+      doc.text(`Sana: ${new Date().toLocaleDateString()} | Jami mahsulot: ${filteredItems.length} ta`, 14, 30);
+
+      autoTable(doc, {
+        head: [tableColumn],
+        body: tableRows,
+        startY: 35,
+        theme: 'grid',
+        headStyles: { fillColor: [99, 102, 241], halign: 'center' },
+        styles: { fontSize: 10 },
+        columnStyles: {
+          2: { halign: 'center' }, 
+          3: { halign: 'right' },  
+          4: { halign: 'center' }  
+        }
+      });
+
+      doc.save(`Kolbasa_Ombori_${new Date().toISOString().split('T')[0]}.pdf`);
+      toast.success("PDF muvaffaqiyatli yuklandi");
+    } catch (error) {
+      console.error("PDF Export error:", error);
+      toast.error("PDF yaratishda xatolik yuz berdi");
+    }
+  };
+
   const toggleStatus = useCallback((id) => {
-    setProducts(prev => prev.map(p => {
+    setProducts(prev => (prev || []).map(p => {
       if (p.id === id) {
         const yangiHolat = !p.active;
-        
-        // setTimeout orqali React render siklidan chiqariladi va 1 marta chiqishi ta'minlanadi
         setTimeout(() => {
-          toast.dismiss(); // Oldingi ochiq toastlarni yopadi
-          if (yangiHolat) {
-            toast.success(`${p.name} faollashtirildi`);
-          } else {
-            toast.warn(`${p.name} nofaol holatga o'tkazildi`);
-          }
+          toast.dismiss(); 
+          yangiHolat ? toast.success(`${p.name} faollashtirildi`) : toast.warn(`${p.name} nofaol qilindi`);
         }, 0);
-
         return { ...p, active: yangiHolat };
       }
       return p;
     }));
-  }, []);
+  }, [setProducts]);
 
   const handleAddProduct = () => {
     if (!newProduct.name.trim() || !newProduct.price || !newProduct.stock) {
@@ -91,7 +120,7 @@ export default function Kolbasamaxsulotlar({ open }) {
       stock: productStock 
     };
     
-    setProducts(prev => [...prev, item]);
+    setProducts(prev => [item, ...(prev || [])]);
 
     sotuvQoshish({
       id: commonId,
@@ -106,30 +135,26 @@ export default function Kolbasamaxsulotlar({ open }) {
 
   const handleConfirmDelete = () => {
     if (selectedProduct) {
-      setProducts(prev => prev.filter(p => p.id !== selectedProduct.id));
+      setProducts(prev => (prev || []).filter(p => p.id !== selectedProduct.id));
       sotuvOchirish(selectedProduct.id); 
       setIsDeleteModalOpen(false);
       setSelectedProduct(null);
-      toast.error("O'chirildi");
+      toast.error("Mahsulot o'chirildi");
     }
   };
 
   return (
     <div className={`mijozlar-sahifa ${open ? 'sidebar-ochiq' : 'sidebar-yopiq'}`}>
-      <ToastContainer position="top-right" autoClose={1500} />
+      <ToastContainer position="top-right" autoClose={1500} hideProgressBar={false} />
 
       <div className="konteyner">
         <div className="header-main">
           <div className="header-left">
-            <div className="header-icon"><Plus size={24} /></div>
+            <div className="header-icon"><PackageOpen size={24} /></div>
             <h1>Kolbasa Ombori</h1>
           </div>
           <div className="header-actions">
-            <button 
-              className="btn-export pdf" 
-              onClick={handleDownloadPDF}
-              style={{width: '100%', background: 'var(--primary-color)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', color: 'white', border: 'none', padding: '10px', borderRadius: '8px'}}
-            >
+            <button className="btn-export pdf" onClick={exportToPDF}>
               <FileText size={16} /> PDF Export
             </button>
           </div>
@@ -149,7 +174,7 @@ export default function Kolbasamaxsulotlar({ open }) {
           </div>
         </div>
 
-        <div className="card" id="kolbasa-table-pdf">
+        <div className="card">
           <div className="flex-center" style={{marginBottom: '15px'}}>
             <Search size={18} color="#64748b" />
             <input className="input-style w-full" placeholder="Qidirish..." onChange={e => { setSearchQuery(e.target.value); setCurrentPage(1); }} />
@@ -168,12 +193,12 @@ export default function Kolbasamaxsulotlar({ open }) {
                 </tr>
               </thead>
               <tbody>
-                {currentItems.length > 0 ? currentItems.map(p => (
+                {currentItems.map(p => (
                   <tr key={p.id} className={p.active ? 'row-active' : 'row-inactive'}>
                     <td className={p.active ? 'name-active' : 'name-inactive'}>{p.name}</td>
                     <td>{p.unit}</td>
-                    <td>{Number(p.stock).toLocaleString()}</td>
-                    <td>{Number(p.price).toLocaleString()} so'm</td>
+                    <td>{Number(p.stock || 0).toLocaleString()}</td>
+                    <td>{Number(p.price || 0).toLocaleString()} so'm</td>
                     <td className="text-center">
                       <button className={`switch ${p.active ? 'switch-on' : 'switch-off'}`} onClick={() => toggleStatus(p.id)}>
                         <div className={`knopka ${p.active ? 'knopka-on' : 'knopka-off'}`}></div>
@@ -186,11 +211,12 @@ export default function Kolbasamaxsulotlar({ open }) {
                       </div>
                     </td>
                   </tr>
-                )) : (
+                ))}
+                {currentItems.length === 0 && (
                   <tr>
-                    <td colSpan="6" className="text-center" style={{padding: '50px 0', opacity: 0.5}}>
-                      <PackageOpen size={40} style={{margin: '0 auto 10px'}} />
-                      <p>Mahsulotlar mavjud emas</p>
+                    <td colSpan="6" className="empty-table">
+                      <PackageOpen size={40} />
+                      <p>Mahsulotlar topilmadi</p>
                     </td>
                   </tr>
                 )}
@@ -211,6 +237,7 @@ export default function Kolbasamaxsulotlar({ open }) {
         </div>
       </div>
 
+      {/* MODALLAR */}
       {isEditModalOpen && selectedProduct && (
         <div className="modal-parda" onClick={() => setIsEditModalOpen(false)}>
           <div className="modal-oyna" onClick={e => e.stopPropagation()}>
@@ -227,7 +254,7 @@ export default function Kolbasamaxsulotlar({ open }) {
                 <button className="btn-blue" style={{width: 'auto'}} onClick={() => { 
                   setProducts(products.map(p => p.id === selectedProduct.id ? selectedProduct : p)); 
                   setIsEditModalOpen(false); 
-                  toast.info("Yangilandi"); 
+                  toast.info("Ma'lumot yangilandi"); 
                 }}>Saqlash</button>
               </div>
             </div>
@@ -238,9 +265,9 @@ export default function Kolbasamaxsulotlar({ open }) {
       {isDeleteModalOpen && selectedProduct && (
         <div className="modal-parda" onClick={() => setIsDeleteModalOpen(false)}>
           <div className="modal-oyna modal-delete" onClick={e => e.stopPropagation()}>
-            <div className="delete-icon-center"><AlertTriangle size={48} color="var(--primary-color)" /></div>
+            <div className="delete-icon-center"><AlertTriangle size={48} color="#ef4444" /></div>
             <h3 className="delete-title">Diqqat!</h3>
-            <p className="delete-text"><b>{selectedProduct.name}</b> o'chirilsinmi? Bu statistikaga ham ta'sir qiladi.</p>
+            <p className="delete-text"><b>{selectedProduct.name}</b> o'chirilsinmi?</p>
             <div className="modal-footer-btns">
               <button className="btn-cancel" onClick={() => setIsDeleteModalOpen(false)}>Yo'q</button>
               <button className="btn-red-confirm" onClick={handleConfirmDelete}>Ha, o'chirilsin</button>

@@ -6,14 +6,16 @@ import {
 import toast, { Toaster } from 'react-hot-toast';
 import { jsPDF } from "jspdf";
 import autoTable from 'jspdf-autotable';
-import { useData } from '../../DataContext'; // Markaziy bazani ulaymiz
+import { useData } from '../../DataContext'; 
 import './masalliqlar.css';
 
 const Masalliqlar = ({ open }) => {
   // --- DATA CONTEXT ULanishi ---
   const { 
-    masalliqlar, setMasalliqlar, 
-    chiqimQoshish, masalliqMiqdoriniYangilash 
+    masalliqlar = [], 
+    setMasalliqlar, 
+    chiqimQoshish, 
+    masalliqMiqdoriniYangilash 
   } = useData();
 
   // --- INTERFEYS VA PAGINATION HOLATLARI ---
@@ -31,13 +33,13 @@ const Masalliqlar = ({ open }) => {
     nomi: '', miqdori: '', birligi: 'kg', narxi: '', zavod: '', status: true 
   });
 
-  const [tarix, setTarix] = useState([]); // Lokal kirim tarixi uchun
+  const [tarix, setTarix] = useState([]); 
 
   // --- FILTRLASH MANTIQI ---
   const filtrlangan = useMemo(() => {
-    return masalliqlar.filter(m =>
-      m.nomi.toLowerCase().includes(qidiruvMatni.toLowerCase()) ||
-      m.zavod.toLowerCase().includes(qidiruvMatni.toLowerCase())
+    return (masalliqlar || []).filter(m =>
+      (m.nomi || '').toLowerCase().includes(qidiruvMatni.toLowerCase()) ||
+      (m.zavod || '').toLowerCase().includes(qidiruvMatni.toLowerCase())
     );
   }, [masalliqlar, qidiruvMatni]);
 
@@ -71,7 +73,6 @@ const Masalliqlar = ({ open }) => {
     const jamiSumma = Number(tanlangan.yangiMiqdor) * Number(tanlangan.narxi);
     const joriySana = new Date().toISOString().split('T')[0];
 
-    // 1. Markaziy moliya bazasiga chiqim (xarajat) sifatida yuborish
     chiqimQoshish({
       id: Date.now(),
       turi: "Masalliq xaridi",
@@ -80,10 +81,8 @@ const Masalliqlar = ({ open }) => {
       sana: joriySana
     });
 
-    // 2. Markaziy ombordagi miqdorni yangilash
     masalliqMiqdoriniYangilash(tanlangan.id, tanlangan.yangiMiqdor);
 
-    // 3. Lokal tarixga qo'shish
     const yangiKirim = {
       id: Date.now() + 1,
       sana: joriySana,
@@ -126,7 +125,6 @@ const Masalliqlar = ({ open }) => {
       <Toaster position="top-right" />
       <div className="m-container">
         
-        {/* Sarlavha qismi */}
         <div className="m-title-area" style={{display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between'}}>
           <div style={{display: 'flex', alignItems: 'center', gap: '1rem'}}>
             <div className="m-main-icon"><Package size={22} /></div>
@@ -137,7 +135,6 @@ const Masalliqlar = ({ open }) => {
           </button>
         </div>
 
-        {/* Yangi masalliq qo'shish formasi */}
         <div className="m-data-card">
           <div className="m-card-subtitle">Yangi masalliq turi va birligini tanlash</div>
           <div className="m-input-row">
@@ -158,7 +155,6 @@ const Masalliqlar = ({ open }) => {
           </button>
         </div>
 
-        {/* Jadval qismi */}
         <div className="m-data-card">
           <div className="m-search-box">
             <Search className="m-search-icon" size={20} />
@@ -196,14 +192,14 @@ const Masalliqlar = ({ open }) => {
                       </button>
                     </td>
                     <td className="text-center">
-                      <div className="m-action-flex">
+                      <div className="m-action-flex" style={{display: 'flex', gap: '5px', justifyContent: 'center'}}>
                         <button className="m-icon-btn m-edit" onClick={() => { setTanlangan(m); setTahrirlashModalOchiq(true); }}><Edit size={16} /></button>
-                        <button className="m-icon-btn m-delete" style={{background: 'var(--primary-color)'}} onClick={() => { setTanlangan(m); setOchirishModalOchiq(true); }}><Trash2 size={16} /></button>
+                        <button className="m-icon-btn m-delete" onClick={() => { setTanlangan(m); setOchirishModalOchiq(true); }}><Trash2 size={16} /></button>
                       </div>
                     </td>
                   </tr>
                 )) : (
-                  <tr><td colSpan="7" className="m-empty-msg" style={{textAlign: 'center', padding: '20px'}}>Topilmadi.</td></tr>
+                  <tr><td colSpan="7" style={{textAlign: 'center', padding: '20px'}}>Topilmadi.</td></tr>
                 )}
               </tbody>
             </table>
@@ -212,61 +208,31 @@ const Masalliqlar = ({ open }) => {
           {/* Pagination */}
           {jamiBetlar > 1 && (
             <div className="m-pagination-row" style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '15px'}}>
-              <span className="m-total-count" style={{color: '#64748b', fontSize: '14px'}}>
-                Jami: <b>{filtrlangan.length}</b> tadan {(joriyBet - 1) * betdagiSoni + 1}-{Math.min(joriyBet * betdagiSoni, filtrlangan.length)} ko'rsatilyapti
-              </span>
-              <div className="m-page-btns" style={{display: 'flex', gap: '8px', alignItems: 'center'}}>
-                <button 
-                  className="m-nav-btn" 
-                  disabled={joriyBet === 1} 
-                  onClick={() => setJoriyBet(v => v - 1)}
-                  style={{padding: '5px 10px', borderRadius: '4px', cursor: joriyBet === 1 ? 'not-allowed' : 'pointer'}}
-                >
-                  <ChevronLeft size={16} />
-                </button>
-                <div className="m-num-group" style={{display: 'flex', gap: '5px'}}>
+              <span style={{color: '#64748b', fontSize: 'var(--font-size-14)'}}>Jami: <b>{filtrlangan.length}</b> ta</span>
+              <div style={{display: 'flex', gap: '5px', alignItems: 'center'}}>
+                <button className="m-nav-btn" disabled={joriyBet === 1} onClick={() => setJoriyBet(v => v - 1)}><ChevronLeft size={16} /></button>
+                <div style={{display: 'flex', gap: '5px'}}>
                   {Array.from({ length: jamiBetlar }, (_, i) => (
-                    <button 
-                      key={i} 
-                      className={`m-num-btn ${joriyBet === i + 1 ? 'm-num-active' : ''}`} 
-                      onClick={() => setJoriyBet(i + 1)}
+                    <button key={i} className={`m-num-btn ${joriyBet === i + 1 ? 'm-num-active' : ''}`} onClick={() => setJoriyBet(i + 1)} 
                       style={{
-                        width: '30px', 
-                        height: '30px', 
-                        borderRadius: '4px', 
-                        border: '1px solid #e2e8f0',
+                        width: '30px', height: '30px', borderRadius: '4px', border: '1px solid #e2e8f0',
                         backgroundColor: joriyBet === i + 1 ? 'var(--primary-color)' : 'white',
                         color: joriyBet === i + 1 ? 'white' : '#1e293b'
-                      }}
-                    >
-                      {i + 1}
-                    </button>
+                      }}>{i + 1}</button>
                   ))}
                 </div>
-                <button 
-                  className="m-nav-btn" 
-                  disabled={joriyBet === jamiBetlar} 
-                  onClick={() => setJoriyBet(v => v + 1)}
-                  style={{padding: '5px 10px', borderRadius: '4px', cursor: joriyBet === jamiBetlar ? 'not-allowed' : 'pointer'}}
-                >
-                  <ChevronRight size={16} />
-                </button>
+                <button className="m-nav-btn" disabled={joriyBet === jamiBetlar} onClick={() => setJoriyBet(v => v + 1)}><ChevronRight size={16} /></button>
               </div>
             </div>
           )}
         </div>
       </div>
 
-      {/* MODALLAR QISMI */}
-      
-      {/* 1. Sotib olish modali */}
+      {/* MODALLAR */}
       {buyurtmaModalOchiq && tanlangan && (
         <div className="m-overlay">
           <div className="m-modal">
-            <div className="m-modal-head">
-              <span>Sotib olish: {tanlangan.nomi}</span>
-              <X className="m-close" size={20} onClick={() => setBuyurtmaModalOchiq(false)} />
-            </div>
+            <div className="m-modal-head"><span>Sotib olish: {tanlangan.nomi}</span><X className="m-close" onClick={() => setBuyurtmaModalOchiq(false)} /></div>
             <div className="m-modal-body">
               <div className="m-modal-field">
                 <label>Miqdorni kiriting ({tanlangan.birligi})</label>
@@ -279,31 +245,18 @@ const Masalliqlar = ({ open }) => {
         </div>
       )}
 
-      {/* 2. Kirim tarixi modali */}
       {tarixModalOchiq && (
         <div className="m-overlay">
           <div className="m-modal" style={{maxWidth: '650px'}}>
-            <div className="m-modal-head">
-              <span>Masalliqlar kirim tarixi</span>
-              <X className="m-close" size={20} onClick={() => setTarixModalOchiq(false)} />
-            </div>
+            <div className="m-modal-head"><span>Masalliqlar kirim tarixi</span><X className="m-close" onClick={() => setTarixModalOchiq(false)} /></div>
             <div className="m-modal-body">
-              <button className="m-add-btn" style={{marginBottom: '15px'}} onClick={tarixExportPDF}>
-                <Printer size={16} /> PDF ko'rinishida chop etish
-              </button>
+              <button className="m-add-btn" style={{marginBottom: '15px'}} onClick={tarixExportPDF}><Printer size={16} /> PDF Export</button>
               <div className="m-table-wrapper" style={{maxHeight: '350px'}}>
                 <table className="m-data-table">
-                  <thead>
-                    <tr><th>Sana</th><th>Nomi</th><th>Miqdor</th><th>Summa</th></tr>
-                  </thead>
+                  <thead><tr><th>Sana</th><th>Nomi</th><th>Miqdor</th><th>Summa</th></tr></thead>
                   <tbody>
                     {tarix.map(t => (
-                      <tr key={t.id}>
-                        <td>{t.sana}</td>
-                        <td>{t.nomi}</td>
-                        <td>{t.miqdor}</td>
-                        <td>{t.summa.toLocaleString()}</td>
-                      </tr>
+                      <tr key={t.id}><td>{t.sana}</td><td>{t.nomi}</td><td>{t.miqdor}</td><td>{t.summa.toLocaleString()}</td></tr>
                     ))}
                   </tbody>
                 </table>
@@ -313,14 +266,10 @@ const Masalliqlar = ({ open }) => {
         </div>
       )}
 
-      {/* 3. Tahrirlash modali */}
       {tahrirlashModalOchiq && tanlangan && (
         <div className="m-overlay">
           <div className="m-modal">
-            <div className="m-modal-head">
-              <span>Tahrirlash</span>
-              <X className="m-close" size={20} onClick={() => setTahrirlashModalOchiq(false)} />
-            </div>
+            <div className="m-modal-head"><span>Tahrirlash</span><X className="m-close" onClick={() => setTahrirlashModalOchiq(false)} /></div>
             <div className="m-modal-body">
               <div className="m-modal-field"><label>Nomi</label><input className="m-custom-input" value={tanlangan.nomi} onChange={e => setTanlangan({ ...tanlangan, nomi: e.target.value })} /></div>
               <div className="m-modal-grid" style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px'}}>
@@ -334,7 +283,6 @@ const Masalliqlar = ({ open }) => {
         </div>
       )}
 
-      {/* 4. O'chirish modali */}
       {ochirishModalOchiq && (
         <div className="m-overlay">
           <div className="m-modal m-modal-sm">
@@ -342,9 +290,9 @@ const Masalliqlar = ({ open }) => {
               <div className="m-warn-circle"><AlertTriangle size={36} /></div>
               <h3 className="m-modal-title">O'chirilsinmi?</h3>
               <p className="m-modal-text"><b>{tanlangan?.nomi}</b> o'chirib tashlanadi.</p>
-              <div className="m-modal-btns">
+              <div className="m-modal-btns" style={{display: 'flex', gap: '10px', justifyContent: 'center', marginTop: '15px'}}>
                 <button className="m-btn-gray" onClick={() => setOchirishModalOchiq(false)}>Yo'q</button>
-                <button className="m-btn-danger" onClick={tasdiqlanganOchirish}>Ha</button>
+                <button className="m-btn-danger" onClick={tasdiqlanganOchirish} style={{backgroundColor: 'var(--primary-color)', color: 'white', padding: '8px 20px', borderRadius: '4px'}}>Ha</button>
               </div>
             </div>
           </div>

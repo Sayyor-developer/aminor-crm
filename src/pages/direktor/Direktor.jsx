@@ -22,11 +22,11 @@ import {
 } from 'recharts';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { useData } from '../../DataContext'; // Markaziy bazani ulaymiz
+import { useData } from '../../DataContext'; 
 import './direktor.css';
 
 const Direktor = ({ open }) => {
-  const { mijozlar, sotuvlar } = useData(); // Real ma'lumotlarni olish
+  const { mijozlar, sotuvlar, jamiKirim, jamiQarzlar } = useData(); 
 
   const [fullname, setFullname] = useState('Alisher Valiyev');
   const [isEditingName, setIsEditingName] = useState(false);
@@ -36,14 +36,13 @@ const Direktor = ({ open }) => {
 
   // --- DINAMIK STATISTIKANI HISOBLASH ---
   const stats = useMemo(() => {
-    const jamiDaromad = sotuvlar.reduce((sum, s) => sum + s.summa, 0);
+    const jamiDaromad = jamiKirim;
     const jamiMijozlar = mijozlar.length;
-    const jamiQarz = mijozlar.reduce((sum, m) => sum + Number(m.qarzdorlik), 0);
+    const jamiQarz = jamiQarzlar;
     
-    // Grafik uchun oxirgi 7 ta sotuvni tayyorlash (namuna sifatida)
-    const chartData = sotuvlar.slice(-7).map((s, index) => ({
-      name: new Date(s.sana).toLocaleDateString('uz-UZ', { weekday: 'short' }),
-      sales: s.summa
+    const chartData = sotuvlar.slice(-7).map((s) => ({
+      name: s.sana ? new Date(s.sana).toLocaleDateString('uz-UZ', { weekday: 'short' }) : 'Noma\'lum',
+      sales: Number(s.summa || 0)
     }));
 
     return {
@@ -51,14 +50,14 @@ const Direktor = ({ open }) => {
       mijozlar: jamiMijozlar.toLocaleString(),
       qarz: jamiQarz.toLocaleString(),
       grafik: chartData.length > 0 ? chartData : [
-        { name: 'Dush', sales: 4000 },
-        { name: 'Sesh', sales: 3000 },
-        { name: 'Chor', sales: 2000 },
-        { name: 'Pay', sales: 2780 },
-        { name: 'Jum', sales: 1890 },
+        { name: 'Dush', sales: 0 },
+        { name: 'Sesh', sales: 0 },
+        { name: 'Chor', sales: 0 },
+        { name: 'Pay', sales: 0 },
+        { name: 'Jum', sales: 0 },
       ]
     };
-  }, [sotuvlar, mijozlar]);
+  }, [sotuvlar, mijozlar, jamiKirim, jamiQarzlar]); // Bog'liqliklar to'liq qo'shildi
 
   const toastOptions = {
     position: "top-right",
@@ -90,14 +89,12 @@ const Direktor = ({ open }) => {
       <ToastContainer />
       <div className="direktor-wrapper">
         
-        {/* Breadcrumb */}
         <div className="breadcrumb-nav">
           <span>Admin Panel</span>
           <ChevronRight size={14} />
           <span className="active-link">Direktor Sozlamalari</span>
         </div>
 
-        {/* Dinamik Statistik Kartochkalar */}
         <div className="stats-container">
           {[
             { label: 'Umumiy Savdo', value: `${stats.daromad} so'm`, icon: DollarSign, color: 'emerald' },
@@ -118,9 +115,7 @@ const Direktor = ({ open }) => {
         </div>
 
         <div className="direktor-grid">
-          {/* Chap ustun */}
           <div className="left-column">
-            
             <div className="main-card">
               <div className="card-top">
                 <div className="title-box">
@@ -155,7 +150,6 @@ const Direktor = ({ open }) => {
               </div>
             </div>
 
-            {/* Dinamik Grafik */}
             <div className="main-card">
               <div className="card-top">
                 <div className="title-box">
@@ -169,8 +163,8 @@ const Direktor = ({ open }) => {
                     <AreaChart data={stats.grafik}>
                       <defs>
                         <linearGradient id="colorSales" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#ef4444" stopOpacity={0.2}/>
-                          <stop offset="95%" stopColor="#ef4444" stopOpacity={0}/>
+                          <stop offset="5%" stopColor="var(--primary-color)" stopOpacity={0.2}/>
+                          <stop offset="95%" stopColor="var(--primary-color)" stopOpacity={0}/>
                         </linearGradient>
                       </defs>
                       <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
@@ -182,7 +176,7 @@ const Direktor = ({ open }) => {
                       <Area 
                         type="monotone" 
                         dataKey="sales" 
-                        stroke="#ef4444" 
+                        stroke="var(--primary-color)" 
                         strokeWidth={3} 
                         fill="url(#colorSales)" 
                       />
@@ -193,7 +187,6 @@ const Direktor = ({ open }) => {
             </div>
           </div>
 
-          {/* O'ng ustun - Xavfsizlik */}
           <div className="right-column">
             <div className="main-card">
               <div className="card-top">
@@ -244,7 +237,6 @@ const Direktor = ({ open }) => {
               <Lock className="banner-icon" size={80} />
             </div>
           </div>
-
         </div>
       </div>
     </div>
