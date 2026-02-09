@@ -90,7 +90,7 @@
     padding: 0.5rem 1rem;
     border: 1px solid #d1d5db;
     border-radius: 0.375rem;
-    font-size: 0.875rem;
+    font-size: var(--font-size-14);
     outline: none;
     box-sizing: border-box;
 }
@@ -524,4 +524,51 @@
     background-position: right 12px center;
     background-size: 16px;
     cursor: pointer;
+}
+
+/* INPUTLARNI BUTTON KABI QISQARTIRISH VA RESPONSIV QILISH */
+.input-guruhi {
+    display: flex;
+    flex-wrap: wrap;
+    /* Elementlar sig'masa pastga tushadi */
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.input-guruhi input,
+.input-guruhi select,
+.input-guruhi div {
+    flex: 1;
+    /* Hamma inputlar teng taqsimlanadi */
+    min-width: 200px;
+    /* Qisqarganda 200px dan kam bo'lsa pastga tushadi */
+}
+
+/* MODAL ICHIDAGI INPUTLAR VA SOTUV QISMI UCHUN */
+.modal-body .input-guruhi {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    /* Modalda 2 ta ustun */
+    gap: 15px;
+}
+
+/* MOBIL QURILMALAR UCHUN (480px) */
+@media (max-width: 480px) {
+    .input-guruhi {
+        flex-direction: column;
+        /* Inputlar ketma-ket tushadi */
+    }
+
+    .input-guruhi input,
+    .input-guruhi select,
+    .input-guruhi div {
+        width: 100% !important;
+        /* To'liq ekran kengligida bo'ladi */
+        min-width: 100%;
+    }
+
+    .modal-body .input-guruhi {
+        grid-template-columns: 1fr;
+        /* Modalda ham bir qator bo'lib qoladi */
+    }
 }
