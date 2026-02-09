@@ -110,7 +110,7 @@ export default function Kolbasamaxsulotlar({ open }) {
             <h1>Kolbasa Ombori</h1>
           </div>
           <div className="header-actions">
-            <button className="btn-export pdf" style={{width: 'auto', background: 'var(--primary-color)'}}>
+            <button className="btn-export pdf" style={{width: '100%', background: 'var(--primary-color)'}}>
               <FileText size={16} /> PDF Export
             </button>
           </div>

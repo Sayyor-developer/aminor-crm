@@ -1,6 +1,5 @@
 /* ASOSIY STRUKTURA */
 .home-page {
-    /* Positionni absolute-dan margin-ga o'zgartirdik, sidebar qotib turishi uchun */
     margin-top: 70px;
     margin-left: 260px;
     padding: 20px;
@@ -57,7 +56,7 @@
 
 .blue-bg {
     background: #f1f5f9;
-    color: #4338ca;
+    color: #3b82f6;
 }
 
 .red-bg {
@@ -141,6 +140,7 @@
     padding: 8px 16px;
     border: 1px solid #e2e8f0;
     border-radius: 8px;
+    
 }
 
 .chart-wrapper {
@@ -148,7 +148,7 @@
     height: 320px;
 }
 
-/* RESPONSIVE 480PX va 380PX */
+/* RESPONSIVE */
 @media (max-width: 480px) {
     .home-page {
         margin-left: 80px !important;
@@ -156,7 +156,10 @@
         padding: 15px !important;
         margin-top: 60px !important;
     }
-
+    .period-select {
+        width: 100% !important;
+        flex-direction: column !important;
+    }
     .stats-container {
         display: flex !important;
         flex-direction: column !important;
@@ -170,20 +173,12 @@
     }
 }
 
-@media (max-width: 380px) {
-    .home-page {
-        margin-left: 70px !important;
-        width: calc(100% - 70px) !important;
-    }
-
-    .stat-card {
-        max-width: 280px !important;
-    }
-}
-
-.clickable-card:hover {
+/* --- FAQAT SHU YER O'ZGARDI --- */
+.home-page .clickable-card:hover {
     transform: scale(1.02);
-    border-color: #6366f1;
+    border-color: #ef4444;
+    /* QIZIL */
     cursor: pointer;
     transition: 0.2s;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.15);
 }

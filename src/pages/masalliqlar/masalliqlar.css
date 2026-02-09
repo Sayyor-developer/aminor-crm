@@ -65,7 +65,6 @@
 /* Inputlar */
 .m-input-row {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
     gap: 1rem;
     margin-bottom: 1.25rem;
 }
