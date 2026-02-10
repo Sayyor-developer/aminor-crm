@@ -23,13 +23,19 @@ const Home = ({ open }) => {
 
   const [period, setPeriod] = useState('month');
   
-  // --- DINAMIK GRAFIK MA'LUMOTI ---
+  // --- DINAMIK GRAFIK MA'LUMOTI (Direktor bilan bir xil mantiq) ---
   const currentData = useMemo(() => {
     if (!dinamika || dinamika.length === 0) {
-      return [{ label: 'Ma\'lumot yo\'q', value: 0 }];
+      return [
+        { label: 'Dush', value: 0 },
+        { label: 'Sesh', value: 0 },
+        { label: 'Chor', value: 0 },
+        { label: 'Pay', value: 0 },
+        { label: 'Jum', value: 0 },
+      ];
     }
-    return [...dinamika].reverse().slice(-7).map((item, index) => ({
-      label: item.sana ? item.sana.substring(5) : `Kun ${index + 1}`, 
+    return [...dinamika].slice(-7).map((item) => ({
+      label: item.sana ? new Date(item.sana).toLocaleDateString('uz-UZ', { weekday: 'short' }) : 'Kun', 
       value: Number(item.tayyor || 0)
     }));
   }, [dinamika]);
@@ -124,7 +130,7 @@ const Home = ({ open }) => {
           </div>
         </div>
 
-        {/* GRAFIK QISMI */}
+        {/* GRAFIK QISMI - DIZAYNGA TEGMADIM, FAQAT SOZLAMALAR DIREKTORDEK BO'LDI */}
         <div className="chart-section">
           <div className="chart-header">
             <h3 className="section-title">Ishlab chiqarish dinamikasi</h3>
@@ -135,11 +141,17 @@ const Home = ({ open }) => {
           <div className="chart-wrapper">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={currentData}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
-                <XAxis dataKey="label" axisLine={false} tickLine={false} />
-                <YAxis axisLine={false} tickLine={false} />
-                <Tooltip />
-                <Area type="monotone" dataKey="value" stroke="#6366f1" strokeWidth={3} fill="#6366f133" />
+                <defs>
+                  <linearGradient id="colorHome" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#6366f1" stopOpacity={0.2}/>
+                    <stop offset="95%" stopColor="#6366f1" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 12}} />
+                <YAxis axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 12}} />
+                <Tooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }} />
+                <Area type="monotone" dataKey="value" stroke="#6366f1" strokeWidth={3} fill="url(#colorHome)" />
               </AreaChart>
             </ResponsiveContainer>
           </div>
@@ -171,9 +183,9 @@ const Home = ({ open }) => {
               {stats.topQarzdorlar.length > 0 ? stats.topQarzdorlar.map((debtor, idx) => (
                 <div key={debtor.id || `q-li-${idx}`} className="list-row">
                   <span>{debtor.ism || 'Nomsiz'}</span> 
-                  <strong style={{color: '#ef4444'}}>{Number(debtor.qarzdorlik || 0).toLocaleString()}</strong>
+                  <strong style={{color: 'var(--primary-color)'}}>{Number(debtor.qarzdorlik || 0).toLocaleString()}</strong>
                 </div>
-              )) : <p className="unit" style={{textAlign: 'center', padding: '10px'}}>Qarzdorlar yo'q</p>}
+              )) : <p className="unit xx" style={{textAlign: 'center', padding: '10px'}}>Qarzdorlar yo'q</p>}
             </div>
           </div>
         </div>

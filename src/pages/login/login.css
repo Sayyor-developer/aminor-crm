@@ -1,0 +1,94 @@
+/* login.css */
+
+.loginPage {
+    background: var(--white); /* Facebook uslubidagi toza fon */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 999;
+}
+
+.login-card {
+    width: 100%;
+    max-width: 400px;
+    border-radius: 20px !important;
+    overflow: hidden;
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.login-header {
+    background: var(--white);
+    padding: 40px 20px 20px;
+    text-align: center;
+}
+
+.login-logo {
+    height: 80px;
+    margin-bottom: 10px;
+}
+
+.brand-tagline {
+    color: var();
+    /* font-style: italic; */
+    font-size: var(--font-size-20) !important;
+    
+}
+
+.login-form {
+    padding: 0 40px 40px;
+    display: flex;
+    flex-direction: column;
+}
+
+.form-title {
+    font-weight: 700 !important;
+    margin-bottom: 25px !important;
+    color: var(--primary-color);
+    text-align: center;
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.css-ci5apu-MuiSvgIcon-root{
+    fill: var(--primary-color) !important;
+}
+
+/* Material UI inputlarini yanada yumshatish */
+.MuiOutlinedInput-root {
+    border-radius: 12px !important;
+}
+
+.submit-btn {
+    margin-top: 30px !important;
+    padding: 12px !important;
+    border-radius: 12px !important;
+    text-transform: none !important;
+    font-size: 1.1rem !important;
+    font-weight: bold !important;
+    background: var(--primary-color) !important;
+}
+
+.forgot-password {
+    text-align: center;
+    margin-top: 20px !important;
+    color: var(--primary-color);
+    cursor: pointer;
+}
+
+.forgot-password:hover {
+    text-decoration: underline;
+}
