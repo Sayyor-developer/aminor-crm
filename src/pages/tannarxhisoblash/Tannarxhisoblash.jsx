@@ -12,6 +12,7 @@ const Tannarxhisoblash = ({ open }) => {
       haftalik: 'Ha',
       narx: 50000 + i * 500,
       sana: '2025-01-28',
+      
       isActive: true,
     }))
   );
