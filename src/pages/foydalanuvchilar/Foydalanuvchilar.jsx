@@ -107,21 +107,21 @@ const Foydalanuvchilar = ({ open }) => {
         </header>
 
         <div className="user-card card-padding mb-6">
-          <form onSubmit={handleAddSubmit} className="form-grid">
-            <div className="input-group"><User className="input-icon" size={16}/><input type="text" placeholder="F.I.O" className="form-input" value={addFormData.name} onChange={e => setAddFormData({...addFormData, name: e.target.value})} /></div>
-            <div className="input-group">
-                <Phone className="input-icon" size={16}/>
+          <form onSubmit={handleAddSubmit} className="f-form-grid">
+            <div className="f-input-group"><User className="f-input-icon" size={16}/><input type="text" placeholder="F.I.O" className="f-form-input" value={addFormData.name} onChange={e => setAddFormData({...addFormData, name: e.target.value})} /></div>
+            <div className="f-input-group">
+                <Phone className="f-input-icon" size={16}/>
                 <input 
                     type="text" 
                     placeholder="Telefon (+998)" 
-                    className="form-input" 
+                    className="f-form-input" 
                     value={addFormData.phone} 
                     onChange={e => handlePhoneInput(e.target.value)} 
                 />
             </div>
-            <div className="input-group qq"><Send className="input-icon" size={16}/><input type="text" placeholder="Telegram" className="form-input" value={addFormData.telegram} onChange={e => setAddFormData({...addFormData, telegram: e.target.value})} /></div>
-            <div className="input-group"><MapPin className="input-icon" size={16}/><input type="text" placeholder="Manzil" className="form-input" value={addFormData.address} onChange={e => setAddFormData({...addFormData, address: e.target.value})} /></div>
-            <button type="submit" className="submit-btn"><UserPlus size={18}/> Qo'shish</button>
+            <div className="f-input-group qq"><Send className="f-input-icon" size={16}/><input type="text" placeholder="Telegram" className="f-form-input" value={addFormData.telegram} onChange={e => setAddFormData({...addFormData, telegram: e.target.value})} /></div>
+            <div className="f-input-group"><MapPin className="f-input-icon" size={16}/><input type="text" placeholder="Manzil" className="f-form-input" value={addFormData.address} onChange={e => setAddFormData({...addFormData, address: e.target.value})} /></div>
+            <button type="submit" className="f-submit-btn"><UserPlus size={18}/> Qo'shish</button>
           </form>
         </div>
 
