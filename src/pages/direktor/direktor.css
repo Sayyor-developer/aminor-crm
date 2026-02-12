@@ -68,22 +68,22 @@
 
 .mini-icon.emerald {
     background: #ecfdf5;
-    color: #10b981;
+    color: var(--primary-color);
 }
 
 .mini-icon.blue {
     background: #eff6ff;
-    color: #3b82f6;
+    color: var(--primary-color);
 }
 
 .mini-icon.amber {
     background: #fffbeb;
-    color: #f59e0b;
+    color: var(--primary-color);
 }
 
 .mini-icon.purple {
     background: #f5f3ff;
-    color: #8b5cf6;
+    color: var(--primary-color);
 }
 
 .mini-info p {
@@ -363,3 +363,23 @@
         height: 220px;
     }
 }
+/* O'chirish tugmasi stili */
+.delete-all-btn {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-10);
+    background-color: var(--primary-color);
+    color: var(--white);
+    border: 1px solid #fecaca;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: var(--font-weight-600);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.delete-all-btn:hover {
+    background-color: var(--primary-hover-color);
+    color: var(--white);
+}
+

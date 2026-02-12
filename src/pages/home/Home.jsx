@@ -11,47 +11,77 @@ import './home.css';
 const Home = ({ open }) => {
   const navigate = useNavigate();
   
+  // DataContext'dan barcha kerakli ma'lumotlarni olish
   const { 
     mijozlar = [], 
     sotuvlar = [], 
-    dinamika = [], 
+    products = [],
     jamiQarzlar = 0, 
-    // Kolbasa mahsulotlari uchun yangi o'zgaruvchilar
     kolbasaJamiSoni = 0,
     kolbasaJamiNarx = 0 
   } = useData(); 
 
-  const [period, setPeriod] = useState('month');
+  // Grafik uchun tanlangan vaqt oralig'i (Hafta, Oy, Yil)
+  const [period, setPeriod] = useState('week');
   
-  // --- DINAMIK GRAFIK MA'LUMOTI (Direktor bilan bir xil mantiq) ---
-  const currentData = useMemo(() => {
-    if (!dinamika || dinamika.length === 0) {
-      return [
-        { label: 'Dush', value: 0 },
-        { label: 'Sesh', value: 0 },
-        { label: 'Chor', value: 0 },
-        { label: 'Pay', value: 0 },
-        { label: 'Jum', value: 0 },
-      ];
-    }
-    return [...dinamika].slice(-7).map((item) => ({
-      label: item.sana ? new Date(item.sana).toLocaleDateString('uz-UZ', { weekday: 'short' }) : 'Kun', 
-      value: Number(item.tayyor || 0)
-    }));
-  }, [dinamika]);
+  // --- GRAFIKNI QURISH VA DINAMIK KENGAYTIRISH LOGIKASI ---
+  const { chartData, chartWidth } = useMemo(() => {
+    const now = new Date();
+    let filterDate = new Date();
 
-  // --- BUGUNGI STATISTIKA (Warninglar olib tashlangan) ---
-  const bugungiStatistika = useMemo(() => {
-    const bugun = new Date().toISOString().split('T')[0];
-    const bugungiSotuvlar = (sotuvlar || []).filter(s => s && s.sana && s.sana.startsWith(bugun));
+    if (period === 'week') filterDate.setDate(now.getDate() - 7);
+    else if (period === 'month') filterDate.setMonth(now.getMonth() - 1);
+    else if (period === 'year') filterDate.setFullYear(now.getFullYear() - 1);
+
+    // Sotuvlar va mahsulotlarni bir xil formatga keltirib, bitta massivga yig'amiz
+    const combinedTransactions = [
+      ...sotuvlar.map(s => ({ 
+        sana: s.sana, 
+        summa: Number(s.summa || 0), 
+        tur: 'Sotuv',
+        color: 'var1'
+      })),
+      ...products.map(p => ({ 
+        sana: p.date, 
+        summa: Number(p.price || 0) * Number(p.stock || 0), 
+        tur: 'Maxsulot Kirimi',
+        color: '#10b981'
+      }))
+    ];
+
+    // Vaqt bo'yicha tartiblash (grafik chizig'i to'g'ri chiqishi uchun muhim)
+    const sortedData = combinedTransactions
+      .filter(item => item.sana && new Date(item.sana) >= filterDate)
+      .sort((a, b) => new Date(a.sana) - new Date(b.sana))
+      .map((item, index) => ({
+        index,
+        label: new Date(item.sana).toLocaleDateString('uz-UZ', { day: '2-digit', month: 'short' }) + " " + 
+               new Date(item.sana).toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' }),
+        value: item.summa,
+        tur: item.tur
+      }));
+
+    // Agar savdolar ko'p bo'lsa, har bir nuqtaga 120px joy ajratamiz (skroll uchun)
+    const dynamicWidth = Math.max(100, sortedData.length * 120);
     
     return {
-      tushum: bugungiSotuvlar.reduce((sum, s) => sum + Number(s.summa || 0), 0),
-      hajm: bugungiSotuvlar.reduce((sum, s) => sum + Number(s.miqdor || 0), 0)
+      chartData: sortedData.length > 0 ? sortedData : [{ label: 'Ma\'lumot yo\'q', value: 0 }],
+      chartWidth: sortedData.length > 6 ? `${dynamicWidth}px` : '100%'
+    };
+  }, [sotuvlar, products, period]);
+
+  // Bugungi umumiy tushum va miqdorni hisoblash
+  const bugungiStatistika = useMemo(() => {
+    const bugunStr = new Date().toISOString().split('T')[0];
+    const bugunSales = (sotuvlar || []).filter(s => s?.sana?.startsWith(bugunStr));
+    
+    return {
+      tushum: bugunSales.reduce((sum, s) => sum + Number(s.summa || 0), 0),
+      hajm: bugunSales.reduce((sum, s) => sum + Number(s.miqdor || 0), 0)
     };
   }, [sotuvlar]);
 
-  // --- MIJOZLAR VA QARZLAR ---
+  // Mijozlar va qarzdorlar ro'yxati
   const stats = useMemo(() => {
     const qarzdorlar = (mijozlar || []).filter(m => Number(m.qarzdorlik || 0) > 0);
     const qarzsizlar = (mijozlar || []).filter(m => Number(m.qarzdorlik || 0) <= 0);
@@ -65,15 +95,20 @@ const Home = ({ open }) => {
     };
   }, [mijozlar, jamiQarzlar]);
 
-  const handleCardClick = (path) => { navigate(path); };
+  // Raqamlarni qisqartirish (masalan 1500000 -> 1.5M)
+  const formatYAxis = (val) => {
+    if (val >= 1000000) return `${(val / 1000000).toFixed(1)}M`;
+    if (val >= 1000) return `${(val / 1000).toFixed(0)}k`;
+    return val;
+  };
 
   return (
     <div className={`home-page ${!open ? 'sidebar-h-closed' : ''}`}>
       <div className="main-wrapper">
         
+        {/* STATISTIKA KARTALARI (O'ZGARISSIZ) */}
         <div className="stats-container">
-          {/* 1. Ombor Qiymati (Kolbasa mantiqi bilan) */}
-          <div className="stat-card clickable-card" onClick={() => handleCardClick('/kolbasamaxsulotlar')}>
+          <div className="stat-card clickable-card" onClick={() => navigate('/kolbasamaxsulotlar')}>
             <div className="stat-info">
               <div className="stat-header">
                 <div className="icon-box blue-bg"><TbMoneybag className="icon-svg" /></div>
@@ -84,19 +119,18 @@ const Home = ({ open }) => {
             <p className="stat-footer">Bugun: {bugungiStatistika.tushum.toLocaleString()} so'm</p>
           </div>
 
-          {/* 2. Mahsulotlar Soni (Kolbasa mantiqi bilan) */}
-          <div className="stat-card clickable-card" onClick={() => handleCardClick('/kolbasamaxsulotlar')}>
+          <div className="stat-card clickable-card" onClick={() => navigate('/kolbasamaxsulotlar')}>
             <div className="stat-info">
               <div className="stat-header">
                 <div className="icon-box red-bg"><TbMeat className="icon-svg" /></div>
                 <span className="stat-label">Mahsulotlar Soni</span>
               </div>
-              <h2 className="stat-value">{(kolbasaJamiSoni || 0).toLocaleString()} <span className="unit">dona/kg</span></h2>
+              <h2 className="stat-value">{(kolbasaJamiSoni || 0).toLocaleString()} <span className="unit">kg</span></h2>
             </div>
             <p className="stat-footer">Bugun: {bugungiStatistika.hajm.toLocaleString()} dona</p>
           </div>
 
-          <div className="stat-card clickable-card" onClick={() => handleCardClick('/mijozlar')}>
+          <div className="stat-card clickable-card" onClick={() => navigate('/mijozlar')}>
             <div className="stat-info">
               <div className="stat-header">
                 <div className="icon-box purple-bg"><TbUsers className="icon-svg" /></div>
@@ -104,10 +138,9 @@ const Home = ({ open }) => {
               </div>
               <h2 className="stat-value">{stats.jamiMijozlar}</h2>
             </div>
-            <p className="stat-footer">Bazada mavjud mijozlar</p>
           </div>
 
-          <div className="stat-card clickable-card" onClick={() => handleCardClick('/mijozlar')}>
+          <div className="stat-card clickable-card" onClick={() => navigate('/mijozlar')}>
             <div className="stat-info">
               <div className="stat-header">
                 <div className="icon-box orange-bg"><TbUserExclamation className="icon-svg" /></div>
@@ -115,10 +148,9 @@ const Home = ({ open }) => {
               </div>
               <h2 className="stat-value" style={{color: '#f97316'}}>{stats.qarzdorlarSoni} <span className="unit">ta</span></h2>
             </div>
-            <p className="stat-footer">Hozirda qarzi borlar</p>
           </div>
 
-          <div className="stat-card clickable-card" onClick={() => handleCardClick('/mijozlar')}>
+          <div className="stat-card clickable-card" onClick={() => navigate('/mijozlar')}>
             <div className="stat-info">
               <div className="stat-header">
                 <div className="icon-box orange-bg"><TbUserExclamation className="icon-svg" /></div>
@@ -126,66 +158,83 @@ const Home = ({ open }) => {
               </div>
               <h2 className="stat-value">{(stats.jamiQarzSumma || 0).toLocaleString()} <span className="unit">so'm</span></h2>
             </div>
-            <p className="stat-footer">Kutilayotgan jami summa</p>
           </div>
         </div>
 
-        {/* GRAFIK QISMI - DIZAYNGA TEGMADIM, FAQAT SOZLAMALAR DIREKTORDEK BO'LDI */}
-        <div className="chart-section">
-          <div className="chart-header">
-            <h3 className="section-title">Ishlab chiqarish dinamikasi</h3>
+        {/* --- GRAFIK KORINISHI --- */}
+        <div className="chart-section" style={{ background: '#fff', padding: '20px', borderRadius: '15px', marginTop: '25px', boxShadow: '0 4px 10px rgba(0,0,0,0.05)' }}>
+          <div className="chart-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+            <h3 className="section-title">Savdo va Ombor Harakati Grafigi (↔️ suring)</h3>
             <select className="period-select" value={period} onChange={(e) => setPeriod(e.target.value)}>
-              <option value="month">Haqiqiy o'sish</option>
+              <option value="week">1 Hafta</option>
+              <option value="month">1 Oy</option>
+              <option value="year">1 Yil</option>
             </select>
           </div>
-          <div className="chart-wrapper">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={currentData}>
-                <defs>
-                  <linearGradient id="colorHome" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#6366f1" stopOpacity={0.2}/>
-                    <stop offset="95%" stopColor="#6366f1" stopOpacity={0}/>
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                <XAxis dataKey="label" axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 12}} />
-                <YAxis axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 12}} />
-                <Tooltip contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }} />
-                <Area type="monotone" dataKey="value" stroke="#6366f1" strokeWidth={3} fill="url(#colorHome)" />
-              </AreaChart>
-            </ResponsiveContainer>
+          
+          <div className="chart-scroll-holder" style={{ width: '100%', overflowX: 'auto', paddingBottom: '10px' }}>
+            <div style={{ width: chartWidth, minWidth: '100%', height: '350px' }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 60 }}>
+                  <defs>
+                    <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="var1" stopOpacity={0.3}/>
+                      <stop offset="95%" stopColor="var1" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" vertical={true} stroke="#f1f5f9" />
+                  <XAxis 
+                    dataKey="label" 
+                    interval={0} 
+                    angle={-35} 
+                    textAnchor="end" 
+                    height={70}
+                    tick={{fill: '#94a3b8', fontSize: 10}} 
+                  />
+                  <YAxis 
+                    axisLine={false} 
+                    tickLine={false} 
+                    tick={{fill: '#94a3b8', fontSize: 11}} 
+                    width={55}
+                    tickFormatter={formatYAxis} 
+                  />
+                  <Tooltip 
+                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }}
+                    formatter={(val, name, props) => [val.toLocaleString() + " so'm", props.payload.tur]}
+                  />
+                  <Area 
+                    type="monotone" 
+                    dataKey="value" 
+                    stroke="var(--primary-color)" 
+                    strokeWidth={3} 
+                    fillOpacity={1} 
+                    fill="url(#colorValue)" 
+                    dot={{ r: 5, fill: 'var(--primary-color)', strokeWidth: 2, stroke: '#fff' }}
+                    activeDot={{ r: 8 }}
+                    animationDuration={1200}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
           </div>
         </div>
 
-        {/* PASTKI LISTLAR */}
+        {/* PASTDAGI LISTLAR (O'ZGARISSIZ) */}
         <div className="lists-grid" style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px', marginTop: '20px'}}>
           <div className="stat-card">
-            <div className="stat-header">
-              <div className="icon-box blue-bg"><TbUsers className="icon-svg" /></div>
-              <span className="stat-label">Mijozlar (Qarzsiz)</span>
-            </div>
+            <div className="stat-header"><div className="icon-box blue-bg"><TbUsers className="icon-svg" /></div><span className="stat-label">Mijozlar (Qarzsiz)</span></div>
             <div className="list-content">
-              {stats.qarzsizlar.length > 0 ? stats.qarzsizlar.map((customer, idx) => (
-                <div key={customer.id || `q-sz-${idx}`} className="list-row">
-                  <span>{customer.ism || 'Nomsiz mijoz'}</span> 
-                  <strong>Active</strong>
-                </div>
-              )) : <p className="unit" style={{textAlign: 'center', padding: '10px'}}>Mijozlar yo'q</p>}
+              {stats.qarzsizlar.map((customer, idx) => (
+                <div key={customer.id || idx} className="list-row"><span>{customer.ism}</span><strong style={{color: '#10b981'}}>Active</strong></div>
+              ))}
             </div>
           </div>
-
           <div className="stat-card">
-            <div className="stat-header">
-              <div className="icon-box orange-bg"><TbUserExclamation className="icon-svg" /></div>
-              <span className="stat-label">Eng ko'p qarzdorlar</span>
-            </div>
+            <div className="stat-header"><div className="icon-box orange-bg"><TbUserExclamation className="icon-svg" /></div><span className="stat-label">Eng ko'p qarzdorlar</span></div>
             <div className="list-content">
-              {stats.topQarzdorlar.length > 0 ? stats.topQarzdorlar.map((debtor, idx) => (
-                <div key={debtor.id || `q-li-${idx}`} className="list-row">
-                  <span>{debtor.ism || 'Nomsiz'}</span> 
-                  <strong style={{color: 'var(--primary-color)'}}>{Number(debtor.qarzdorlik || 0).toLocaleString()}</strong>
-                </div>
-              )) : <p className="unit xx" style={{textAlign: 'center', padding: '10px'}}>Qarzdorlar yo'q</p>}
+              {stats.topQarzdorlar.map((debtor, idx) => (
+                <div key={debtor.id || idx} className="list-row"><span>{debtor.ism}</span><strong style={{color: '#ef4444'}}>{Number(debtor.qarzdorlik).toLocaleString()}</strong></div>
+              ))}
             </div>
           </div>
         </div>
