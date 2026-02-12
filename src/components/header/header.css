@@ -13,7 +13,6 @@
   border-bottom: 1px solid #ddd;
 }
 
-/* Sidebar ochiq bo'lgandagi masofa */
 
 /* Sidebar yopiq bo'lgandagi masofa */
 
@@ -73,4 +72,84 @@
 .logout-icon {
     color: var(--primary-color);
     font-size: var(--font-size-20);
+}
+/* Modal Overlay - butun ekranni qoplaydi */
+.logout-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5); /* Orqa fon qorayishi */
+    backdrop-filter: blur(4px); /* Orqa fon xiralashishi */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+/* Modal Karobkasi */
+.logout-modal-content {
+    background: white;
+    padding: 2rem;
+    border-radius: 1.2rem;
+    width: 90%;
+    max-width: 350px;
+    text-align: center;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    animation: modalShow 0.3s ease-out;
+}
+
+@keyframes modalShow {
+    from { transform: scale(0.9); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+.logout-modal-title {
+    margin: 1rem 0 0.5rem;
+    font-size: var(--font-size-20);
+    color: #1e293b;
+}
+
+.logout-modal-text {
+    color: #64748b;
+    margin-bottom: 1.5rem;
+}
+
+/* Tugmalar stili */
+.logout-modal-actions {
+    display: flex;
+    gap: var(--gap-10);
+}
+
+.logout-btn-cancel {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #e2e8f0;
+    background: #f8fafc;
+    border-radius: 0.7rem;
+    cursor: pointer;
+    font-weight: var(--font-weight-600);
+    transition: 0.2s;
+}
+
+.logout-btn-cancel:hover {
+    background: #f1f5f9;
+}
+
+.logout-btn-confirm {
+    flex: 1;
+    padding: 10px;
+    border: none;
+    background: var(--primary-color); /* Sizning asosiy qizil rangingiz */
+    color: var(--white);
+    border-radius: 0.7rem;
+    cursor: pointer;
+    font-weight: var(--font-weight-600);
+    transition: 0.2s;
+}
+
+.logout-btn-confirm:hover {
+    background: #751313;
+    box-shadow: 0 4px 12px rgba(159, 39, 40, 0.2);
 }
