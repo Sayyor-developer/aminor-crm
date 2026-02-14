@@ -433,8 +433,12 @@
         padding: 10px 0 !important;
     }
 
-    .m-add-btn {
+    .masalliq-qoshish-kirim {
         width: 100% !important;
+    }
+    .masalliq-qoshish-kirim{
+        flex-direction: column;
+
     }
 
     .m-page-btns {

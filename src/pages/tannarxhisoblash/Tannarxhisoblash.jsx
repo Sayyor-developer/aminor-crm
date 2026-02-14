@@ -9,10 +9,9 @@ const Tannarxhisoblash = ({ open }) => {
       id: i + 1,
       materialTuri: ['Plastik', 'Metall', 'Qog\'oz', 'Shisha'][i % 4],
       miqdor: 100 + i,
-      haftalik: 'Ha',
+      birlik: 'kg',
       narx: 50000 + i * 500,
       sana: '2025-01-28',
-      
       isActive: true,
     }))
   );
@@ -26,8 +25,18 @@ const Tannarxhisoblash = ({ open }) => {
   const itemsPerPage = 10;
 
   const [formData, setFormData] = useState({
-    materialTuri: '', miqdor: '', haftalik: 'Ha', narx: '', isActive: true
+    materialTuri: '', miqdor: '', birlik: 'kg', narx: '', isActive: true
   });
+
+  // --- NARXNI FORMATLASH FUNKSIYALARI ---
+  const formatNumber = (val) => {
+    if (!val) return '';
+    return val.toString().replace(/\D/g, '').replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+  };
+
+  const parseNumber = (val) => {
+    return val.toString().replace(/\s/g, '');
+  };
 
   const filteredData = tannarxlar.filter(item =>
     item.materialTuri.toLowerCase().includes(searchTerm.toLowerCase())
@@ -46,21 +55,26 @@ const Tannarxhisoblash = ({ open }) => {
       setFormData({ ...item });
     } else {
       setEditingItem(null);
-      setFormData({ materialTuri: '', miqdor: '', haftalik: 'Ha', narx: '', isActive: true });
+      setFormData({ materialTuri: '', miqdor: '', birlik: 'kg', narx: '', isActive: true });
     }
     setIsModalOpen(true);
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    const finalData = { 
+      ...formData, 
+      narx: Number(parseNumber(formData.narx)) 
+    };
+
     if (editingItem) {
-      setTannarxlar(tannarxlar.map(t => t.id === editingItem.id ? { ...formData, id: t.id } : t));
+      setTannarxlar(tannarxlar.map(t => t.id === editingItem.id ? { ...finalData, id: t.id } : t));
       toast.success('Muvaffaqiyatli tahrirlandi!');
     } else {
-      const newItem = { ...formData, id: Date.now(), sana: new Date().toISOString().split('T')[0] };
+      const newItem = { ...finalData, id: Date.now(), sana: new Date().toISOString().split('T')[0] };
       const newTannarxlar = [...tannarxlar, newItem];
       setTannarxlar(newTannarxlar);
-      toast.success('Yangi mahsulot oxirgi sahifaga qo’shildi!');
+      toast.success('Qo’shildi!');
       setCurrentPage(Math.ceil(newTannarxlar.length / itemsPerPage));
     }
     setIsModalOpen(false);
@@ -70,7 +84,7 @@ const Tannarxhisoblash = ({ open }) => {
     setTannarxlar(tannarxlar.map(t => {
       if (t.id === id) {
         const newStatus = !t.isActive;
-        toast.success(newStatus ? 'Holat: Faol' : 'Holat: Noactive', { icon: '🔔' });
+        toast.success(newStatus ? 'Faol' : 'Noactive');
         return { ...t, isActive: newStatus };
       }
       return t;
@@ -97,7 +111,7 @@ const Tannarxhisoblash = ({ open }) => {
             <Search className="s-icon" size={18} />
             <input 
               type="text" 
-              placeholder="Material turi bo'yicha qidirish..." 
+              placeholder="Qidirish..." 
               value={searchTerm}
               onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }}
             />
@@ -110,8 +124,7 @@ const Tannarxhisoblash = ({ open }) => {
               <thead>
                 <tr>
                   <th>Material Turi</th>
-                  <th>Miqdor (kg)</th>
-                  <th>Haftalik</th>
+                  <th>Miqdor</th>
                   <th>Narx (so'm)</th>
                   <th>Sana</th>
                   <th className="center-text">Holat</th>
@@ -122,9 +135,8 @@ const Tannarxhisoblash = ({ open }) => {
                 {currentItems.map((item) => (
                   <tr key={item.id}>
                     <td className="bold-td">{item.materialTuri}</td>
-                    <td>{item.miqdor}</td>
-                    <td>{item.haftalik}</td>
-                    <td>{item.narx.toLocaleString()}</td>
+                    <td>{item.miqdor} <span className="birlik-tag" style={{fontSize: '12px', color: '#64748b'}}>{item.birlik}</span></td>
+                    <td style={{fontWeight: '600'}}>{formatNumber(item.narx)}</td>
                     <td className="gray-td">{item.sana}</td>
                     <td>
                       <div className="toggle-center">
@@ -157,12 +169,11 @@ const Tannarxhisoblash = ({ open }) => {
         </div>
       </div>
 
-      {/* MODAL - HAMMA MAYDONLAR QAYTARILDI */}
       {isModalOpen && (
         <div className="modal-overlay-bg">
           <div className="modal-content-card">
             <div className="modal-header-top">
-              <h3>{editingItem ? 'Tannarxni Tahrirlash' : 'Yangi Tannarx Qo\'shish'}</h3>
+              <h3>{editingItem ? 'Tahrirlash' : 'Yangi Qo\'shish'}</h3>
               <X className="modal-x-close" onClick={() => setIsModalOpen(false)} />
             </div>
             <form onSubmit={handleSubmit}>
@@ -179,19 +190,25 @@ const Tannarxhisoblash = ({ open }) => {
                   </select>
                 </div>
                 <div className="field-group">
-                  <label>Miqdor (kg)</label>
+                  <label>Miqdor</label>
                   <input type="number" step="0.01" value={formData.miqdor} onChange={(e) => setFormData({...formData, miqdor: e.target.value})} required />
                 </div>
                 <div className="field-group">
-                  <label>Narx (so'm)</label>
-                  <input type="number" value={formData.narx} onChange={(e) => setFormData({...formData, narx: e.target.value})} required />
+                  <label>Birlik</label>
+                  <select value={formData.birlik} onChange={(e) => setFormData({...formData, birlik: e.target.value})} required>
+                    <option value="kg">kg</option>
+                    <option value="dona">dona</option>
+                  </select>
                 </div>
                 <div className="field-group full-width">
-                  <label>Harakatga qarshi haftalik</label>
-                  <select value={formData.haftalik} onChange={(e) => setFormData({...formData, haftalik: e.target.value})}>
-                    <option value="Ha">Ha</option>
-                    <option value="Yo'q">Yo'q</option>
-                  </select>
+                  <label>Narx (so'm)</label>
+                  <input 
+                    type="text" 
+                    value={formatNumber(formData.narx)} 
+                    onChange={(e) => setFormData({...formData, narx: e.target.value})} 
+                    placeholder="0"
+                    required 
+                  />
                 </div>
               </div>
               <div className="modal-footer-btns">
@@ -203,13 +220,11 @@ const Tannarxhisoblash = ({ open }) => {
         </div>
       )}
 
-      {/* DELETE MODAL */}
       {isDeleteModalOpen && (
         <div className="modal-overlay-bg">
           <div className="modal-content-card delete-mode">
             <AlertTriangle size={50} className="warn-svg" />
             <h3>O'chirib tashlaysizmi?</h3>
-            <p>Bu ma'lumot tizimdan butunlay yo'qoladi.</p>
             <div className="modal-footer-btns center-btns">
               <button className="cancel-action-btn" onClick={() => setIsDeleteModalOpen(false)}>Yo'q</button>
               <button className="confirm-del-btn" onClick={() => {

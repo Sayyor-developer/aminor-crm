@@ -1,39 +1,39 @@
 import React, { useState, useMemo } from 'react';
-import { 
-  User, Settings, BarChart3, Lock, Save, ChevronRight,
-  TrendingUp, Package, Users, DollarSign,/*  Trash2, AlertTriangle */
+import {
+  User, Settings, BarChart3, Lock,
+  TrendingUp, Package, Users, DollarSign, /* Trash2,
+  AlertTriangle, */ X, Eye, EyeOff
 } from 'lucide-react';
-import { 
+import {
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   AreaChart, Area
 } from 'recharts';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { useData } from '../../DataContext'; 
+import { useData } from '../../DataContext';
 import './direktor.css';
 
 const Direktor = ({ open }) => {
-  const { 
-    mijozlar = [], 
-    sotuvlar = [], 
-    products = [], 
-    jamiKirim = 0, 
+  const {
+    mijozlar = [],
+    sotuvlar = [],
+    products = [],
+    jamiKirim = 0,
     jamiQarzlar = 0,
-    // clearAllData 
-  } = useData(); 
+    // clearAllData
+  } = useData();
 
   const [fullname, setFullname] = useState('Alisher Valiyev');
-  const [isEditingName, setIsEditingName] = useState(false);
-  const [vaqtFiltr, setVaqtFiltr] = useState('7kun'); 
-  // const [showModal, setShowModal] = useState(false);
+  const [tempName, setTempName] = useState('');
+  const [vaqtFiltr, setVaqtFiltr] = useState('7kun');
+  const [activeModal, setActiveModal] = useState(null);
 
-  // Xavfsizlik bo'limi uchun soddalashtirilgan state
   const [passwords, setPasswords] = useState({ new: '', confirm: '' });
+  const [showPass, setShowPass] = useState(false);
 
   const stats = useMemo(() => {
     const bugun = new Date();
     let filterDate = new Date();
-
     if (vaqtFiltr === '7kun') filterDate.setDate(bugun.getDate() - 7);
     else if (vaqtFiltr === '1oy') filterDate.setMonth(bugun.getMonth() - 1);
     else if (vaqtFiltr === '1yil') filterDate.setFullYear(bugun.getFullYear() - 1);
@@ -56,52 +56,74 @@ const Direktor = ({ open }) => {
       .sort((a, b) => a.sana - b.sana)
       .map((item, index) => ({
         id: index,
-        label: item.sana.toLocaleDateString('uz-UZ', { day: '2-digit', month: 'short' }) + " " + 
-               item.sana.toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' }),
-        qiymat: item.qiymat, 
+        label: item.sana.toLocaleDateString('uz-UZ', { day: '2-digit', month: 'short' }),
+        qiymat: item.qiymat,
         tur: item.tur,
-        toliqSana: item.sana.toLocaleString('uz-UZ')
       }));
-
-    const chartWidth = Math.max(100, chartData.length * 110);
 
     return {
       daromad: jamiKirim.toLocaleString(),
       mijozlar: mijozlar.length.toLocaleString(),
       qarz: jamiQarzlar.toLocaleString(),
-      chartData: chartData.length > 0 ? chartData : [{ label: 'Ma\'lumot yo\'q', qiymat: 0, tur: 'Mavjud emas' }],
-      chartWidth: chartData.length > 6 ? `${chartWidth}px` : '100%'
+      chartData: chartData.length > 0 ? chartData : [{ label: 'Ma\'lumot yo\'q', qiymat: 0 }],
+      chartWidth: chartData.length > 6 ? `${chartData.length * 80}px` : '100%'
     };
   }, [sotuvlar, products, mijozlar, jamiKirim, jamiQarzlar, vaqtFiltr]);
 
-  /* const handleConfirmReset = () => {
-    if (clearAllData) {
-      clearAllData();
-      setShowModal(false);
-      toast.error("Barcha ma'lumotlar tozalandi!");
+  const handleProfileUpdate = (e) => {
+    e.preventDefault();
+    if (tempName.trim()) {
+      setFullname(tempName);
+      setActiveModal(null);
+      toast.success("Profil yangilandi!");
     }
-  }; */
+  };
 
   const handlePasswordSubmit = (e) => {
     e.preventDefault();
-    if (passwords.new !== passwords.confirm) {
-      toast.warning("Parollar mos kelmadi!");
+    if (passwords.new.length < 4) {
+      toast.error("Parol kamida 4 ta belgidan iborat bo'lsin!");
       return;
     }
-    toast.success("Parol muvaffaqiyatli yangilandi!");
+    if (passwords.new !== passwords.confirm) {
+      toast.error("Parollar mos kelmadi!");
+      return;
+    }
+    toast.success("Parol yangilandi!");
     setPasswords({ new: '', confirm: '' });
+    setShowPass(false);
+    setActiveModal(null);
   };
+
+ /*  const handleConfirmReset = () => {
+    if (clearAllData) {
+      clearAllData();
+      setActiveModal(null);
+      toast.error("Ma'lumotlar tozalandi!");
+    }
+  }; */
 
   return (
     <div className={`direktor-page ${open ? 'shifted' : 'collapsed'}`}>
       <ToastContainer position="top-right" autoClose={2000} />
-      
-      <div className="direktor-wrapper">
-        <div className="breadcrumb-nav">
-          <span>Admin Panel</span> <ChevronRight size={14} /> <span className="active-link">Direktor Sozlamalari</span>
-        </div>
 
-        <div className="stats-container">
+      <div className="direktor-wrapper">
+        <header className="direktor-header">
+          <div className="header-left">
+            <div className="icon-box"><Settings /></div>
+            <h1 className="page-title">Direktor Paneli</h1>
+          </div>
+          <div className="header-actions">
+            <button className="action-btn profile-btn" onClick={() => { setTempName(fullname); setActiveModal('profile'); }}>
+              <User size={18} /> {fullname}
+            </button>
+            <button className="action-btn security-btn" onClick={() => setActiveModal('security')}>
+              <Lock size={18} /> Xavfsizlik
+            </button>
+          </div>
+        </header>
+
+        <div className="d-stats-container">
           {[
             { label: 'Umumiy Savdo', value: `${stats.daromad} so'm`, icon: DollarSign, color: 'emerald' },
             { label: 'Jami Mijozlar', value: stats.mijozlar, icon: Users, color: 'blue' },
@@ -110,125 +132,151 @@ const Direktor = ({ open }) => {
           ].map((stat, i) => (
             <div key={i} className="mini-card">
               <div className={`mini-icon ${stat.color}`}><stat.icon size={22} /></div>
-              <div className="mini-info"><p>{stat.label}</p><h4>{stat.value}</h4></div>
+              <div className="mini-info">
+                <p>{stat.label}</p>
+                <h4>{stat.value}</h4>
+              </div>
             </div>
           ))}
         </div>
 
-        <div className="direktor-grid">
-          <div className="left-column">
-            <div className="main-card">
-              <div className="card-top">
-                <div className="title-box"><BarChart3 size={20} className="red-icon" /><h3>Biznes Dinamikasi</h3></div>
-                <select className="vaqt-select-direktor" value={vaqtFiltr} onChange={e => setVaqtFiltr(e.target.value)}>
-                  <option value="7kun">1 hafta</option>
-                  <option value="1oy">1 oy</option>
-                  <option value="1yil">1 yil</option>
-                </select>
-              </div>
-              
-              <div className="card-content">
-                <div className="chart-scroll-box">
-                  <div style={{ width: stats.chartWidth, minWidth: '100%', height: '350px' }}>
-                    <ResponsiveContainer width="100%" height="100%">
-                      <AreaChart data={stats.chartData}>
-                        <defs>
-                          <linearGradient id="colorDir" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="var(--primary-color)" stopOpacity={0.3}/>
-                            <stop offset="95%" stopColor="var(--primary-color)" stopOpacity={0}/>
-                          </linearGradient>
-                        </defs>
-                        <CartesianGrid strokeDasharray="3 3" vertical={true} stroke="#f1f5f9" />
-                        <XAxis dataKey="label" stroke="#94a3b8" fontSize={10} interval={0} angle={-30} textAnchor="end" height={60} />
-                        <YAxis stroke="#94a3b8" fontSize={11} tickLine={false} axisLine={false} tickFormatter={(v) => v >= 1000 ? `${(v/1000).toFixed(0)}k` : v} />
-                        <Tooltip 
-                          contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }}
-                          formatter={(value, name, props) => [`${Number(value).toLocaleString()} so'm`, props.payload.tur]}
-                          labelFormatter={(label, items) => items[0] ? `Sana: ${items[0].payload.toliqSana}` : label}
-                        />
-                        <Area type="monotone" dataKey="qiymat" stroke="var(--primary-color)" strokeWidth={3} fill="url(#colorDir)" dot={{ r: 4, fill: 'var(--primary-color)', strokeWidth: 2, stroke: '#fff' }} activeDot={{ r: 7 }} />
-                      </AreaChart>
-                    </ResponsiveContainer>
-                  </div>
-                </div>
-              </div>
+        <div className="main-card">
+          <div className="card-top">
+            <div className="title-box">
+              <BarChart3 size={20} className="red-icon" />
+              <h3>Biznes Dinamikasi</h3>
             </div>
-
-            {/* <div className="danger-zone-card main-card">
-                <div className="card-top">
-                    <div className="title-box"><AlertTriangle size={20} className="red-icon" /><h3>Xavfli Hudud</h3></div>
-                </div>
-                <div className="card-content">
-                    <p className="danger-text">Barcha savdolar va ombor ma'lumotlarini butunlay o'chirib tashlash.</p>
-                    <button className="delete-all-btn" onClick={() => setShowModal(true)}>
-                        <Trash2 size={18} /> Statistikani tozalash
-                    </button>
-                </div>
-            </div> */}
+            <select className="vaqt-select-direktor" value={vaqtFiltr} onChange={e => setVaqtFiltr(e.target.value)}>
+              <option value="7kun">1 hafta</option>
+              <option value="1oy">1 oy</option>
+              <option value="1yil">1 yil</option>
+            </select>
           </div>
-
-          <div className="right-column">
-             <div className="main-card profile-card-height" style={{marginBottom: '20px'}}>
-              <div className="card-top">
-                <div className="title-box"><User size={20} className="red-icon" /><h3>Profil</h3></div>
-                <button className="action-btn" onClick={() => setIsEditingName(!isEditingName)}>
-                  {isEditingName ? <Save size={16} /> : <Settings size={16} />}
-                </button>
+          <div className="card-content">
+            <div className="chart-scroll-box">
+              <div className="chart-container" style={{ width: stats.chartWidth }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={stats.chartData}>
+                    <defs>
+                      <linearGradient id="colorDir" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="var(--primary-color)" stopOpacity={0.3} />
+                        <stop offset="95%" stopColor="var(--primary-color)" stopOpacity={0} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                    <XAxis dataKey="label" stroke="#94a3b8" fontSize={11} />
+                    <YAxis stroke="#94a3b8" fontSize={11} tickFormatter={(v) => v >= 1000 ? `${(v / 1000).toFixed(0)}k` : v} />
+                    <Tooltip />
+                    <Area type="monotone" dataKey="qiymat" stroke="var(--primary-color)" strokeWidth={3} fill="url(#colorDir)" />
+                  </AreaChart>
+                </ResponsiveContainer>
               </div>
-              <div className="card-content">
-                <p className="field-label">Direktor F.I.O</p>
-                {isEditingName ? 
-                  <input className="name-input" value={fullname} onChange={e => setFullname(e.target.value)} autoFocus /> : 
-                  <div className="profile-info"><h4>{fullname}</h4></div>
-                }
-              </div>
-            </div>
-
-            <div className="main-card">
-              <div className="card-top"><div className="title-box"><Lock size={20} className="red-icon" /><h3>Xavfsizlik</h3></div></div>
-              <form className="security-form card-content" onSubmit={handlePasswordSubmit}>
-                <div className="input-item">
-                  <label>Yangi Parol</label>
-                  <input 
-                    type="password" 
-                    placeholder="••••••" 
-                    value={passwords.new}
-                    onChange={(e) => setPasswords({...passwords, new: e.target.value})}
-                    required
-                  />
-                </div>
-                <div className="input-item">
-                  <label>Tasdiqlash</label>
-                  <input 
-                    type="password" 
-                    placeholder="••••••" 
-                    value={passwords.confirm}
-                    onChange={(e) => setPasswords({...passwords, confirm: e.target.value})}
-                    required
-                  />
-                </div>
-                <button type="submit" className="save-code-btn">Yangilash</button>
-              </form>
             </div>
           </div>
         </div>
+
+       {/*  <div className="main-card danger-zone-card">
+          <div className="card-top">
+            <div className="title-box">
+              <AlertTriangle size={20} className="red-icon" />
+              <h3>Xavfli Hudud</h3>
+            </div>
+          </div>
+          <div className="card-content danger-content">
+            <p>Statistikani tozalash ma'lumotlarni butunlay o'chirib yuboradi.</p>
+            <button className="delete-all-btn" onClick={() => setActiveModal('danger')}>
+              <Trash2 size={18} /> Ma'lumotlarni o'chirish
+            </button>
+          </div>
+        </div> */}
       </div>
 
-     {/*  {showModal && (
-        <div className="m-modal-overlay">
-          <div className="m-modal-card">
-            <div className="m-modal-header">
-              <AlertTriangle size={45} color="var(--primary-color)" />
-              <h3>Ma'lumotlar o'chirilsinmi?</h3>
+      {activeModal && (
+        <div className="modal-overlay" onClick={() => setActiveModal(null)}>
+          <div className="modal-content">
+            <div className={`modal-header ${activeModal === 'danger' ? 'danger-head' : 'dark-head'}`}>
+              <h3 className="modal-title">
+                {activeModal === 'profile' ? "Profilni tahrirlash" :
+                  activeModal === 'security' ? "Parolni yangilash" : "Tasdiqlash"}
+              </h3>
+              <X onClick={() => setActiveModal(null)} className="close-icon" size={20} />
             </div>
-            <p>Bu amalni bajarganingizdan so'ng barcha statistika 0 ga tushadi. Buni ortga qaytarib bo'lmaydi!</p>
-            <div className="m-modal-btns">
-              <button className="m-btn-no" onClick={() => setShowModal(false)}>Bekor qilish</button>
-              <button className="m-btn-yes" onClick={handleConfirmReset}>Ha, o'chirilsin</button>
+
+            <div className="modal-body">
+              {activeModal === 'profile' && (
+                <form onSubmit={handleProfileUpdate}>
+                  <div className="f-input-group">
+                    <User className="f-input-icon" size={18} />
+                    <input
+                      className="name-input custom-p"
+                      placeholder="Direktor F.I.O"
+                      value={tempName}
+                      onChange={e => setTempName(e.target.value)}
+                      autoFocus
+                    />
+                  </div>
+                  <div className="modal-footer-btns">
+                    <button type="button" className="btn-cancel-modal" onClick={() => setActiveModal(null)}>Bekor qilish</button>
+                    <button type="submit" className="btn-save-modal">Saqlash</button>
+                  </div>
+                </form>
+              )}
+
+              {activeModal === 'security' && (
+                <form onSubmit={handlePasswordSubmit}>
+                  <div className="f-input-group">
+                    <Lock className="f-input-icon" size={18} />
+                    <input
+                      type={showPass ? "text" : "password"}
+                      className="name-input custom-p"
+                      placeholder="Yangi kod"
+                      value={passwords.new}
+                      onChange={(e) => setPasswords({ ...passwords, new: e.target.value })}
+                      required
+                    />
+                    <div
+                      className="eye-icon"
+                      onClick={(e) => {
+                        e.stopPropagation(); // Mana shu qator modal yopilib ketishini to'xtatadi
+                        setShowPass(!showPass);
+                      }}
+                    >
+                      {showPass ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </div>
+                  </div>
+
+                  <div className="f-input-group">
+                    <Lock className="f-input-icon" size={18} />
+                    <input
+                      type={showPass ? "text" : "password"}
+                      className="name-input custom-p"
+                      placeholder="Qayta kiriting"
+                      value={passwords.confirm}
+                      onChange={(e) => setPasswords({ ...passwords, confirm: e.target.value })}
+                      required
+                    />
+                  </div>
+
+                  <div className="modal-footer-btns">
+                    <button type="button" className="btn-cancel-modal" onClick={() => { setActiveModal(null); setShowPass(false); }}>Bekor qilish</button>
+                    <button type="submit" className="btn-save-modal dark-btn">Yangilash</button>
+                  </div>
+                </form>
+              )}
+
+              {/* {activeModal === 'danger' && (
+                <div className="delete-confirm-box">
+                  <p className="danger-text">Haqiqatan ham barcha statistikani o'chirib tashlamoqchimisiz? Bu amalni ortga qaytarib bo'lmaydi.</p>
+                  <div className="modal-footer-btns">
+                    <button className="btn-cancel-modal" onClick={() => setActiveModal(null)}>Bekor qilish</button>
+                    <button className="btn-save-modal danger-btn" onClick={handleConfirmReset}>Ha, o'chirilsin</button>
+                  </div>
+                </div>
+              )} */}
             </div>
           </div>
         </div>
-      )} */}
+      )}
     </div>
   );
 };

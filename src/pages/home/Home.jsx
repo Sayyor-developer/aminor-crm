@@ -11,7 +11,6 @@ import './home.css';
 const Home = ({ open }) => {
   const navigate = useNavigate();
   
-  // DataContext'dan barcha kerakli ma'lumotlarni olish
   const { 
     mijozlar = [], 
     sotuvlar = [], 
@@ -21,10 +20,8 @@ const Home = ({ open }) => {
     kolbasaJamiNarx = 0 
   } = useData(); 
 
-  // Grafik uchun tanlangan vaqt oralig'i (Hafta, Oy, Yil)
   const [period, setPeriod] = useState('week');
   
-  // --- GRAFIKNI QURISH VA DINAMIK KENGAYTIRISH LOGIKASI ---
   const { chartData, chartWidth } = useMemo(() => {
     const now = new Date();
     let filterDate = new Date();
@@ -33,44 +30,40 @@ const Home = ({ open }) => {
     else if (period === 'month') filterDate.setMonth(now.getMonth() - 1);
     else if (period === 'year') filterDate.setFullYear(now.getFullYear() - 1);
 
-    // Sotuvlar va mahsulotlarni bir xil formatga keltirib, bitta massivga yig'amiz
     const combinedTransactions = [
       ...sotuvlar.map(s => ({ 
-        sana: s.sana, 
+        sana: new Date(s.sana), // VAQTNI TO'G'RI HISOB-KITOB QILISH UCHUN
         summa: Number(s.summa || 0), 
         tur: 'Sotuv',
         color: 'var1'
       })),
       ...products.map(p => ({ 
-        sana: p.date, 
+        sana: new Date(p.date), 
         summa: Number(p.price || 0) * Number(p.stock || 0), 
         tur: 'Maxsulot Kirimi',
         color: '#10b981'
       }))
     ];
 
-    // Vaqt bo'yicha tartiblash (grafik chizig'i to'g'ri chiqishi uchun muhim)
     const sortedData = combinedTransactions
-      .filter(item => item.sana && new Date(item.sana) >= filterDate)
-      .sort((a, b) => new Date(a.sana) - new Date(b.sana))
+      .filter(item => item.sana && item.sana >= filterDate)
+      .sort((a, b) => a.sana - b.sana) // SOAT VA MINUTNI KETMA-KETLIKKA SOLADI
       .map((item, index) => ({
         index,
-        label: new Date(item.sana).toLocaleDateString('uz-UZ', { day: '2-digit', month: 'short' }) + " " + 
-               new Date(item.sana).toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' }),
+        label: item.sana.toLocaleDateString('uz-UZ', { day: '2-digit', month: 'short' }) + " " + 
+               item.sana.toLocaleTimeString('uz-UZ', { hour: '2-digit', minute: '2-digit' }),
         value: item.summa,
         tur: item.tur
       }));
 
-    // Agar savdolar ko'p bo'lsa, har bir nuqtaga 120px joy ajratamiz (skroll uchun)
     const dynamicWidth = Math.max(100, sortedData.length * 120);
     
     return {
-      chartData: sortedData.length > 0 ? sortedData : [{ label: 'Ma\'lumot yo\'q', value: 0 }],
+      chartData: sortedData, 
       chartWidth: sortedData.length > 6 ? `${dynamicWidth}px` : '100%'
     };
   }, [sotuvlar, products, period]);
 
-  // Bugungi umumiy tushum va miqdorni hisoblash
   const bugungiStatistika = useMemo(() => {
     const bugunStr = new Date().toISOString().split('T')[0];
     const bugunSales = (sotuvlar || []).filter(s => s?.sana?.startsWith(bugunStr));
@@ -81,21 +74,28 @@ const Home = ({ open }) => {
     };
   }, [sotuvlar]);
 
-  // Mijozlar va qarzdorlar ro'yxati
   const stats = useMemo(() => {
     const qarzdorlar = (mijozlar || []).filter(m => Number(m.qarzdorlik || 0) > 0);
-    const qarzsizlar = (mijozlar || []).filter(m => Number(m.qarzdorlik || 0) <= 0);
+    
+    const salesMap = {};
+    sotuvlar.forEach(s => {
+      salesMap[s.mijozId] = (salesMap[s.mijozId] || 0) + Number(s.summa || 0);
+    });
+
+    const topMijozlar = (mijozlar || [])
+      .map(m => ({ ...m, jamiXarid: salesMap[m.id] || 0 }))
+      .sort((a, b) => b.jamiXarid - a.jamiXarid)
+      .slice(0, 5);
 
     return {
       jamiMijozlar: mijozlar.length,
       qarzdorlarSoni: qarzdorlar.length,
       jamiQarzSumma: jamiQarzlar, 
       topQarzdorlar: [...qarzdorlar].sort((a, b) => Number(b.qarzdorlik || 0) - Number(a.qarzdorlik || 0)).slice(0, 5),
-      qarzsizlar: qarzsizlar.slice(0, 5)
+      topMijozlar: topMijozlar
     };
-  }, [mijozlar, jamiQarzlar]);
+  }, [mijozlar, jamiQarzlar, sotuvlar]);
 
-  // Raqamlarni qisqartirish (masalan 1500000 -> 1.5M)
   const formatYAxis = (val) => {
     if (val >= 1000000) return `${(val / 1000000).toFixed(1)}M`;
     if (val >= 1000) return `${(val / 1000).toFixed(0)}k`;
@@ -106,13 +106,12 @@ const Home = ({ open }) => {
     <div className={`home-page ${!open ? 'sidebar-h-closed' : ''}`}>
       <div className="main-wrapper">
         
-        {/* STATISTIKA KARTALARI (O'ZGARISSIZ) */}
         <div className="stats-container">
           <div className="stat-card clickable-card" onClick={() => navigate('/kolbasamaxsulotlar')}>
             <div className="stat-info">
               <div className="stat-header">
                 <div className="icon-box blue-bg"><TbMoneybag className="icon-svg" /></div>
-                <span className="stat-label">Ombor Qiymati</span>
+                <span className="stat-label">Bugungi sotuv</span>
               </div>
               <h2 className="stat-value">{(kolbasaJamiNarx || 0).toLocaleString()} <span className="unit">so'm</span></h2>
             </div>
@@ -161,7 +160,6 @@ const Home = ({ open }) => {
           </div>
         </div>
 
-        {/* --- GRAFIK KORINISHI --- */}
         <div className="chart-section" style={{ background: '#fff', padding: '20px', borderRadius: '15px', marginTop: '25px', boxShadow: '0 4px 10px rgba(0,0,0,0.05)' }}>
           <div className="chart-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
             <h3 className="section-title">Savdo va Ombor Harakati Grafigi (↔️ suring)</h3>
@@ -173,59 +171,67 @@ const Home = ({ open }) => {
           </div>
           
           <div className="chart-scroll-holder" style={{ width: '100%', overflowX: 'auto', paddingBottom: '10px' }}>
-            <div style={{ width: chartWidth, minWidth: '100%', height: '350px' }}>
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 60 }}>
-                  <defs>
-                    <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="var1" stopOpacity={0.3}/>
-                      <stop offset="95%" stopColor="var1" stopOpacity={0}/>
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" vertical={true} stroke="#f1f5f9" />
-                  <XAxis 
-                    dataKey="label" 
-                    interval={0} 
-                    angle={-35} 
-                    textAnchor="end" 
-                    height={70}
-                    tick={{fill: '#94a3b8', fontSize: 10}} 
-                  />
-                  <YAxis 
-                    axisLine={false} 
-                    tickLine={false} 
-                    tick={{fill: '#94a3b8', fontSize: 11}} 
-                    width={55}
-                    tickFormatter={formatYAxis} 
-                  />
-                  <Tooltip 
-                    contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }}
-                    formatter={(val, name, props) => [val.toLocaleString() + " so'm", props.payload.tur]}
-                  />
-                  <Area 
-                    type="monotone" 
-                    dataKey="value" 
-                    stroke="var(--primary-color)" 
-                    strokeWidth={3} 
-                    fillOpacity={1} 
-                    fill="url(#colorValue)" 
-                    dot={{ r: 5, fill: 'var(--primary-color)', strokeWidth: 2, stroke: '#fff' }}
-                    activeDot={{ r: 8 }}
-                    animationDuration={1200}
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
+            {chartData.length > 0 ? (
+              <div style={{ width: chartWidth, minWidth: '100%', height: '350px' }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 60 }}>
+                    <defs>
+                      <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="var1" stopOpacity={0.3}/>
+                        <stop offset="95%" stopColor="var1" stopOpacity={0}/>
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" vertical={true} stroke="#f1f5f9" />
+                    <XAxis 
+                      dataKey="label" 
+                      interval={0} 
+                      angle={-35} 
+                      textAnchor="end" 
+                      height={70}
+                      tick={{fill: '#94a3b8', fontSize: 10}} 
+                    />
+                    <YAxis 
+                      axisLine={false} 
+                      tickLine={false} 
+                      tick={{fill: '#94a3b8', fontSize: 11}} 
+                      width={55}
+                      tickFormatter={formatYAxis} 
+                    />
+                    <Tooltip 
+                      contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }}
+                      formatter={(val, name, props) => [val.toLocaleString() + " so'm", props.payload.tur]}
+                    />
+                    <Area 
+                      type="monotone" 
+                      dataKey="value" 
+                      stroke="var(--primary-color)" 
+                      strokeWidth={3} 
+                      fillOpacity={1} 
+                      fill="url(#colorValue)" 
+                      dot={{ r: 5, fill: 'var(--primary-color)', strokeWidth: 2, stroke: '#fff' }}
+                      activeDot={{ r: 8 }}
+                      animationDuration={1200}
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
+              </div>
+            ) : (
+              <div style={{height: '350px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8'}}>
+                Ma'lumotlar mavjud emas
+              </div>
+            )}
           </div>
         </div>
 
-        {/* PASTDAGI LISTLAR (O'ZGARISSIZ) */}
         <div className="lists-grid" style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px', marginTop: '20px'}}>
           <div className="stat-card">
-            <div className="stat-header"><div className="icon-box blue-bg"><TbUsers className="icon-svg" /></div><span className="stat-label">Mijozlar (Qarzsiz)</span></div>
+            <div className="stat-header"><div className="icon-box blue-bg"><TbUsers className="icon-svg" /></div><span className="stat-label">Top mijozlar (Eng ko'p xarid)</span></div>
             <div className="list-content">
-              {stats.qarzsizlar.map((customer, idx) => (
-                <div key={customer.id || idx} className="list-row"><span>{customer.ism}</span><strong style={{color: '#10b981'}}>Active</strong></div>
+              {stats.topMijozlar.map((customer, idx) => (
+                <div key={customer.id || idx} className="list-row">
+                  <span>{customer.ism}</span>
+                  <strong style={{color: '#10b981'}}>{Number(customer.jamiXarid).toLocaleString()}</strong>
+                </div>
               ))}
             </div>
           </div>

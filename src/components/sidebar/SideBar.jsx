@@ -30,12 +30,12 @@ const SideBar = ({ open, setOpen }) => {
         </li>
         <li>
           <NavLink to="/mijozlar" className={({ isActive }) => isActive ? "side active" : "side"}>
-            <MdPeopleAlt /> <span className="link-text">Mijozlar Bazasi</span>
+            <MdPeopleAlt /> <span className="link-text">Mijozlar ro'yxati</span>
           </NavLink>
         </li>
         <li>
           <NavLink to="/masalliqlar" className={({ isActive }) => isActive ? "side active" : "side"}>
-            <MdMenuBook /> <span className="link-text">Masalliqlar</span>
+            <MdMenuBook /> <span className="link-text">Masalliqlar bo'limi</span>
           </NavLink>
         </li>
         <li>
@@ -45,12 +45,12 @@ const SideBar = ({ open, setOpen }) => {
         </li>
         <li>
           <NavLink to="/moliya" className={({ isActive }) => isActive ? "side active" : "side"}>
-            <FaMoneyBillTrendUp /> <span className="link-text">Moliya</span>
+            <FaMoneyBillTrendUp /> <span className="link-text">Moliya bo'limi</span>
           </NavLink>
         </li>
         <li>
           <NavLink to="/tovuqchiqim" className={({ isActive }) => isActive ? "side active" : "side"}>
-            <GiChickenOven /> <span className="link-text">Tovuq Chiqimlari</span>
+            <GiChickenOven /> <span className="link-text">Tovuq mahsulotlari</span>
           </NavLink>
         </li>
         <li>

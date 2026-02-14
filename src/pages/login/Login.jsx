@@ -1,13 +1,18 @@
 import React, { useState } from 'react';
 import logo from '../../assets/Aminorlogo.png';
-import { Box, TextField, Button, Typography, Paper, InputAdornment } from '@mui/material';
-import { Phone, Lock } from '@mui/icons-material';
+import {
+    Box, TextField, Button, Typography, Paper,
+    InputAdornment, IconButton
+} from '@mui/material';
+import { Phone, Lock, Visibility, VisibilityOff } from '@mui/icons-material';
 import { toast } from 'react-toastify';
 import './login.css';
 
 const Login = () => {
     const [phone, setPhone] = useState('+998');
     const [password, setPassword] = useState('');
+    // Ko'zcha holati uchun yangi state
+    const [showPassword, setShowPassword] = useState(false);
 
     const handlePhoneChange = (e) => {
         const value = e.target.value;
@@ -20,6 +25,9 @@ const Login = () => {
             setPhone(cleanValue);
         }
     };
+
+    // Ko'zcha bosilganda holatni o'zgartirish
+    const handleClickShowPassword = () => setShowPassword(!showPassword);
 
     const handleLogin = (e) => {
         e.preventDefault();
@@ -35,11 +43,9 @@ const Login = () => {
         }
 
         if (phone === "+998979359707" && password === "12345") {
-            // Tokenni saqlash
             sessionStorage.setItem("token", "true");
             toast.success("Xush kelibsiz!");
-            
-            // Navigate warning bo'lmasligi uchun window.location ishlatamiz
+
             setTimeout(() => {
                 window.location.replace("/");
             }, 500);
@@ -60,7 +66,7 @@ const Login = () => {
 
                 <form className="login-form" onSubmit={handleLogin}>
                     <Typography variant="h5" className="form-title">Kirish</Typography>
-                    
+
                     <Box className="input-group">
                         <TextField
                             fullWidth
@@ -86,7 +92,8 @@ const Login = () => {
                         <TextField
                             fullWidth
                             label="Parol"
-                            type="password"
+                            // showPassword holatiga qarab type o'zgaradi
+                            type={showPassword ? 'text' : 'password'}
                             variant="outlined"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
@@ -102,17 +109,29 @@ const Login = () => {
                                         <Lock />
                                     </InputAdornment>
                                 ),
+                                // O'ng tomondagi ko'zcha qismi
+                                endAdornment: (
+                                    <InputAdornment position="end">
+                                        <IconButton
+                                            aria-label="toggle password visibility"
+                                            onClick={handleClickShowPassword}
+                                            edge="end"
+                                        >
+                                            {showPassword ? <VisibilityOff /> : <Visibility />}
+                                        </IconButton>
+                                    </InputAdornment>
+                                )
                             }}
                         />
                     </Box>
 
-                    <Button 
-                        fullWidth 
-                        variant="contained" 
-                        size="large" 
+                    <Button
+                        fullWidth
+                        variant="contained"
+                        size="large"
                         type="submit"
                         className="submit-btn"
-                        sx={{ mt: 3 }}
+                        sx={{ mt: 3, bgcolor: 'var(--primary-color)', '&:hover': { bgcolor: 'var(--primary-hover-color)' } }}
                     >
                         Kirish
                     </Button>

@@ -104,6 +104,7 @@
     gap: var(--gap-10);
     padding: 0.75rem;
 }
+
 .f-submit-btn:hover {
     background: var(--primary-hover-color);
 }
@@ -444,4 +445,50 @@
 
 .custom-p {
     padding-left: 2.5rem !important;
+}
+
+/* Sizning CSS'ingizga qo'shimcha yoki tahrir */
+.modal-header {
+    background: #A12323 !important;
+    /* Header to'q qizil */
+    color: white !important;
+    padding: 1.2rem 1.5rem;
+}
+
+.modal-footer {
+    display: grid !important;
+    /* Tugmalarni 50/50 qilish uchun */
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.btn-save-modal {
+    background: #A12323 !important;
+    /* Saqlash tugmasi qizil */
+    border-radius: 0.7rem;
+    transition: 0.2s;
+}
+
+.btn-save-modal:hover {
+    background: #861d1d !important;
+}
+
+.btn-cancel-modal {
+    background: #f1f5f9 !important;
+    /* Bekor qilish kulrang */
+    color: #94a3b8 !important;
+    border-radius: 0.7rem;
+}
+
+/* Input ichidagi ikonka rangi uchun */
+.f-input-icon {
+    color: #64748b !important;
+}
+@media (max-width: 480px) {
+    .page-header{
+        flex-direction: column;
+    }
+    .f-submit-btn{
+        width: 100%;
+    }
 }
