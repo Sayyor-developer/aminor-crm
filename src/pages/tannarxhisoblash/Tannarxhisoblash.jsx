@@ -166,6 +166,7 @@ const Tannarxhisoblash = ({ open }) => {
               <button disabled={currentPage === totalPages} onClick={() => setCurrentPage(p => p + 1)}><ChevronRight size={20} /></button>
             </div>
           </div>
+          
         </div>
       </div>
 
@@ -179,7 +180,7 @@ const Tannarxhisoblash = ({ open }) => {
             <form onSubmit={handleSubmit}>
               <div className="modal-form-fields">
                 <div className="field-group full-width">
-                  <label>Material Turi</label>
+                  <label>Mahsulot Turi</label>
                   <select value={formData.materialTuri} onChange={(e) => setFormData({...formData, materialTuri: e.target.value})} required>
                     <option value="">Tanlang</option>
                     <option value="Plastik">Plastik</option>

@@ -145,7 +145,7 @@ const Home = ({ open }) => {
                 <div className="icon-box orange-bg"><TbUserExclamation className="icon-svg" /></div>
                 <span className="stat-label">Qarzdorlar soni</span>
               </div>
-              <h2 className="stat-value" style={{color: '#f97316'}}>{stats.qarzdorlarSoni} <span className="unit">ta</span></h2>
+              <h2 className="stat-value" style={{color: 'black'}}>{stats.qarzdorlarSoni} <span className="unit">ta</span></h2>
             </div>
           </div>
 

@@ -178,7 +178,7 @@ const Masalliqlar = ({ open }) => {
                   <th>Narxi (so'm)</th>
                   <th>Ta'minotchi</th>
                   <th className="text-center">Active</th>
-                  <th className="text-center">Sotib olish</th>
+                  <th className="text-center">Buyurtma berish</th>
                   <th className="text-center">Boshqaruv</th>
                 </tr>
               </thead>

@@ -116,7 +116,7 @@ const MijozProfil = ({ open }) => {
         <main className="profil-main-content">
           <div className="content-tabs">
             <button className={activeTab === 'history' ? 'active' : ''} onClick={() => setActiveTab('history')}>
-               <MdHistory /> Amallar tarixi
+               <MdHistory /> To'lovlar tarixi
             </button>
           </div>
           <div className="history-table-container">
