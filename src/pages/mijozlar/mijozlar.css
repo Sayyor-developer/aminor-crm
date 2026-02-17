@@ -418,7 +418,6 @@
 }
 
 .select-filtr {
-    width: 250px !important;
     background-color: #fff;
     cursor: pointer;
     border: 1px solid #d1d5db;
@@ -578,11 +577,11 @@
 
 .mijoz-profil-page {
     padding: 100px 30px 30px;
-    /* Header balandligi uchun joy */
     min-height: 100vh;
     background-color: #f4f7fe;
-    /* Global fon rangi */
     transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow-x: hidden;
+    /* Page o'zi faqat vertikal scroll bo'ladi */
 }
 
 /* Sidebar holatiga ko'ra surilish */
@@ -604,10 +603,8 @@
 .history-table-container {
     background: #ffffff;
     border-radius: 15px;
-    /* Standart yumshoqlik */
     padding: 25px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
-    /* Yumshoq soya */
     border: 1px solid #edf2f7;
 }
 
@@ -630,11 +627,7 @@
     transition: 0.2s;
 }
 
-.edit-icon-btn:hover {
-    color: #ebf8ff;
-    background: var(--primary-color);
-}
-
+.edit-icon-btn:hover,
 .delete-icon-btn:hover {
     color: #ebf8ff;
     background: var(--primary-color);
@@ -663,12 +656,12 @@
     font-size: var(--font-size-18);
     margin: 0;
     color: #2d3748;
-    font-weight: var(--font-weight-var(--font-weight-700));
+    font-weight: var(--font-weight-700);
 }
 
 .id-badge {
     font-size: var(--font-size-12);
-    color: #a0aec0;
+    color: var(--light-gray);
     font-weight: var(--font-weight-500);
 }
 
@@ -681,7 +674,7 @@
 
 .balance-status-box.is-debt {
     background: #fff5f5;
-    color: #c53030;
+    color: var(--primary-color);
     border: 1px solid #fed7d7;
 }
 
@@ -700,7 +693,7 @@
 
 .balance-status-box p {
     font-size: var(--font-size-18);
-    font-weight: var(--font-weight-800);
+    font-weight: 800;
     margin-top: 5px;
 }
 
@@ -714,7 +707,7 @@
     align-items: center;
     gap: var(--gap-10);
     margin-bottom: 12px;
-    color: #4a5568;
+    color: var(--light-gray);
     font-size: var(--font-size-14);
 }
 
@@ -723,21 +716,18 @@
     font-size: var(--font-size-18);
 }
 
-/* Header primary rangi */
-
-/* O'ng taraf - Jadval */
-.content-tabs {
+.tab-left {
     margin-bottom: 20px;
     border-bottom: 1px solid #edf2f7;
     display: flex;
 }
 
-.content-tabs button {
+.tab-left button {
     background: none;
     border: none;
     padding: 10px 20px;
     cursor: pointer;
-    color: #718096;
+    color: var(--light-gray);
     font-weight: var(--font-weight-600);
     font-size: var(--font-size-14);
     display: flex;
@@ -745,7 +735,7 @@
     gap: var(--gap-10);
 }
 
-.content-tabs button.active {
+.tab-left button.active {
     color: var(--primary-color);
     border-bottom: 2px solid var(--primary-color);
 }
@@ -771,45 +761,6 @@
     color: #2d3748;
 }
 
-.bold-text {
-    font-weight: var(--font-weight-600);
-}
-
-.text-green {
-    color: #38a169;
-    font-weight: var(--font-weight-700);
-}
-
-.text-red {
-    color: #e53e3e;
-    font-weight: var(--font-weight-700);
-}
-
-.type-tag {
-    background: #ebf4ff;
-    color: var(--primary-color);
-    padding: 4px 10px;
-    border-radius: 6px;
-    font-size: var(--font-size-12);
-    font-weight: var(--font-weight-700);
-}
-
-.admin-tag {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    color: #718096;
-    font-size: var(--font-size-14);
-}
-
-.empty-row {
-    text-align: center;
-    padding: 40px !important;
-    color: #a0aec0;
-    font-style: italic;
-}
-
-/* Yuqori navigatsiya qismi */
 .mp-top-navigation {
     display: flex;
     align-items: center;
@@ -829,137 +780,188 @@
     justify-content: center;
     cursor: pointer;
     transition: all 0.2s ease;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
 }
 
-.back-btn-circle:hover {
-    background: var(--primary-color);
-    /* Headeringizdagi rang */
-    color: #ffffff;
-    border-color: var(--primary-color);
-    transform: translateX(-3px);
-    /* Bir oz chapga surilish effekti */
-}
-
-.mp-breadcrumb-simple {
-    font-size: var(--font-size-14);
-    color: #718096;
-}
-
-.mp-breadcrumb-simple strong {
-    color: #2d3748;
+.btn-add-sotuv {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-10);
+    background-color: var(--primary-color);
+    color: var(--white);
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
     font-weight: var(--font-weight-600);
-    margin-left: 5px;
+    cursor: pointer;
 }
 
-/* --- RESPONSIVE OPTIMIZATSIYA --- */
+.total-display-box {
+    background: var(--primary-color);
+    padding: 12px;
+    border-radius: 8px;
+    text-align: center;
+    font-weight: var(--font-weight-800);
+    font-size: var(--font-size-18);
+    color: var(--white);
+    margin: 10px 0;
+}
 
-/* 1. Planshetlar uchun (Ustunlarni bitta qilish) */
+.payment-type-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--gap-10);
+    margin-top: 8px;
+}
+
+.pay-type-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    padding: 10px;
+    border: 1px solid #e2e8f0;
+    background: white;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.pay-type-btn.active {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.old-debt-box {
+    background: #fff7ed;
+    border: 1px solid #ffedd5;
+    padding: 12px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.old-debt-box p {
+    color: var(--primary-color);
+    font-weight: var(--font-weight-700);
+    font-size: var(--font-size-18);
+}
+
+.btn-print {
+    background-color: var(--primary-color);
+    color: var(--white);
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: var(--gap-10);
+}
+
+/* --- Umumiy mobil moslashuv --- */
+
 @media (max-width: 1100px) {
     .profil-grid-wrapper {
-        grid-template-columns: 1fr;
-        /* Chap va o'ng ustunni bitta qiladi */
-        gap: var(--gap-20);
+        grid-template-columns: 1fr; /* Ustunlarni bitta qilish */
+        gap: 20px;
+        padding: 10px;
     }
-
     .profil-aside-card {
         width: 100%;
+        max-width: 100%;
     }
-
     .inner-card {
         position: static;
-        /* Sticky holatini bekor qilish */
+        margin: 0 auto; /* Kartani o'rtaga olish */
     }
 }
 
-/* 2. O'rta hajmdagi telefonlar (768px dan pastda) */
-@media (max-width: 768px) {
+@media (max-width: 480px) {
+    /* Asosiy konteynerni o'rtalash */
     .mijoz-profil-page {
-        padding: 90px 15px 20px;
-        margin-left: 0 !important;
-        /* Mobilda sidebarga joy tashlamaydi */
+        padding: 10px;
+        display: flex;
+        flex-direction: column;
+        align-items: center; /* Hamma narsani o'rtaga tekislaydi */
     }
 
-    .user-main-info h2 {
-        font-size: var(--font-size-18);
-    }
-}
-
-/* 3. Eng kichik ekranlar uchun (380px gacha) */
-@media (max-width: 450px) {
-    .mp-top-navigation {
-        gap: var(--gap-10);
+    .profil-main-content {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
     }
 
-    .back-btn-circle {
-        width: 38px;
-        height: 38px;
-    }
-
-    .mp-breadcrumb-simple {
-        font-size: var(--font-size-14);
-    }
-
-    /* Kartalarning ichki paddingini kamaytiramiz */
+    /* Karta ko'rinishidagi qismlar */
     .inner-card,
     .history-table-container {
+        width: 100% !important; /* 80% emas, 100% qilib, padding bilan chetidan joy tashlaymiz */
+        max-width: 400px; /* Haddan tashqari kengayib ketmasligi uchun */
+        margin: 0 auto 15px auto !important;
         padding: 15px;
-        border-radius: 10px;
+        box-sizing: border-box; /* Padding kenglikka ta'sir qilmasligi uchun */
     }
 
-    /* Jadval mobilda o'ngga-chapga suriladigan bo'ladi */
+    /* Tugmalar rasmdegidek yonma-yon tursin */
+    .content-tabs {
+        flex-direction: column;
+        width: 100%;
+        gap: 10px;
+    }
+
+    .tab-right-actions {
+        display: flex !important;
+        flex-direction: row !important; /* Tugmalar yonma-yon */
+        justify-content: space-between;
+        width: 100%;
+        gap: 8px;
+    }
+
+    .btn-print, .btn-add-sotuv {
+        flex: 1;
+        justify-content: center;
+        padding: 10px 5px;
+        font-size: 12px;
+        white-space: nowrap; /* Matn pastga tushib ketmasligi uchun */
+    }
+
+    /* Jadval skroll bo'lishi */
     .history-table-container {
         overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
-        /* Silliq skroll */
+        display: block; /* Skroll ishlashi uchun */
+        background: white;
+        border: 1px solid #eee;
     }
 
     .mijoz-table {
-        min-width: 450px;
-        /* Jadval o'ta siqilib ketmasligi uchun */
-    }
-
-    .mijoz-table th,
-    .mijoz-table td {
-        padding: 10px 8px;
-        font-size: var(--font-size-12);
-    }
-
-    /* Balans qutisini ixchamlashtirish */
-    .balance-status-box p {
-        font-size: var(--font-size-18);
-    }
-
-    /* Tab tugmalarini siqish */
-    .content-tabs button {
-        padding: 10px 8px;
-        font-size: var(--font-size-14);
-        flex: 1;
-        justify-content: center;
-    }
-
-    /* Ikonka va matn nisbati */
-    .contact-row {
-        font-size: var(--font-size-14);
-        gap: var(--gap-10);
+        min-width: 500px; /* Jadval qisilib ketmasdan skroll bo'lishi uchun */
     }
 }
 
-/* 4. O'ta kichik ekranlar (380px dan past) */
+/* 380px va undan kichik ekranlar uchun maxsus */
 @media (max-width: 380px) {
     .user-main-info h2 {
-        font-size: var(--font-size-14);
+        font-size: 16px;
     }
 
-    .type-tag {
-        font-size: var(--font-size-12);
-        padding: 2px 6px;
+    .tab-right-actions {
+        gap: 5px;
     }
 
-    .admin-tag {
-        font-size: var(--font-size-12);
+    .btn-print, .btn-add-sotuv {
+        font-size: 11px;
+        padding: 8px 2px;
+    }
+
+    /* Agar sidebar ochiq bo'lsa kontent siqilmasligi uchun */
+    .mijoz-profil-page.open {
+        padding-left: 5px;
+        padding-right: 5px;
     }
 }
+
+
+
+
 
 /* Edit Modal uchun maxsus */
 .edit-modal-content {
@@ -1066,75 +1068,13 @@
     font-weight: var(--font-weight-600);
 }
 
-/* Responsivlik (Edit modal uchun) */
-@media (max-width: 450px) {
-    .edit-modal-content {
-        padding: 20px;
-        width: 95%;
-    }
-}
+
 
 /* Qolgan barcha CSS avvalgi kod bilan bir xil qoladi */
 
-
-
-/* --- RESPONSIVE (380PX GACHA) --- */
-@media (max-width: 768px) {
-    .profil-grid-layout {
-        grid-template-columns: 1fr;
-    }
-
-    .profil-balance-box {
-        text-align: left;
-        background: #f8fafc;
-    }
-
-    .balance-status {
-        justify-content: flex-start;
+@media(max-width:380px){
+    .header{
+        flex-direction: column;
     }
 }
 
-@media (max-width: 480px) {
-    .profil-main-info {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-
-    .header {
-        flex-direction: column;
-        width: 100%;
-    }
-
-    .avatar-huge {
-        width: 60px;
-        height: 60px;
-        font-size: var(--font-size-25);
-    }
-
-    .profil-nav {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 15px;
-    }
-
-    .btn-pdf-unique {
-        width: 85%;
-        justify-content: center;
-    }
-}
-
-@media (max-width: 380px) {
-    .konteyner {
-        padding: 10px;
-    }
-
-    .info-content h1 {
-        font-size: var(--font-size-18);
-    }
-
-    .profil-history-table th,
-    .profil-history-table td {
-        padding: 10px 8px;
-        font-size: var(--font-size-14);
-    }
-}

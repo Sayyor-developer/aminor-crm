@@ -43,7 +43,8 @@
     color: #1e293b;
     margin: 0;
 }
-.action-btn{
+
+.action-btn {
     min-width: 160px;
     height: 45px;
     justify-content: center;
@@ -51,7 +52,8 @@
     box-sizing: border-box;
     white-space: nowrap;
 }
-.action-btn{
+
+.action-btn {
     background: var(--primary-color);
     color: var(--white);
     border: none;
@@ -328,6 +330,9 @@
         width: 100%;
         flex-direction: column;
     }
+    .single-full-btn{
+        width: 100%;
+    }
 
     .action-btn {
         flex: 1;
@@ -344,6 +349,9 @@
 @media (max-width: 380px) {
     .direktor-page {
         padding: 10px;
+    }
+    .single-full-btn{
+        width: 100%;
     }
 
     .page-title {
@@ -365,4 +373,42 @@
     .header-actions {
         flex-direction: column;
     }
+}
+
+.single-full-btn {
+    display: flex;
+    align-items: center;
+    gap: var(--gap-10);
+    background-color: var(--primary-color);
+    border: none;
+    border-radius: 12px;
+    padding: 10px 20px;
+    color: white;
+    cursor: pointer;
+    font-weight: var(--font-weight-600);
+    transition: 0.3s;
+}
+
+.btn-divider-v {
+    width: 1px;
+    height: 20px;
+    background-color: rgba(255, 255, 255, 0.3);
+}
+
+.m-label {
+    display: block;
+    font-size: var(--font-size-14);
+    color: #64748b;
+    margin-bottom: 8px;
+    margin-top: 15px;
+}
+
+.modal-hr {
+    border: 0;
+    border-top: 1px solid #e2e8f0;
+    margin: 20px 0;
+}
+
+.btn-text {
+    font-size: var(--font-size-14);
 }

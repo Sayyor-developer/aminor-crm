@@ -9,7 +9,8 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
 export default function Kolbasamaxsulotlar({ open }) {
-  const { sotuvQoshish, sotuvOchirish, products = [], setProducts } = useData();
+  // Context-dan kerakli funksiya va ma'lumotlarni olamiz
+  const { products = [], setProducts } = useData();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [newProduct, setNewProduct] = useState({ name: '', unit: 'kg', price: '', stock: '' });
@@ -27,14 +28,16 @@ export default function Kolbasamaxsulotlar({ open }) {
   };
 
   const cleanNumber = (str) => {
+    if (typeof str !== 'string') str = String(str);
     return str.replace(/\s/g, "");
   };
 
-  // --- JAMI QOLDIQNI HISOBLASH (QO'SHILDI) ---
+  // --- JAMI QOLDIQNI HISOBLASH ---
   const jamiQoldiq = useMemo(() => {
     return (products || []).reduce((sum, item) => sum + Number(item.stock || 0), 0);
   }, [products]);
 
+  // --- QIDIRUV VA FILTRLASH ---
   const filteredItems = useMemo(() => {
     return (products || []).filter(p => {
       const productName = p && p.name ? String(p.name).toLowerCase() : "";
@@ -43,13 +46,14 @@ export default function Kolbasamaxsulotlar({ open }) {
     });
   }, [products, searchQuery]);
 
+  // --- PAGINATION ---
   const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
-
   const currentItems = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage;
     return filteredItems.slice(startIndex, startIndex + itemsPerPage);
   }, [filteredItems, currentPage]);
 
+  // --- PDF EXPORT ---
   const exportToPDF = () => {
     try {
       if (filteredItems.length === 0) {
@@ -57,17 +61,19 @@ export default function Kolbasamaxsulotlar({ open }) {
         return;
       }
       const doc = new jsPDF();
-      const tableColumn = ["Nomi", "Birlik", "Qoldiq", "Narxi (so'm)", "Holat"];
+      const tableColumn = ["Nomi", "Birlik", "Qoldiq", "Narxi (so'm)", "Umumiy Qiymati"];
       const tableRows = [];
+      
       filteredItems.forEach(p => {
         tableRows.push([
           p.name || "Nomsiz",
           p.unit || "kg",
           Number(p.stock || 0).toLocaleString(),
           Number(p.price || 0).toLocaleString(),
-          p.active ? "Faol" : "Nofaol"
+          (Number(p.stock || 0) * Number(p.price || 0)).toLocaleString()
         ]);
       });
+
       doc.setFontSize(18);
       doc.text("Kolbasa Ombori Hisoboti", 14, 20);
       autoTable(doc, {
@@ -78,34 +84,32 @@ export default function Kolbasamaxsulotlar({ open }) {
         headStyles: { fillColor: [99, 102, 241], halign: 'center' },
         styles: { fontSize: 10 }
       });
-      doc.save(`Kolbasa_Ombori_${new Date().toISOString().split('T')[0]}.pdf`);
+      doc.save(`Ombor_Hisoboti_${new Date().toLocaleDateString()}.pdf`);
       toast.success("PDF muvaffaqiyatli yuklandi");
     } catch (error) {
       toast.error("PDF yaratishda xatolik yuz berdi");
     }
   };
 
+  // --- HOLATNI O'ZGARTIRISH (ACTIVE/INACTIVE) ---
   const toggleStatus = useCallback((id) => {
-    setProducts(prev => (prev || []).map(p => {
-      if (p.id === id) {
-        return { ...p, active: !p.active };
-      }
-      return p;
-    }));
+    setProducts(prev => (prev || []).map(p => 
+      p.id === id ? { ...p, active: !p.active } : p
+    ));
   }, [setProducts]);
 
+  // --- YANGI MAHSULOT QO'SHISH ---
   const handleAddProduct = () => {
     if (!newProduct.name.trim() || !newProduct.price || !newProduct.stock) {
       toast.error("Ma'lumotlarni to'liq kiriting!");
       return;
     }
 
-    const commonId = Date.now();
     const productPrice = Number(cleanNumber(newProduct.price));
     const productStock = Number(newProduct.stock);
 
     const item = {
-      id: commonId,
+      id: Date.now(),
       name: newProduct.name.trim(),
       unit: newProduct.unit,
       active: true,
@@ -115,16 +119,31 @@ export default function Kolbasamaxsulotlar({ open }) {
     };
 
     setProducts(prev => [item, ...(prev || [])]);
-    sotuvQoshish({ id: commonId, summa: productPrice * productStock, miqdor: productStock, sana: new Date().toISOString() });
     setNewProduct({ name: '', unit: 'kg', price: '', stock: '' });
     setIsAddModalOpen(false); 
-    toast.success("Muvaffaqiyatli qo'shildi!");
+    toast.success("Mahsulot omborga qo'shildi!");
   };
 
+  // --- TAHRIRLASHNI SAQLASH ---
+  const handleUpdateProduct = () => {
+    if (!selectedProduct.name.trim() || !selectedProduct.price || !selectedProduct.stock) {
+      toast.error("Ma'lumotlarni to'ldiring!");
+      return;
+    }
+
+    setProducts(products.map(p => 
+      p.id === selectedProduct.id 
+      ? { ...selectedProduct, price: Number(cleanNumber(String(selectedProduct.price))), stock: Number(selectedProduct.stock) } 
+      : p
+    ));
+    setIsEditModalOpen(false);
+    toast.info("Ma'lumot yangilandi");
+  };
+
+  // --- O'CHIRISHNI TASDIQLASH ---
   const handleConfirmDelete = () => {
     if (selectedProduct) {
       setProducts(prev => (prev || []).filter(p => p.id !== selectedProduct.id));
-      sotuvOchirish(selectedProduct.id);
       setIsDeleteModalOpen(false);
       setSelectedProduct(null);
       toast.error("Mahsulot o'chirildi");
@@ -133,19 +152,22 @@ export default function Kolbasamaxsulotlar({ open }) {
 
   return (
     <div className={`mijozlar-sahifa ${open ? 'sidebar-ochiq' : 'sidebar-yopiq'}`}>
-      <ToastContainer position="top-right" autoClose={1500} hideProgressBar={false} />
+      <ToastContainer position="top-right" autoClose={1500}
+      containerStyle={{
+    zIndex: 99999, // Hamma narsadan tepada turishi uchun
+  }}
+      />
 
       <div className="konteyner">
         <div className="header-main">
           <div className="header-left">
             <div className="header-icon"><PackageOpen size={24} /></div>
-            <h1>Kolbasa Ombori</h1>
+            <h1>Kolbasa Ombori (Qoldiqlar)</h1>
           </div>
           <div className="header-actions">
             <button className="btn-export kolbasa-qoshish-modal-style" onClick={() => setIsAddModalOpen(true)}>
               <Plus size={16} /> Yangi mahsulot
             </button>
-
             <button className="btn-export pdf" onClick={exportToPDF}>
               <FileText size={16} /> PDF Export
             </button>
@@ -153,42 +175,41 @@ export default function Kolbasamaxsulotlar({ open }) {
         </div>
 
         <div className="kolbasa-card">
-          {/* --- SEARCH VA JAMI QOLDIQ QISMI (MANA SHU YERDA QOSHILDI) --- */}
           <div className="search-stat-grid">
             <div className="flex-center" style={{ flex: 1, marginBottom: 0 }}>
               <Search size={18} color="#64748b" />
               <input 
                 className="input-style w-full" 
-                placeholder="Qidirish..." 
+                placeholder="Mahsulot nomi bo'yicha qidirish..." 
+                value={searchQuery}
                 onChange={e => { setSearchQuery(e.target.value); setCurrentPage(1); }} 
               />
             </div>
 
             <div className="jami-qoldiq-box">
               <Database size={20} />
-              <span>Jami qoldiq: {jamiQoldiq.toLocaleString()} kg/dona</span>
+              <span>Jami qoldiq: <b>{jamiQoldiq.toLocaleString()}</b> {newProduct.unit}</span>
             </div>
           </div>
-          {/* -------------------------------------------------------- */}
 
           <div className="jadval-qobiq">
             <table className="mijoz-table">
               <thead>
                 <tr>
-                  <th>Nomi</th>
+                  <th>Mahsulot Nomi</th>
                   <th>Birlik</th>
-                  <th>Qoldiq</th>
-                  <th>Narxi</th>
+                  <th>Ombordagi Qoldiq</th>
+                  <th>Narxi (1 birlik)</th>
                   <th className="text-center">Holat</th>
                   <th className="text-right">Amal</th>
                 </tr>
               </thead>
               <tbody>
-                {currentItems.map(p => (
+                {currentItems.length > 0 ? currentItems.map(p => (
                   <tr key={p.id} className={p.active ? 'row-active' : 'row-inactive'}>
                     <td className={p.active ? 'name-active' : 'name-inactive'}>{p.name}</td>
                     <td>{p.unit}</td>
-                    <td>{Number(p.stock || 0).toLocaleString()}</td>
+                    <td style={{ fontWeight: 'bold' }}>{Number(p.stock || 0).toLocaleString()}</td>
                     <td>{Number(p.price || 0).toLocaleString()} so'm</td>
                     <td className="text-center">
                       <button className={`switch ${p.active ? 'switch-on' : 'switch-off'}`} onClick={() => toggleStatus(p.id)}>
@@ -202,14 +223,18 @@ export default function Kolbasamaxsulotlar({ open }) {
                       </div>
                     </td>
                   </tr>
-                ))}
+                )) : (
+                  <tr>
+                    <td colSpan="6" className="text-center" style={{ padding: '20px', color: '#94a3b8' }}>Mahsulot topilmadi</td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>
 
           {totalPages > 1 && (
             <div className="pagination-wrapper">
-              <span className="total-count">Jami: {filteredItems.length} ta</span>
+              <span className="total-count">Jami: {filteredItems.length} ta mahsulot</span>
               <div className="pagination-controls">
                 <button className="pagi-arrow" disabled={currentPage === 1} onClick={() => setCurrentPage(p => p - 1)}><ChevronLeft size={16} /></button>
                 <span className="pagi-num active">{currentPage}</span>
@@ -220,12 +245,12 @@ export default function Kolbasamaxsulotlar({ open }) {
         </div>
       </div>
 
-      {/* YANGI MAHSULOT QO'SHISH MODALI */}
+      {/* MODAL: QO'SHISH */}
       {isAddModalOpen && (
         <div className="modal-parda" onClick={() => setIsAddModalOpen(false)}>
           <div className="modal-oyna" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
-              <span>Yangi mahsulot kirimi</span>
+              <span>Yangi mahsulot qo'shish</span>
               <X className="cursor-pointer" onClick={() => setIsAddModalOpen(false)} />
             </div>
             <div className="modal-body">
@@ -246,35 +271,40 @@ export default function Kolbasamaxsulotlar({ open }) {
                 </div>
               </div>
 
-              <label className="input-label">Narxi (1 birlik uchun)</label>
+              <label className="input-label">Sotuv narxi (1 {newProduct.unit} uchun)</label>
               <input
                 className="input-style w-full mb-4"
                 type="text"
-                placeholder="Narxi"
+                placeholder="0"
                 value={formatNumber(newProduct.price)}
                 onChange={e => setNewProduct({ ...newProduct, price: cleanNumber(e.target.value) })}
               />
 
               <div className="modal-footer">
                 <button className="btn-cancel" onClick={() => setIsAddModalOpen(false)}>Bekor qilish</button>
-                <button className="btn-blue" style={{ width: 'auto' }} onClick={handleAddProduct}>Qo'shish</button>
+                <button className="btn-blue" onClick={handleAddProduct}>Omborga qo'shish</button>
               </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* TAHRIRLASH MODALI */}
+      {/* MODAL: TAHRIRLASH */}
       {isEditModalOpen && selectedProduct && (
         <div className="modal-parda" onClick={() => setIsEditModalOpen(false)}>
           <div className="modal-oyna" onClick={e => e.stopPropagation()}>
             <div className="modal-header">
-              <span>Tahrirlash</span>
+              <span>Mahsulotni tahrirlash</span>
               <X className="cursor-pointer" onClick={() => setIsEditModalOpen(false)} />
             </div>
             <div className="modal-body">
+              <label className="input-label">Nomi</label>
               <input className="input-style w-full mb-3" value={selectedProduct.name} onChange={e => setSelectedProduct({ ...selectedProduct, name: e.target.value })} />
+              
+              <label className="input-label">Qoldiq miqdori</label>
               <input className="input-style w-full mb-3" type="number" value={selectedProduct.stock} onChange={e => setSelectedProduct({ ...selectedProduct, stock: e.target.value })} />
+              
+              <label className="input-label">Narxi</label>
               <input
                 className="input-style w-full mb-3"
                 type="text"
@@ -283,24 +313,20 @@ export default function Kolbasamaxsulotlar({ open }) {
               />
               <div className="modal-footer">
                 <button className="btn-cancel" onClick={() => setIsEditModalOpen(false)}>Bekor qilish</button>
-                <button className="btn-blue" style={{ width: 'auto' }} onClick={() => {
-                  setProducts(products.map(p => p.id === selectedProduct.id ? { ...selectedProduct, price: Number(cleanNumber(String(selectedProduct.price))) } : p));
-                  setIsEditModalOpen(false);
-                  toast.info("Ma'lumot yangilandi");
-                }}>Saqlash</button>
+                <button className="btn-blue" onClick={handleUpdateProduct}>Saqlash</button>
               </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* O'CHIRISH MODALI */}
+      {/* MODAL: O'CHIRISH */}
       {isDeleteModalOpen && selectedProduct && (
         <div className="modal-parda" onClick={() => setIsDeleteModalOpen(false)}>
           <div className="modal-oyna modal-delete" onClick={e => e.stopPropagation()}>
             <div className="delete-icon-center"><AlertTriangle size={48} color="#ef4444" /></div>
-            <h3 className="delete-title">Diqqat!</h3>
-            <p className="delete-text"><b>{selectedProduct.name}</b> o'chirilsinmi?</p>
+            <h3 className="delete-title">Mahsulotni o'chirish</h3>
+            <p className="delete-text"><b>{selectedProduct.name}</b> ombordan butunlay o'chirilsinmi?</p>
             <div className="modal-footer-btns">
               <button className="btn-cancel" onClick={() => setIsDeleteModalOpen(false)}>Yo'q</button>
               <button className="btn-red-confirm" onClick={handleConfirmDelete}>Ha, o'chirilsin</button>

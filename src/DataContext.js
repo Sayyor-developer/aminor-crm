@@ -3,6 +3,7 @@ import React, { createContext, useState, useContext, useEffect, useMemo } from '
 const DataContext = createContext();
 
 export const DataProvider = ({ children }) => {
+    // LocalStorage dan ma'lumotlarni o'qish funksiyasi
     const getLocal = (key, initial) => {
         const saved = localStorage.getItem(key);
         try {
@@ -32,79 +33,94 @@ export const DataProvider = ({ children }) => {
 
     // Barcha ma'lumotlarni tozalash
     const clearAllData = () => {
-        if(window.confirm("Barcha ma'lumotlar o'chirib tashlansinmi?")) {
-            setMijozlar([]); setProducts([]); setSotuvlar([]); 
-            setChiqimlar([]); setMasalliqlar([]); setTarix([]);
+        if(window.confirm("DIQQAT! Barcha ma'lumotlar butunlay o'chirib tashlansinmi?")) {
+            setMijozlar([]); 
+            setProducts([]); 
+            setSotuvlar([]); 
+            setChiqimlar([]); 
+            setMasalliqlar([]); 
+            setTarix([]);
             localStorage.clear();
         }
     };
 
-    // --- MANTIQIY FUNKSIYALAR ---
-    
-    // 1. Mijozlar mantiqi
+    // --- 1. MIJOZLAR MANTIQI ---
     const mijozQoshish = (yangi) => setMijozlar(prev => [yangi, ...prev]);
     
     const mijozOchirish = (id) => {
-        // Mijoz o'chganda uning hamma izi (sotuvlari) ham o'chishi shart
         setMijozlar(prev => prev.filter(m => m.id !== id));
         setSotuvlar(prev => prev.filter(s => s.mijozId !== id));
     };
 
-    const mijozYangilash = (updated) => setMijozlar(prev => prev.map(m => m.id === updated.id ? updated : m));
+    const mijozYangilash = (updated) => {
+        setMijozlar(prev => prev.map(m => m.id === updated.id ? updated : m));
+    };
 
-    // 2. Sotuvlar mantiqi
+    // --- 2. SOTUV MANTIQI (DIQQAT: TUZATILDI) ---
+    /**
+     * Mijozlar.jsx sahifasida handleSotuvBajarish funksiyasi 
+     * allaqachon setProducts va mijozYangilash-ni bajaradi.
+     * Shuning uchun sotuvQoshish faqat ro'yxatni yangilashi kerak.
+     */
     const sotuvQoshish = (yangiSotuv) => {
         setSotuvlar(prev => [yangiSotuv, ...prev]);
-        if(yangiSotuv.mijozId) {
-            setMijozlar(prev => prev.map(m => 
-                m.id === yangiSotuv.mijozId ? 
-                { ...m, qarzdorlik: Number(m.qarzdorlik || 0) + Number(yangiSotuv.summa) } : m
-            ));
-        }
     };
 
     const sotuvOchirish = (id) => {
         const ochilayotganSotuv = sotuvlar.find(s => s.id === id);
-        if (ochilayotganSotuv && ochilayotganSotuv.mijozId) {
-            setMijozlar(prev => prev.map(m => 
-                m.id === ochilayotganSotuv.mijozId ? 
-                { ...m, qarzdorlik: Math.max(0, Number(m.qarzdorlik || 0) - Number(ochilayotganSotuv.summa)) } : m
+        
+        if (ochilayotganSotuv) {
+            // A) Mijoz qarzidan qayta ayirish
+            if (ochilayotganSotuv.mijozId) {
+                setMijozlar(prev => prev.map(m => 
+                    m.id === ochilayotganSotuv.mijozId ? 
+                    { 
+                        ...m, 
+                        qarzdorlik: Number((parseFloat(m.qarzdorlik || 0) - parseFloat(ochilayotganSotuv.summa)).toFixed(2)) 
+                    } : m
+                ));
+            }
+            // B) OMBORGA QAYTARISH (Sotuv bekor bo'lsa mahsulot qaytadi)
+            setProducts(prev => prev.map(p => 
+                p.name === ochilayotganSotuv.mahsulot ? 
+                { 
+                    ...p, 
+                    stock: Number((parseFloat(p.stock || 0) + parseFloat(ochilayotganSotuv.miqdor)).toFixed(2)) 
+                } : p
             ));
         }
         setSotuvlar(prev => prev.filter(s => s.id !== id));
     };
 
-    // 3. Masalliq va Chiqim
+    // --- 3. MASALLIQ VA CHIQIM MANTIQI ---
     const masalliqMiqdoriniYangilash = (id, miqdor) => {
         setMasalliqlar(prev => prev.map(m => 
-            m.id === id ? { ...m, miqdori: Number(m.miqdori || 0) + Number(miqdor) } : m
+            m.id === id ? { ...m, miqdori: Number((parseFloat(m.miqdori || 0) + parseFloat(miqdor)).toFixed(2)) } : m
         ));
     };
 
     const chiqimQoshish = (yangiChiqim) => setChiqimlar(prev => [yangiChiqim, ...prev]);
     const chiqimOchirish = (id) => setChiqimlar(prev => prev.filter(c => c.id !== id));
 
-    // --- GLOBAL HISOB-KITOBLAR (HOME UCHUN STATISTIKA) ---
-    // 
-    
+    // --- 4. GLOBAL HISOB-KITOBLAR ---
     const jamiKirim = useMemo(() => {
-        return sotuvlar.reduce((sum, s) => sum + Number(s.summa || 0), 0);
+        return sotuvlar.reduce((sum, s) => sum + parseFloat(s.summa || 0), 0);
     }, [sotuvlar]);
 
     const jamiQarzlar = useMemo(() => {
-        return mijozlar.reduce((sum, m) => sum + Number(m.qarzdorlik || 0), 0);
+        return mijozlar.reduce((sum, m) => sum + parseFloat(m.qarzdorlik || 0), 0);
     }, [mijozlar]);
 
     const jamiChiqim = useMemo(() => {
-        return chiqimlar.reduce((sum, c) => sum + Number(c.summa || 0), 0);
+        return chiqimlar.reduce((sum, c) => sum + parseFloat(c.summa || 0), 0);
     }, [chiqimlar]);
 
     const kolbasaJamiNarx = useMemo(() => {
-        return products.reduce((sum, p) => sum + (Number(p.price || 0) * Number(p.stock || 0)), 0);
+        return products.reduce((sum, p) => sum + (parseFloat(p.price || 0) * parseFloat(p.stock || 0)), 0);
     }, [products]);
 
     const kolbasaJamiSoni = useMemo(() => {
-        return products.reduce((sum, p) => sum + Number(p.stock || 0), 0);
+        return products.reduce((sum, p) => sum + parseFloat(p.stock || 0), 0);
     }, [products]);
 
     return (

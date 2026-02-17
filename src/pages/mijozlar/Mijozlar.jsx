@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Search, UserPlus, Edit, Trash2, X, AlertTriangle,
-  Printer, History, ShoppingCart, TrendingDown, TrendingUp, CheckCircle2, Plus
+  Printer, History, /* ShoppingCart, */ TrendingDown, TrendingUp, CheckCircle2, Plus
 } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
 import html2pdf from 'html2pdf.js';
@@ -11,7 +11,15 @@ import './mijozlar.css';
 
 const Mijozlar = ({ open }) => {
   const navigate = useNavigate();
-  const { mijozlar = [], mijozQoshish, mijozOchirish, mijozYangilash, sotuvQoshish, products = [] } = useData();
+  const { 
+    mijozlar = [], 
+    mijozQoshish, 
+    mijozOchirish, 
+    mijozYangilash, 
+    // sotuvQoshish, 
+    // products = [],
+    // setProducts 
+  } = useData();
 
   // --- FORMATLASH VA TOZALASH FUNKSIYALARI ---
   const formatNumber = (num) => {
@@ -39,10 +47,10 @@ const Mijozlar = ({ open }) => {
   const [tahrirlashModalOchiq, setTahrirlashModalOchiq] = useState(false);
   const [ochirishModalOchiq, setOchirishModalOchiq] = useState(false);
   const [profilModalOchiq, setProfilModalOchiq] = useState(false);
-  const [sotishModalOchiq, setSotishModalOchiq] = useState(false);
+  // const [sotishModalOchiq, setSotishModalOchiq] = useState(false);
   const [yangiMijozModalOchiq, setYangiMijozModalOchiq] = useState(false);
 
-  const [sotuvData, setSotuvData] = useState({ mahsulot: '', miqdor: '', narx: '' });
+  // const [sotuvData, setSotuvData] = useState({ mahsulot: '', miqdor: '', narx: '' });
 
   const [yangiMijozState, setYangiMijozState] = useState({
     ism: '',
@@ -53,7 +61,7 @@ const Mijozlar = ({ open }) => {
   });
 
   // --- FUNKSIYALAR ---
-  const handleMahsulotSelect = (e) => {
+ /*  const handleMahsulotSelect = (e) => {
     const nomi = e.target.value;
     const topilgan = products.find(p => p.name === nomi);
     if (topilgan) {
@@ -61,7 +69,7 @@ const Mijozlar = ({ open }) => {
     } else {
       setSotuvData({ ...sotuvData, mahsulot: nomi, narx: '' });
     }
-  };
+  }; */
 
   const handleDownloadPDF = () => {
     const element = document.getElementById('pdf-content');
@@ -115,43 +123,70 @@ const Mijozlar = ({ open }) => {
     toast.success("Ma'lumotlar yangilandi");
   };
 
-  const handleSotuvBajarish = () => {
-    const tozaNarx = Number(cleanNumber(sotuvData.narx));
-    if (!sotuvData.mahsulot || !sotuvData.miqdor || !tozaNarx) {
-      return toast.error("Ma'lumotlarni to'liq kiriting!");
+  // --- SOTUVNI TO'G'IRLANGAN VARIANTI ---
+  /* const handleSotuvBajarish = () => {
+    const sotishMiqdori = parseFloat(sotuvData.miqdor);
+    const sotishNarxi = parseFloat(cleanNumber(sotuvData.narx));
+
+    if (!sotuvData.mahsulot || isNaN(sotishMiqdori) || sotishMiqdori <= 0) {
+      return toast.error("Miqdorni to'g'ri kiriting!");
     }
 
-    const jamiSumma = Number(sotuvData.miqdor) * tozaNarx;
+    // Ombordagi mahsulotni topish
+    const omborMahsulot = products.find(p => p.name === sotuvData.mahsulot);
+    
+    if (!omborMahsulot) {
+      return toast.error("Mahsulot omborda topilmadi!");
+    }
+
+    // MUHIM: parseFloat ishlatish zaxira bilan matematik xatoni oldini oladi
+    const joriyZaxira = parseFloat(omborMahsulot.stock);
+
+    if (joriyZaxira < sotishMiqdori) {
+      return toast.error(`Omborda yetarli emas! Hozirgi qoldiq: ${joriyZaxira} kg`);
+    }
+
+    const jamiSumma = sotishMiqdori * sotishNarxi;
     const joriySana = getBugungiSana();
 
+    // 1. OMBORNI YANGILASH (Qat'iy matematik ayirish)
+    const yangiQoldiq = joriyZaxira - sotishMiqdori;
+    const yangiProductsList = products.map(p => 
+      p.id === omborMahsulot.id ? { ...p, stock: yangiQoldiq } : p
+    );
+    setProducts(yangiProductsList);
+
+    // 2. MIJOZ QARZINI YANGILASH
     const yangilanganMijoz = {
       ...tanlangan,
-      qarzdorlik: Number(tanlangan.qarzdorlik) + jamiSumma,
+      qarzdorlik: parseFloat(tanlangan.qarzdorlik) + jamiSumma,
       oxirgiXarid: joriySana,
       tolovTarixi: [
         {
           sana: new Date().toLocaleDateString(),
           miqdor: `+${jamiSumma.toLocaleString()} so'm`,
-          izoh: `${sotuvData.mahsulot} (${sotuvData.miqdor} kg)`
+          izoh: `${sotuvData.mahsulot} (${sotishMiqdori} kg)`
         },
         ...(tanlangan.tolovTarixi || [])
       ]
     };
+    mijozYangilash(yangilanganMijoz);
 
+    // 3. UMUMIY SOTUVLARGA QO'SHISH
     sotuvQoshish({
       id: Date.now(),
       mijozId: tanlangan.id,
       mijozIsmi: tanlangan.ism,
       mahsulot: sotuvData.mahsulot,
+      miqdor: sotishMiqdori,
       summa: jamiSumma,
       sana: joriySana
     });
 
-    mijozYangilash(yangilanganMijoz);
     setSotishModalOchiq(false);
     setSotuvData({ mahsulot: '', miqdor: '', narx: '' });
-    toast.success("Sotuv muvaffaqiyatli saqlandi!");
-  };
+    toast.success(`Sotildi! Yangi qoldiq: ${yangiQoldiq} kg`);
+  }; */
 
   const getBalansHolati = (miqdor) => {
     const val = Number(miqdor);
@@ -233,7 +268,7 @@ const Mijozlar = ({ open }) => {
                     </td>
                     <td className="text-center actions-td">
                       <div className="flex-center">
-                        <button className="btn-blue btn-icon" onClick={() => { setTanlangan(m); setSotishModalOchiq(true); }}><ShoppingCart size={14} /></button>
+                      {/*   <button className="btn-blue btn-icon" onClick={() => { setTanlangan(m); setSotishModalOchiq(true); }}><ShoppingCart size={14} /></button> */}
                         <button className="btn-blue btn-icon" onClick={() => { setTanlangan(m); setTahrirlashModalOchiq(true); }}><Edit size={14} /></button>
                         <button className="btn-blue btn-red btn-icon" onClick={() => { setTanlangan(m); setOchirishModalOchiq(true); }}><Trash2 size={14} /></button>
                       </div>
@@ -307,7 +342,7 @@ const Mijozlar = ({ open }) => {
         </div>
       )}
 
-      {sotishModalOchiq && tanlangan && (
+      {/* {sotishModalOchiq && tanlangan && (
         <div className="modal-parda">
           <div className="modal-oyna">
             <div className="modal-header">
@@ -319,7 +354,7 @@ const Mijozlar = ({ open }) => {
               <select className="input-style mb-2 select-sotuv" value={sotuvData.mahsulot} onChange={handleMahsulotSelect}>
                 <option value="">Tanlang...</option>
                 {products.map(p => (
-                  <option key={p.id} value={p.name}>{p.name}</option>
+                  <option key={p.id} value={p.name}>{p.name} ({p.stock} kg qoldi)</option>
                 ))}
               </select>
               <div className="input-guruhi mb-2" style={{ display: 'flex', gap: 'var(--gap-10)' }}>
@@ -339,7 +374,7 @@ const Mijozlar = ({ open }) => {
             </div>
           </div>
         </div>
-      )}
+      )} */}
 
       {profilModalOchiq && tanlangan && (
         <div className="modal-parda" onClick={() => setProfilModalOchiq(false)}>

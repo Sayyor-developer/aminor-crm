@@ -1,8 +1,7 @@
-/* Asosiy konteyner */
 .m-page {
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.3s ease;
     padding: 2rem;
-    background-color: #f1f5f9;
+    background: #f8fafc;
     min-height: 100vh;
     margin-top: 60px;
 }
@@ -20,107 +19,36 @@
     margin: 0 auto;
 }
 
-/* Sarlavha */
 .m-title-area {
     display: flex;
+    justify-content: space-between;
     align-items: center;
-    gap: 1rem;
-    margin-bottom: 2rem;
+    margin-bottom: 25px;
 }
 
 .m-main-icon {
-    width: 3rem;
-    height: 3rem;
-    border-radius: 12px;
+    width: 45px;
+    height: 45px;
     background: var(--primary-color);
+    color: #fff;
+    border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: white;
-    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
 }
 
-.m-title-area h1 {
-    font-size: var(--font-size-20);
-    font-weight: var(--font-weight-600);
-}
-
-/* Card dizayni */
 .m-data-card {
-    background: white;
+    background: #fff;
     border-radius: 16px;
-    padding: 1.5rem;
-    margin-bottom: 1.5rem;
+    padding: 20px;
     border: 1px solid #e2e8f0;
     box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    margin-bottom: 30px;
 }
 
-.m-card-subtitle {
-    margin-bottom: 1.25rem;
-    font-size: 1.1rem;
-    color: #1e293b;
-    font-weight: var(--font-weight-600);
-}
-
-/* Inputlar */
-.m-input-row {
-    display: grid;
-    gap: 1rem;
-    margin-bottom: 1.25rem;
-}
-
-.m-custom-input,
-.m-custom-select {
-    width: 100%;
-    padding: 0.75rem 1rem;
-    border: 1.5px solid #e2e8f0;
-    border-radius: 10px;
-    font-size: var(--font-size-14);
-    outline: none;
-    transition: 0.2s;
-    background: #f8fafc;
-}
-
-.m-custom-input:focus {
-    border-color: var(--primary-color);
-    background: white;
-    box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
-}
-
-.m-split-input {
-    display: flex;
-    gap: 8px;
-}
-
-.m-custom-select {
-    width: 90px;
-    cursor: pointer;
-}
-
-/* Tugmalar */
-.m-add-btn {
-    background: var(--primary-color);
-    color: white;
-    padding: 0.75rem 1.5rem;
-    border-radius: 10px;
-    border: none;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-weight: var(--font-weight-600);
-    transition: 0.2s;
-    width: 100%;
-}
-
-.m-add-btn:hover {
-    background: var(--primary-hover-color);
-}
-
-/* Qidiruv */
 .m-search-box {
     position: relative;
-    margin-bottom: 1.5rem;
+    margin-bottom: 20px;
 }
 
 .m-search-icon {
@@ -132,36 +60,38 @@
 }
 
 .m-pl-40 {
-    padding-left: 45px !important;
+    padding-left: 40px !important;
 }
 
-/* Jadval */
 .m-table-wrapper {
+    width: 100%;
     overflow-x: auto;
-    border-radius: 12px;
-    border: 1px solid #f1f5f9;
 }
 
 .m-data-table {
     width: 100%;
     border-collapse: collapse;
-    text-align: left;
 }
 
 .m-data-table th {
     background: #f8fafc;
-    padding: 1rem;
-    font-size: 0.75rem;
-    text-transform: uppercase;
+    padding: 12px;
+    text-align: left;
+    font-size: var(--font-size-12);
     color: #64748b;
-    font-weight: var(--font-weight-700);
+    text-transform: uppercase;
+    border-bottom: 2px solid #f1f5f9;
 }
 
 .m-data-table td {
-    padding: 1rem;
-    font-size: var(--font-size-14);
+    padding: 14px 12px;
     border-bottom: 1px solid #f1f5f9;
-    color: #334155;
+    font-size: var(--font-size-14);
+}
+
+.m-price-col {
+    font-weight: var(--font-weight-700);
+    color: var(--primary-color);
 }
 
 .m-font-bold {
@@ -169,27 +99,228 @@
     color: #1e293b;
 }
 
-.m-price-col {
-    font-weight: var(--font-weight-700);
-    color: #059669;
-}
-
 .m-tag {
     background: #f1f5f9;
     padding: 2px 6px;
     border-radius: 4px;
     font-size: var(--font-size-12);
-    color: #64748b;
 }
 
-/* Status Toggle (Switch) */
+.m-buy-icon-btn {
+    background: #eff6ff;
+    color: var(--white);
+    background-color: var(--primary-color);
+    border: none;
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.m-buy-icon-btn:hover {
+    background: var(--primary-hover-color);
+}
+
+.m-icon-btn {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: 0.2s;
+}
+
+.m-edit {
+    background: var(--primary-color);
+    color: var(--white);
+}
+
+.m-edit:hover {
+    background-color: var(--primary-hover-color);
+}
+
+.m-delete {
+    background: var(--primary-color);
+    color: var(--white);
+}
+
+.m-delete:hover {
+    background-color: var(--primary-hover-color);
+}
+
+.m-action-flex {
+    display: flex;
+    gap: var(--gap-10);
+    justify-content: center;
+}
+
+.m-history-section {
+    margin-top: 40px;
+}
+
+.m-history-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.m-pdf-btn {
+    background: var(--primary-color);
+    border: 1px solid #e2e8f0;
+    padding: 8px 15px;
+    border-radius: 8px;
+    color: var(--white);
+    display: flex;
+    gap: var(--gap-10);
+    cursor: pointer;
+    align-items: center;
+    font-size: var(--font-size-14);
+    font-weight: var(--font-weight-500);
+}
+
+.m-add-btn {
+    background: var(--primary-color);
+    width: auto;
+    border: 1px solid #e2e8f0;
+    padding: 8px 15px;
+    border-radius: 8px;
+    color: var(--white);
+    display: flex;
+    gap: var(--gap-10);
+    cursor: pointer;
+    align-items: center;
+    font-size: var(--font-size-14);
+    font-weight: var(--font-weight-500);
+}
+
+.m-history-qty {
+    background: var(--primary-color);
+    color: var(--white);
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-weight: var(--font-weight-600);
+    font-size: var(--font-size-12);
+}
+
+.m-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    padding: 15px;
+}
+
+.m-modal {
+    background: #fff;
+    border-radius: 16px;
+    width: 100%;
+    max-width: 450px;
+    overflow: hidden;
+    animation: m-fade 0.3s ease;
+}
+
+@keyframes m-fade {
+    from {
+        transform: translateY(20px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.m-modal-head {
+    background: var(--primary-color);
+    color: #fff;
+    padding: 15px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.m-close {
+    cursor: pointer;
+}
+
+.m-modal-body {
+    padding: 20px;
+}
+
+.m-modal-body label {
+    font-size: var(--font-size-14);
+    color: #64748b;
+    margin-top: 10px;
+    display: block;
+}
+
+.m-custom-input,
+.m-custom-select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    margin: 6px 0 15px;
+    font-size: var(--font-size-14);
+    outline: none;
+    transition: 0.2s;
+}
+
+.m-custom-input:focus {
+    border-color: var(--primary-color);
+}
+
+.m-save-btn {
+    width: 100%;
+    background: var(--primary-color);
+    color: #fff;
+    border: none;
+    padding: 12px;
+    border-radius: 10px;
+    font-weight: var(--font-weight-600);
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+.m-btn-gray {
+    flex: 1;
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    padding: 12px;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.m-summary-box {
+    background: #f8fafc;
+    padding: 15px;
+    border-radius: 8px;
+    text-align: center;
+    margin-bottom: 15px;
+    border: 1px dashed #cbd5e1;
+}
+
+.m-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--gap-10);
+}
+
 .m-toggle {
-    width: 44px;
-    height: 22px;
+    width: 38px;
+    height: 18px;
     border-radius: 20px;
     cursor: pointer;
     position: relative;
-    transition: 0.3s;
     margin: 0 auto;
 }
 
@@ -202,9 +333,9 @@
 }
 
 .m-toggle-circle {
-    width: 16px;
-    height: 16px;
-    background: white;
+    width: 12px;
+    height: 12px;
+    background: #fff;
     border-radius: 50%;
     position: absolute;
     top: 3px;
@@ -212,334 +343,142 @@
 }
 
 .m-toggle-on .m-toggle-circle {
-    left: 25px;
+    left: 22px;
 }
 
 .m-toggle-off .m-toggle-circle {
-    left: 3px;
+    left: 4px;
 }
 
-/* Amallar */
-.m-action-flex {
-    display: flex;
-    justify-content: center;
-    gap: 8px;
+/* ... Oldingi barcha CSS kodlaringiz shu yerda qoladi ... */
+
+/* --- RESPONSIVE DESIGN (380px gacha) --- */
+
+@media (max-width: 1024px) {
+    .m-sidebar-open {
+        margin-left: 80px;
+        /* Planshetlarda sidebar avtomatik yopilsa marginni kamaytirish */
+    }
 }
 
-.m-icon-btn {
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
-    border: none;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    color: var(--white);
-}
+@media (max-width: 768px) {
+    .m-page {
+        padding: 1rem;
+    }
+    .m-history-head{
+        flex-direction: column;
+    }
 
-.m-edit {
-    background: var(--primary-color);
-}
+    .m-title-area {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--gap-10);
+    }
 
-.m-delete {
-    background: var(--primary-color);
-}
+    .m-pdf-btn {
+        width: 100%;
+        /* Mobil va planshetda tugma to'liq kenglikda */
+        justify-content: center;
+    }
 
-/* Row Disabled */
-.m-row-disabled td {
-    opacity: 0.5;
-    color: #94a3b8 !important;
-}
-
-.m-row-disabled .m-action-flex,
-.m-row-disabled .m-toggle {
-    opacity: 1;
-}
-
-/* Pagination */
-.m-pagination-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 1.5rem;
-}
-
-.m-page-btns {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-}
-
-.m-num-group {
-    display: flex;
-    gap: 5px;
-}
-
-.m-num-btn {
-    width: 32px;
-    height: 32px;
-    border-radius: 6px;
-    border: 1px solid #e2e8f0;
-    background: var(--white);
-    cursor: pointer;
-}
-
-.m-num-active {
-    background: var(--primary-color);
-    color: var(--white);
-    border-color: var(--primary-color);
-}
-
-.m-nav-btn {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    padding: 6px 12px;
-    border-radius: 6px;
-    border: 1px solid #e2e8f0;
-    background: white;
-    cursor: pointer;
-    font-size: var(--font-size-12);
-}
-
-.m-nav-btn:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-}
-
-/* Modallar */
-.m-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(15, 23, 42, 0.6);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 9999;
-    backdrop-filter: blur(4px);
-}
-
-.m-modal {
-    background: white;
-    width: 95%;
-    max-width: 450px;
-    border-radius: 20px;
-    overflow: hidden;
-    animation: m-slide 0.3s ease;
-}
-
-.m-modal-sm {
-    max-width: 350px;
-}
-
-.m-modal-head {
-    background: var(--primary-color);
-    color: var(--white);
-    padding: 1.25rem;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-weight: var(--font-weight-600);
-}
-
-.m-modal-body {
-    padding: 1.5rem;
-}
-
-.m-modal-field {
-    margin-bottom: 1rem;
-}
-
-.m-modal-field label {
-    display: block;
-    margin-bottom: 5px;
-    font-size: var(--font-size-12);
-    font-weight: var(--font-weight-600);
-    color: #475569;
-}
-
-.m-modal-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1rem;
-    margin-bottom: 1rem;
-}
-
-.m-save-btn {
-    width: 100%;
-    padding: 0.8rem;
-    background: var(--primary-color);
-    color: var(--white);
-    border: none;
-    border-radius: 10px;
-    font-weight: var(--font-weight-700);
-    cursor: pointer;
-    margin-top: 0.5rem;
-}
-
-/* O'chirish modal elementlari */
-.m-warn-circle {
-    width: 70px;
-    height: 70px;
-    background: #fee2e2;
-    color: var(--primary-color);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto 1rem;
-}
-
-.m-modal-btns {
-    display: flex;
-    gap: var(--gap-10);
-    margin-top: 1.5rem;
-}
-
-.m-btn-gray {
-    flex: 1;
-    padding: 0.75rem;
-    border-radius: 8px;
-    border: none;
-    background: #f1f5f9;
-    cursor: pointer;
-}
-
-.m-btn-danger {
-    flex: 1;
-    padding: 0.75rem;
-    border-radius: 8px;
-    border: none;
-    background: var(--primary-color);
-    color: var(--white);
-    cursor: pointer;
-}
-
-@media (max-width: 665px) {
     .m-add-btn {
-        width: 100% !important;
+        width: 100%;
+        justify-content: center;
     }
 }
 
-/* --- PAGINATION RESPONSIVE FIX --- */
 @media (max-width: 480px) {
-    .m-pagination-row {
-        display: flex !important;
-        flex-direction: column !important;
-        align-items: center !important;
-        gap: 12px !important;
-        width: 100% !important;
-        padding: 10px 0 !important;
+
+    .m-sidebar-closed,
+    .m-sidebar-open {
+        margin-left: 0;
+        /* Mobil qurilmada sidebar ustiga chiqishi yoki yopilishi uchun */
     }
 
-    .masalliq-qoshish-kirim {
-        width: 100% !important;
+    .m-page {
+        margin-top: 70px;
+        padding: 0.8rem;
     }
-    .masalliq-qoshish-kirim{
+    .m-container{
+        margin-left: 80px;
+    }
+    .m-history-head{
         flex-direction: column;
 
     }
 
-    .m-page-btns {
-        display: flex !important;
-        flex-direction: row !important;
-        justify-content: center !important;
-        align-items: center !important;
-        width: 100% !important;
-        gap: 5px !important;
-        flex-wrap: nowrap !important;
+    h1 {
+        font-size: var(--font-size-18);
     }
 
-    .m-nav-btn {
-        width: 38px !important;
-        height: 38px !important;
-        padding: 0 !important;
-        font-size: 0 !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        min-width: 38px !important;
+    .m-data-card {
+        padding: 12px;
+        border-radius: 12px;
     }
 
-    .m-nav-btn svg {
-        width: 20px !important;
-        height: 20px !important;
-        color: var(--primary-color);
+    /* Jadval mobil ekranda juda siqilib ketmasligi uchun */
+    .m-data-table th,
+    .m-data-table td {
+        padding: 10px 8px;
+        font-size: var(--font-size-12) !important;
     }
 
-    .m-num-btn {
-        width: 34px !important;
-        height: 34px !important;
+    .m-action-flex {
+        gap: 5px;
+    }
+
+    .m-icon-btn,
+    .m-buy-icon-btn {
+        width: 30px;
+        height: 30px;
+    }
+
+    .m-modal {
+        max-width: 95%;
+        margin: 10px;
+    }
+}
+
+@media (max-width: 380px) {
+
+    /* Eng kichik ekranlar uchun maxsus */
+    .m-title-area h1 {
+        font-size: var(--font-size-16);
+    }
+    .m-container{
+        margin-left: 80px;
+    }
+
+    .m-grid-2 {
+        grid-template-columns: 1fr;
+        /* Miqdor va Birlik ustma-ust tushadi */
+        gap: 0;
+    }
+
+    .m-modal-head span {
+        font-size: var(--font-size-14);
+    }
+
+    .m-custom-input,
+    .m-custom-select {
+        padding: 8px;
         font-size: var(--font-size-14) !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
     }
 
-    .m-num-group {
-        display: flex !important;
-        gap: 4px !important;
+    .m-save-btn {
+        padding: 10px;
+        font-size: var(--font-size-14);
     }
 
-    .m-total-count {
-        margin: 0 !important;
-        font-size: var(--font-size-14) !important;
-        font-weight: var(--font-weight-500) !important;
+    /* Tarix jadvalidagi sanani kichraytirish */
+    .m-history-section h2 {
+        font-size: var(--font-size-16);
     }
-}
 
-.m-table-wrapper {
-    max-height: 600px;
-    overflow-y: auto;
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
-    background: #fff;
-}
-
-.m-data-table thead th {
-    position: sticky;
-    top: 0;
-    background-color: #f8fafc;
-    z-index: 5;
-    box-shadow: 0 2px 2px -1px rgba(0, 0, 0, 0.1);
-}
-
-.m-pagination-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 15px 0;
-    margin-top: 10px;
-}
-
-.m-page-btns {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.m-num-btn {
-    width: 35px;
-    height: 35px;
-    border-radius: 6px;
-    border: 1px solid var(--primary-color);
-    background: #fff;
-    cursor: pointer;
-    transition: all 0.2s;
-}
-
-.m-num-active {
-    background: var(--primary-color);
-    color: var(--white);
-    border-color: var(--primary-color);
-}
-
-.m-table-wrapper::-webkit-scrollbar {
-    width: 6px;
-}
-
-.m-table-wrapper::-webkit-scrollbar-thumb {
-    background: #cbd5e1;
-    border-radius: 10px;
+    /* Jadval ustunlarini boshqarish */
+    .m-data-table th:nth-child(4),
+    .m-data-table td:nth-child(4) {
+        display: none;
+        /* Ta'minotchi ustunini juda kichik ekranda yashirish (joy tejash uchun) */
+    }
 }
