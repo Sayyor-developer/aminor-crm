@@ -9,7 +9,11 @@ import { GiChickenOven } from "react-icons/gi";
 import { IoMdPerson } from "react-icons/io";
 import { RiMenu2Fill } from "react-icons/ri";
 
-const SideBar = ({ open, setOpen }) => {
+const SideBar = ({ open, setOpen, userPermissions = [] }) => {
+  
+  // Ruxsatni tekshirish funksiyasi
+  const canSee = (name) => userPermissions.includes(name);
+
   return (
     <div className={`sidebar ${open ? 'open' : 'closed'}`} >
       <div className="logo-section">
@@ -18,52 +22,77 @@ const SideBar = ({ open, setOpen }) => {
       <div className="hr"></div>
 
       <ul className="sidebar-list">
-        <li>
-          {/* Dashboard yo'lini /home qildik */}
-          <NavLink to="/home" className={({ isActive }) => isActive ? "side active" : "side"}>
-            <IoHome /> <span className="link-text">Dashboard</span>
-          </NavLink>
-        </li>
-        <li>
-          <NavLink to="/kolbasamaxsulotlar" className={({ isActive }) => isActive ? "side active" : "side"}>
-            <FaBowlFood /> <span className="link-text">Kolbasa va Maxsulotlar</span>
-          </NavLink>
-        </li>
-        <li>
-          <NavLink to="/mijozlar" className={({ isActive }) => isActive ? "side active" : "side"}>
-            <MdPeopleAlt /> <span className="link-text">Mijozlar ro'yxati</span>
-          </NavLink>
-        </li>
-        <li>
-          <NavLink to="/masalliqlar" className={({ isActive }) => isActive ? "side active" : "side"}>
-            <MdMenuBook /> <span className="link-text">Masalliqlar bo'limi</span>
-          </NavLink>
-        </li>
-        <li>
-          <NavLink to="/tannarxhisoblash" className={({ isActive }) => isActive ? "side active" : "side"}>
-            <MdOutlinePriceChange /> <span className="link-text">Tannarx hisoblash</span>
-          </NavLink>
-        </li>
-        <li>
-          <NavLink to="/moliya" className={({ isActive }) => isActive ? "side active" : "side"}>
-            <FaMoneyBillTrendUp /> <span className="link-text">Moliya bo'limi</span>
-          </NavLink>
-        </li>
-        <li>
-          <NavLink to="/tovuqchiqim" className={({ isActive }) => isActive ? "side active" : "side"}>
-            <GiChickenOven /> <span className="link-text">Tovuq mahsulotlari</span>
-          </NavLink>
-        </li>
-        <li>
-          <NavLink to="/foydalanuvchilar" className={({ isActive }) => isActive ? "side active" : "side"}>
-            <MdPeopleAlt /> <span className="link-text">Foydalanuvchilar</span>
-          </NavLink>
-        </li>
-        <li>
-          <NavLink to="/direktor" className={({ isActive }) => isActive ? "side active" : "side"}>
-            <IoMdPerson /> <span className="link-text">Direktor</span>
-          </NavLink>
-        </li>
+        {canSee('Dashboard') && (
+          <li>
+            <NavLink to="/home" className={({ isActive }) => isActive ? "side active" : "side"}>
+              <IoHome /> <span className="link-text">Dashboard</span>
+            </NavLink>
+          </li>
+        )}
+
+        {canSee('Kolbasa va Maxsulotlar') && (
+          <li>
+            <NavLink to="/kolbasamaxsulotlar" className={({ isActive }) => isActive ? "side active" : "side"}>
+              <FaBowlFood /> <span className="link-text">Kolbasa va Maxsulotlar</span>
+            </NavLink>
+          </li>
+        )}
+
+        {canSee('Mijozlar Bazasi') && (
+          <li>
+            <NavLink to="/mijozlar" className={({ isActive }) => isActive ? "side active" : "side"}>
+              <MdPeopleAlt /> <span className="link-text">Mijozlar ro'yxati</span>
+            </NavLink>
+          </li>
+        )}
+
+        {canSee('Masalliqlar') && (
+          <li>
+            <NavLink to="/masalliqlar" className={({ isActive }) => isActive ? "side active" : "side"}>
+              <MdMenuBook /> <span className="link-text">Masalliqlar bo'limi</span>
+            </NavLink>
+          </li>
+        )}
+
+        {canSee('Tannarx hisoblash') && (
+          <li>
+            <NavLink to="/tannarxhisoblash" className={({ isActive }) => isActive ? "side active" : "side"}>
+              <MdOutlinePriceChange /> <span className="link-text">Tannarx hisoblash</span>
+            </NavLink>
+          </li>
+        )}
+
+        {canSee('Moliya') && (
+          <li>
+            <NavLink to="/moliya" className={({ isActive }) => isActive ? "side active" : "side"}>
+              <FaMoneyBillTrendUp /> <span className="link-text">Moliya bo'limi</span>
+            </NavLink>
+          </li>
+        )}
+
+        {canSee('Tovuq Chiqimlari') && (
+          <li>
+            <NavLink to="/tovuqchiqim" className={({ isActive }) => isActive ? "side active" : "side"}>
+              <GiChickenOven /> <span className="link-text">Tovuq mahsulotlari</span>
+            </NavLink>
+          </li>
+        )}
+
+        {canSee('Foydalanuvchilar') && (
+          <li>
+            <NavLink to="/foydalanuvchilar" className={({ isActive }) => isActive ? "side active" : "side"}>
+              <MdPeopleAlt /> <span className="link-text">Foydalanuvchilar</span>
+            </NavLink>
+          </li>
+        )}
+
+        {canSee('Direktor') && (
+          <li>
+            <NavLink to="/direktor" className={({ isActive }) => isActive ? "side active" : "side"}>
+              <IoMdPerson /> <span className="link-text">Direktor</span>
+            </NavLink>
+          </li>
+        )}
       </ul>
 
       <button className="sidebarBtn" onClick={() => setOpen(!open)}>
