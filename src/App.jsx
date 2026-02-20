@@ -4,45 +4,59 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import './App.css';
 
-import { DataProvider } from './DataContext'; 
+// Context va Komponentlar
+import { DataProvider } from './DataContext';
+import { supabase } from './api/supabaseClient'; 
 import Header from './components/header/Header';
 import SideBar from './components/sidebar/SideBar';
+import Loading from './Loading';
 
+// Sahifalar
 import Home from "./pages/home/Home";
-import Kolbasamaxsulotlar from './pages/kolbasamaxsulotlar/Kolbasamaxsulotlar'; 
-import Mijozlar from './pages/mijozlar/Mijozlar'; 
-import MijozProfil from './pages/mijozlar/MijozProfil'; // YANGI SAHIFA
+import Kolbasamaxsulotlar from './pages/kolbasamaxsulotlar/Kolbasamaxsulotlar';
+import Mijozlar from './pages/mijozlar/Mijozlar';
+import MijozProfil from './pages/mijozlar/MijozProfil';
 import Masalliqlar from './pages/masalliqlar/Masalliqlar';
 import Tannarxhisoblash from './pages/tannarxhisoblash/Tannarxhisoblash';
 import Moliya from './pages/moliya/Moliya';
 import Tovuqchiqim from './pages/tovuqchiqim/Tovuqchiqim';
 import Foydalanuvchilar from './pages/foydalanuvchilar/Foydalanuvchilar';
 import Direktor from './pages/direktor/Direktor';
-import Loading from './Loading';
 import Login from './pages/login/Login';
 
 function App() {
   const [open, setOpen] = useState(true);
-  const [loading, setLoading] = useState(false);
+  const [session, setSession] = useState(null);
+  const [authLoading, setAuthLoading] = useState(true);
+  const [pageLoading, setPageLoading] = useState(false);
   const location = useLocation();
 
-  const token = sessionStorage.getItem("token");
-  const isAuthenticated = token === "true";
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setAuthLoading(false);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+      setAuthLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   useEffect(() => {
-    setLoading(true);
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 600);
-    return () => clearTimeout(timer);
-  }, [location.pathname]);
+    if (session) {
+      setPageLoading(true);
+      const timer = setTimeout(() => setPageLoading(false), 600);
+      return () => clearTimeout(timer);
+    }
+  }, [location.pathname, session]);
 
-  if (!isAuthenticated && location.pathname !== "/login") {
-    return <Navigate to="/login" replace />;
-  }
+  if (authLoading) return <Loading />;
 
   const pageTitles = {
-    '/': 'Dashboard',
+    '/home': 'Dashboard',
     '/kolbasamaxsulotlar': 'Kolbasa va Maxsulotlar',
     '/mijozlar': 'Mijozlar Bazasi',
     '/masalliqlar': 'Masalliqlar',
@@ -50,11 +64,10 @@ function App() {
     '/moliya': 'Moliya',
     '/tovuqchiqim': 'Tovuq Chiqimlari',
     '/foydalanuvchilar': 'Foydalanuvchilar',
-    '/direktor': 'Direktor',  
-    '/login': 'Login'
+    '/direktor': 'Direktor',
+    '/login': 'Kirish'
   };
 
-  // Dinamik yo'llar uchun sarlavha (Mijoz profili uchun)
   const getTitle = () => {
     if (location.pathname.startsWith('/mijozlar/')) return "Mijoz Profili";
     return pageTitles[location.pathname] || "Aminor";
@@ -64,39 +77,53 @@ function App() {
     <DataProvider>
       <div className="App">
         <ToastContainer position="top-right" autoClose={2000} />
-        
-        {isAuthenticated && (
+
+        {session && (
           <>
             <SideBar open={open} setOpen={setOpen} />
             <Header open={open} title={getTitle()} />
           </>
         )}
 
-        <main className={isAuthenticated ? `main-content ${open ? 'shifted' : 'full'}` : ""}>
-          {loading ? (
+        <main className={session ? `main-content ${open ? 'shifted' : 'full'}` : ""}>
+          {pageLoading ? (
             <div className="loading-wrapper"><Loading /></div>
           ) : (
-            <Routes>
-              <Route path="/login" element={isAuthenticated ? <Navigate to="/" replace /> : <Login />} />
+        <Routes>
+  {/* 1. Saytga birinchi kirganda (/) login holatini tekshirish */}
+  <Route 
+    path="/" 
+    element={session ? <Navigate to="/home" replace /> : <Navigate to="/login" replace />} 
+  />
 
-              {isAuthenticated ? (
-                <>
-                  <Route path="/" element={<Home open={open} />} />
-                  <Route path="/kolbasamaxsulotlar" element={<Kolbasamaxsulotlar open={open} />} />
-                  <Route path="/mijozlar" element={<Mijozlar open={open} />} />
-                  <Route path="/mijozlar/:id" element={<MijozProfil open={open} />} /> {/* DINAMIK YO'L */}
-                  <Route path="/masalliqlar" element={<Masalliqlar open={open} />} />
-                  <Route path="/tannarxhisoblash" element={<Tannarxhisoblash open={open} />} />
-                  <Route path="/moliya" element={<Moliya open={open} />} />
-                  <Route path="/tovuqchiqim" element={<Tovuqchiqim open={open} />} />
-                  <Route path="/foydalanuvchilar" element={<Foydalanuvchilar open={open} />} />
-                  <Route path="/direktor" element={<Direktor open={open} />} />
-                  <Route path="*" element={<Navigate to="/" replace />} />
-                </>
-              ) : (
-                <Route path="*" element={<Navigate to="/login" replace />} />
-              )}
-            </Routes>
+  {/* 2. Login sahifasi: kirmagan bo'lsa Login, kirgan bo'lsa Home ga otish */}
+  <Route 
+    path="/login" 
+    element={session ? <Navigate to="/home" replace /> : <Login />} 
+  />
+
+  {/* 3. Himoyalangan sahifalar (Faqat session bo'lsa) */}
+  {session ? (
+    <>
+      <Route path="/home" element={<Home open={open} />} />
+      <Route path="/kolbasamaxsulotlar" element={<Kolbasamaxsulotlar open={open} />} />
+      <Route path="/mijozlar" element={<Mijozlar open={open} />} />
+      <Route path="/mijozlar/:id" element={<MijozProfil open={open} />} />
+      <Route path="/masalliqlar" element={<Masalliqlar open={open} />} />
+      <Route path="/tannarxhisoblash" element={<Tannarxhisoblash open={open} />} />
+      <Route path="/moliya" element={<Moliya open={open} />} />
+      <Route path="/tovuqchiqim" element={<Tovuqchiqim open={open} />} />
+      <Route path="/foydalanuvchilar" element={<Foydalanuvchilar open={open} />} />
+      <Route path="/direktor" element={<Direktor open={open} />} />
+      
+      {/* Noto'g'ri URL yozilsa Home ga otish */}
+      <Route path="*" element={<Navigate to="/home" replace />} />
+    </>
+  ) : (
+    /* 4. Agar kirmagan bo'lsa va boshqa sahifaga o'tmoqchi bo'lsa, Login ga qaytarish */
+    <Route path="*" element={<Navigate to="/login" replace />} />
+  )}
+</Routes>
           )}
         </main>
       </div>

@@ -19,7 +19,8 @@ const SideBar = ({ open, setOpen }) => {
 
       <ul className="sidebar-list">
         <li>
-          <NavLink to="/" className={({ isActive }) => isActive ? "side active" : "side"}>
+          {/* Dashboard yo'lini /home qildik */}
+          <NavLink to="/home" className={({ isActive }) => isActive ? "side active" : "side"}>
             <IoHome /> <span className="link-text">Dashboard</span>
           </NavLink>
         </li>

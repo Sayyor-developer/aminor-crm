@@ -1,0 +1,66 @@
+.admin-page {
+    min-height: 100vh;
+    background-color: #F8F9FA;
+    padding: 24px;
+    margin-top: 70px; /* Header uchun joy */
+    transition: all 0.3s ease-in-out;
+}
+
+/* Sidebar holatiga qarab surilish */
+.admin-page.shifted {
+    margin-left: 260px;
+}
+
+.admin-page.collapsed {
+    margin-left: 80px;
+}
+
+.admin-wrapper {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-20);
+}
+
+.admin-card {
+    background: #ffffff;
+    padding: 40px;
+    border-radius: 16px;
+    border: 1px solid #f1f5f9;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+    width: 85%;
+    margin-left: 75px;
+}
+
+.admin-welcome h1 {
+    font-size: var(--font-size-25);
+    color: #1f2937;
+    margin-bottom: 8px;
+}
+
+.admin-welcome p {
+    color: #64748b;
+    font-size: var(--font-size-16);
+}
+
+.dashboard-placeholder {
+    margin-top: 30px;
+    padding: 40px;
+    border: 2px dashed #e2e8f0;
+    border-radius: 12px;
+    color: #94a3b8;
+    text-align: center;
+}
+
+/* Moslashuvchanlik (Responsive) */
+@media (max-width: 1024px) {
+    .admin-page.shifted, .admin-page.collapsed {
+        margin-left: 0 !important;
+        padding: 15px;
+    }
+    .admin-card {
+        width: 100%;
+        margin-left: 0;
+    }
+}

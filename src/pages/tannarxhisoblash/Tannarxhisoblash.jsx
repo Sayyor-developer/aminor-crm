@@ -12,7 +12,6 @@ const Tannarxhisoblash = ({ open }) => {
       birlik: 'kg',
       narx: 50000 + i * 500,
       sana: '2025-01-28',
-      isActive: true,
     }))
   );
 
@@ -25,7 +24,7 @@ const Tannarxhisoblash = ({ open }) => {
   const itemsPerPage = 10;
 
   const [formData, setFormData] = useState({
-    materialTuri: '', miqdor: '', birlik: 'kg', narx: '', isActive: true
+    materialTuri: '', miqdor: '', birlik: 'kg', narx: ''
   });
 
   // --- NARXNI FORMATLASH FUNKSIYALARI ---
@@ -55,7 +54,7 @@ const Tannarxhisoblash = ({ open }) => {
       setFormData({ ...item });
     } else {
       setEditingItem(null);
-      setFormData({ materialTuri: '', miqdor: '', birlik: 'kg', narx: '', isActive: true });
+      setFormData({ materialTuri: '', miqdor: '', birlik: 'kg', narx: '' });
     }
     setIsModalOpen(true);
   };
@@ -78,17 +77,6 @@ const Tannarxhisoblash = ({ open }) => {
       setCurrentPage(Math.ceil(newTannarxlar.length / itemsPerPage));
     }
     setIsModalOpen(false);
-  };
-
-  const toggleStatus = (id) => {
-    setTannarxlar(tannarxlar.map(t => {
-      if (t.id === id) {
-        const newStatus = !t.isActive;
-        toast.success(newStatus ? 'Faol' : 'Noactive');
-        return { ...t, isActive: newStatus };
-      }
-      return t;
-    }));
   };
 
   return (
@@ -127,7 +115,6 @@ const Tannarxhisoblash = ({ open }) => {
                   <th>Miqdor</th>
                   <th>Narx (so'm)</th>
                   <th>Sana</th>
-                  <th className="center-text">Holat</th>
                   <th className="right-text">Amallar</th>
                 </tr>
               </thead>
@@ -138,14 +125,6 @@ const Tannarxhisoblash = ({ open }) => {
                     <td>{item.miqdor} <span className="birlik-tag" style={{fontSize: '12px', color: '#64748b'}}>{item.birlik}</span></td>
                     <td style={{fontWeight: '600'}}>{formatNumber(item.narx)}</td>
                     <td className="gray-td">{item.sana}</td>
-                    <td>
-                      <div className="toggle-center">
-                        <label className="ios-toggle">
-                          <input type="checkbox" checked={item.isActive} onChange={() => toggleStatus(item.id)} />
-                          <span className="toggle-slider"></span>
-                        </label>
-                      </div>
-                    </td>
                     <td>
                       <div className="action-btns-flex">
                         <button className="edit-action-btn" onClick={() => handleOpenModal(item)}><Pencil size={16} /></button>

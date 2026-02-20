@@ -131,7 +131,9 @@ const Home = ({ open }) => {
                 <div className="icon-box purple-bg"><TbUsers className="icon-svg" /></div>
                 <span className="stat-label">Jami Mijozlar</span>
               </div>
-              <h2 className="stat-value">{stats.jamiMijozlar}</h2>
+              <h2 className="stat-value">{stats.jamiMijozlar}
+                 <span className="unit">ta</span>
+              </h2>
             </div>
           </div>
 

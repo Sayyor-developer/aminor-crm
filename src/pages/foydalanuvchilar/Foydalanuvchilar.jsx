@@ -1,10 +1,10 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { 
   Search, UserPlus, Pencil, Trash2, ShieldCheck, 
-  User, Phone, Send, MapPin, X, Check, AlertTriangle,
-  ChevronLeft, ChevronRight, UserCircle 
+  User, Phone, Mail, Lock, X, AlertTriangle, ChevronLeft, ChevronRight 
 } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast'; 
+import { supabase } from '../../api/supabaseClient'; 
 import './foydalanuvchilar.css';
 
 const SECTIONS = [
@@ -14,75 +14,162 @@ const SECTIONS = [
 ];
 
 const Foydalanuvchilar = ({ open }) => {
-  // Sahifa boshida bo'sh turishi uchun
   const [users, setUsers] = useState([]); 
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [loading, setLoading] = useState(false);
   const itemsPerPage = 8;
 
   const [modal, setModal] = useState({ type: null, user: null });
-  const [addFormData, setAddFormData] = useState({ name: '', phone: '+998', telegram: '', address: '', role: 'Xodim' });
-  const [editFormData, setEditFormData] = useState({ name: '', phone: '', telegram: '', address: '', role: '' });
+
+  const [addFormData, setAddFormData] = useState({ 
+    name: '', phone: '+998', email: '', password: '', address: '', role: 'admin' 
+  });
+
+  const [editFormData, setEditFormData] = useState({ 
+    name: '', phone: '', email: '', address: '', role: 'admin' 
+  });
+
   const [tempPerms, setTempPerms] = useState([]);
 
+  // 1. MA'LUMOTLARNI YUKLASH
+  const fetchUsers = useCallback(async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id, full_name, phone, email, address, role, permissions, created_at');
+      
+      if (error) throw error;
+      setUsers(data.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0)));
+    } catch (err) {
+      console.error("Xatolik:", err.message);
+      toast.error("Ma'lumot yuklanmadi");
+    } finally { setLoading(false); }
+  }, []);
+
+  useEffect(() => { fetchUsers(); }, [fetchUsers]);
+
+  // TELEFON FORMATLASH
   const handlePhoneInput = (val, isEdit = false) => {
-    const numbers = val.replace(/[^\d+]/g, '');
-    if (numbers.startsWith('+998') || numbers === '+99' || numbers === '+') {
-       if (isEdit) setEditFormData({ ...editFormData, phone: numbers.substring(0, 13) });
-       else setAddFormData({ ...addFormData, phone: numbers.substring(0, 13) });
-    }
+    const numbers = val.replace(/[^\d+]/g, '').substring(0, 13);
+    if (isEdit) setEditFormData(p => ({ ...p, phone: numbers }));
+    else setAddFormData(p => ({ ...p, phone: numbers }));
   };
 
+  // QIDIRUV
   const filteredUsers = useMemo(() => {
     return users.filter(u => 
-      u.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
-      u.phone.includes(searchTerm)
+      (u.full_name || '').toLowerCase().includes(searchTerm.toLowerCase()) || 
+      (u.phone || '').includes(searchTerm)
     );
   }, [users, searchTerm]);
 
-  const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
+  const totalPages = Math.ceil(filteredUsers.length / itemsPerPage) || 1;
   const currentUsers = filteredUsers.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
+  // MODAL OCHISH
   const openModal = (type, user = null) => {
     setModal({ type, user });
-    if (type === 'edit') setEditFormData({ ...user });
-    if (type === 'add') setAddFormData({ name: '', phone: '+998', telegram: '', address: '', role: 'Xodim' });
-    if (type === 'dostup') setTempPerms([...user.permissions]);
+    if (type === 'edit') setEditFormData({ 
+        name: user.full_name, phone: user.phone, email: user.email, 
+        address: user.address, role: user.role 
+    });
+    if (type === 'add') setAddFormData({ name: '', phone: '+998', email: '', password: '', address: '', role: 'admin' });
+    if (type === 'dostup') setTempPerms(Array.isArray(user.permissions) ? [...user.permissions] : []);
   };
 
-  const closeModal = () => { setModal({ type: null, user: null }); setTempPerms([]); };
+  const closeModal = () => { setModal({ type: null, user: null }); setLoading(false); };
 
-  const handleAddSubmit = (e) => {
-    e.preventDefault();
-    if (!addFormData.name.trim() || addFormData.phone.length < 13) {
-      toast.error("Ma'lumotlarni to'ldiring"); return;
-    }
-    const newUser = { id: Date.now(), ...addFormData, status: true, permissions: addFormData.role === 'Admin' ? SECTIONS : ['Dashboard'] };
-    setUsers([...users, newUser]);
-    closeModal();
-    toast.success("Foydalanuvchi qo'shildi!");
+  // 2. YANGI FOYDALANUVCHI QO'SHISH (DUPLICATE HATOSIGA QARSHI)
+  const handleAddSubmit = async (e) => {
+    if (e) e.preventDefault();
+    if (!addFormData.email || !addFormData.password) return toast.error("Email va parol majburiy!");
+
+    setLoading(true);
+    try {
+        // Auth-dan o'tkazamiz
+        const { data: authData, error: authError } = await supabase.auth.signUp({
+            email: addFormData.email,
+            password: addFormData.password,
+        });
+
+        if (authError) throw authError;
+
+        if (authData?.user) {
+            // INSERT o'rniga UPSERT ishlatamiz (Duplicate key oldini oladi)
+            const { error: profError } = await supabase.from('profiles').upsert([
+                {
+                    id: authData.user.id,
+                    full_name: addFormData.name,
+                    phone: addFormData.phone,
+                    email: addFormData.email,
+                    address: addFormData.address,
+                    role: 'admin',
+                    permissions: SECTIONS 
+                }
+            ], { onConflict: 'id' });
+
+            if (profError) throw profError;
+            
+            toast.success("Muvaffaqiyatli qo'shildi!");
+            await fetchUsers();
+            closeModal();
+        }
+    } catch (err) {
+        toast.error(err.message);
+    } finally { setLoading(false); }
   };
 
-  const handleEditSave = () => {
-    setUsers(users.map(u => u.id === modal.user.id ? { ...u, ...editFormData } : u));
-    closeModal(); toast.success("O'zgarishlar saqlandi!");
+  // 3. TAHRIRLASHNI SAQLASH
+  const handleEditSave = async () => {
+    setLoading(true);
+    try {
+        const { error } = await supabase.from('profiles').update({
+            full_name: editFormData.name,
+            phone: editFormData.phone,
+            address: editFormData.address
+        }).eq('id', modal.user.id);
+
+        if (error) throw error;
+        toast.success("Saqlandi!");
+        await fetchUsers();
+        closeModal();
+    } catch (err) { toast.error(err.message); } 
+    finally { setLoading(false); }
   };
 
-  const handleDostupSave = () => {
-    setUsers(users.map(u => u.id === modal.user.id ? { ...u, permissions: tempPerms } : u));
-    closeModal(); toast.success("Ruxsatlar yangilandi!");
+  // 4. O'CHIRISH
+  const handleDeleteUser = async () => {
+      setLoading(true);
+      try {
+          const { error } = await supabase.from('profiles').delete().eq('id', modal.user.id);
+          if (error) throw error;
+          toast.success("O'chirildi");
+          await fetchUsers();
+          closeModal();
+      } catch (err) { toast.error(err.message); } 
+      finally { setLoading(false); }
   };
 
-  const handleDeleteConfirm = () => {
-    setUsers(users.filter(u => u.id !== modal.user.id));
-    closeModal(); toast.error("O'chirildi!");
+  // 5. RUXSATLARNI SAQLASH
+  const handleDostupSave = async () => {
+    setLoading(true);
+    try {
+        const { error } = await supabase.from('profiles').update({ permissions: tempPerms }).eq('id', modal.user.id);
+        if (error) throw error;
+        toast.success("Ruxsatlar yangilandi!");
+        await fetchUsers();
+        closeModal();
+    } catch (err) { toast.error(err.message); } 
+    finally { setLoading(false); }
   };
 
   return (
     <div className={`foydalanuvchilar-page ${open ? 'content-shifted' : 'content-collapsed'}`}>
       <Toaster position="top-right" />
       <div className="max-w-7xl">
-        <header className="page-header" style={{ justifyContent: 'space-between' }}>
+        <header className="page-header" style={{ justifyContent: 'space-between', display: 'flex', padding: '20px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
             <div className="icon-box"><User /></div>
             <h1 className="page-title">Foydalanuvchilar</h1>
@@ -96,8 +183,10 @@ const Foydalanuvchilar = ({ open }) => {
           <div className="search-section">
             <div className="search-input-box">
               <Search className="search-inner-icon" size={20} />
-              <input type="text" placeholder="Qidirish..." className="modern-search-input" value={searchTerm} onChange={e => {setSearchTerm(e.target.value); setCurrentPage(1);}} />
-              {searchTerm && <X className="clear-search" size={18} onClick={() => setSearchTerm('')} />}
+              <input 
+                type="text" placeholder="Qidirish..." className="modern-search-input" 
+                value={searchTerm} onChange={e => {setSearchTerm(e.target.value); setCurrentPage(1);}} 
+              />
             </div>
           </div>
 
@@ -105,62 +194,38 @@ const Foydalanuvchilar = ({ open }) => {
             <table className="user-table">
               <thead>
                 <tr>
-                  <th>F.I.O</th>
-                  <th>Rol</th>
-                  <th>Telefon</th>
-                  <th>Telegram</th>
-                  <th>Manzil</th>
-                  <th>Holat</th>
-                  <th className="text-right">Amallar</th>
+                  <th>F.I.O</th><th>Rol</th><th>Telefon</th><th>Email/Login</th><th>Manzil</th><th className="text-right">Amallar</th>
                 </tr>
               </thead>
               <tbody>
-                {currentUsers.length > 0 ? (
-                  currentUsers.map(user => (
-                    <tr key={user.id}>
-                      <td className="user-name-cell">{user.name}</td>
-                      <td><span className={`role-badge ${user.role === 'Admin' ? 'role-admin' : 'role-user'}`}>{user.role}</span></td>
-                      <td>{user.phone}</td>
-                      <td>{user.telegram}</td>
-                      <td>{user.address}</td>
-                      <td>
-                        <button className={`status-toggle ${user.status ? 'bg-active' : 'bg-inactive'}`} onClick={() => setUsers(users.map(u => u.id === user.id ? {...u, status: !u.status} : u))}>
-                          <div className={`toggle-circle ${user.status ? 'move-right' : 'move-left'}`} />
-                        </button>
-                      </td>
-                      <td className="action-btns">
-                        <button className="btn-icon bg-blue-light" onClick={() => openModal('dostup', user)}><ShieldCheck size={18}/></button>
-                        <button className="btn-icon bg-orange-light" onClick={() => openModal('edit', user)}><Pencil size={18}/></button>
-                        <button className="btn-icon bg-red-light" onClick={() => openModal('delete', user)}><Trash2 size={18}/></button>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan="7" style={{ textAlign: 'center', padding: '50px', color: '#94a3b8' }}>Ma'lumot yo'q. Yangi foydalanuvchi qo'shing.</td>
+                {loading && users.length === 0 ? (
+                    <tr><td colSpan="6" style={{textAlign: 'center', padding: '20px'}}>Yuklanmoqda...</td></tr>
+                ) : currentUsers.map(user => (
+                  <tr key={user.id}>
+                    <td className="user-name-cell">{user.full_name || '—'}</td>
+                    <td><span className="role-badge role-admin">{user.role || 'admin'}</span></td>
+                    <td>{user.phone || '—'}</td>
+                    <td>{user.email || '—'}</td>
+                    <td>{user.address || '—'}</td>
+                    <td className="action-btns">
+                      <button className="btn-icon bg-blue-light" onClick={() => openModal('dostup', user)}><ShieldCheck size={18}/></button>
+                      <button className="btn-icon bg-orange-light" onClick={() => openModal('edit', user)}><Pencil size={18}/></button>
+                      <button className="btn-icon bg-red-light" onClick={() => openModal('delete', user)}><Trash2 size={18}/></button>
+                    </td>
                   </tr>
-                )}
+                ))}
               </tbody>
             </table>
           </div>
 
-          {totalPages > 1 && (
-            <div className="pagination-footer">
-              <div className="pagination-right">
-                <button className="pagi-ctrl" onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))} disabled={currentPage === 1}><ChevronLeft size={18}/></button>
-                <div className="pagi-pages">
-                  {[...Array(totalPages)].map((_, i) => (
-                    <button key={i+1} className={`pagi-item ${currentPage === i + 1 ? 'active' : ''}`} onClick={() => setCurrentPage(i + 1)}>{i + 1}</button>
-                  ))}
-                </div>
-                <button className="pagi-ctrl" onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))} disabled={currentPage === totalPages}><ChevronRight size={18}/></button>
-              </div>
-            </div>
-          )}
+          <div className="pagination-footer" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '15px', padding: '20px' }}>
+            <button className="pagi-btn" onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1}><ChevronLeft size={20} /></button>
+            <span style={{ fontWeight: '500' }}>Sahifa {currentPage} / {totalPages}</span>
+            <button className="pagi-btn" onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages}><ChevronRight size={20} /></button>
+          </div>
         </div>
       </div>
 
-      {/* MODAL TIZIMI - SIZNING CSS STILINGIZDA */}
       {modal.type && (
         <div className="modal-overlay" onClick={closeModal}>
           <div className="modal-content" onClick={e => e.stopPropagation()}>
@@ -173,76 +238,36 @@ const Foydalanuvchilar = ({ open }) => {
 
             <div className="modal-body">
               {(modal.type === 'add' || modal.type === 'edit') && (
-                <div className="edit-form-stack">
-                  <div className="f-input-group">
-                    <User className="f-input-icon" size={18} />
-                    <input 
-                      className="f-form-input custom-p" 
-                      placeholder="F.I.O" 
-                      value={modal.type === 'add' ? addFormData.name : editFormData.name} 
-                      onChange={e => modal.type === 'add' ? setAddFormData({...addFormData, name: e.target.value}) : setEditFormData({...editFormData, name: e.target.value})} 
-                    />
-                  </div>
+                <form id="userForm" className="edit-form-stack" onSubmit={modal.type === 'add' ? handleAddSubmit : (e) => e.preventDefault()}>
+                   <div className="f-input-group"><User className="f-input-icon" size={18} /><input className="f-form-input custom-p" placeholder="F.I.O" value={modal.type === 'add' ? addFormData.name : editFormData.name} onChange={e => modal.type === 'add' ? setAddFormData({...addFormData, name: e.target.value}) : setEditFormData({...editFormData, name: e.target.value})} required /></div>
+                   <div className="f-input-group"><Phone className="f-input-icon" size={18} /><input className="f-form-input custom-p" placeholder="+998" value={modal.type === 'add' ? addFormData.phone : editFormData.phone} onChange={e => handlePhoneInput(e.target.value, modal.type === 'edit')} required /></div>
+                   <div className="f-input-group"><Mail className="f-input-icon" size={18} /><input type="email" className="f-form-input custom-p" placeholder="Email" value={modal.type === 'add' ? addFormData.email : editFormData.email} onChange={e => modal.type === 'add' ? setAddFormData({...addFormData, email: e.target.value}) : setEditFormData({...editFormData, email: e.target.value})} disabled={modal.type === 'edit'} required /></div>
+                   {modal.type === 'add' && <div className="f-input-group"><Lock className="f-input-icon" size={18} /><input type="password" placeholder="Parol" className="f-form-input custom-p" value={addFormData.password} onChange={e => setAddFormData({...addFormData, password: e.target.value})} required /></div>}
+                </form>
+              )}
 
-                  <div className="f-input-group">
-                    <Phone className="f-input-icon" size={18} />
-                    <input 
-                      className="f-form-input custom-p" 
-                      placeholder="+998" 
-                      value={modal.type === 'add' ? addFormData.phone : editFormData.phone} 
-                      onChange={e => handlePhoneInput(e.target.value, modal.type === 'edit')} 
-                    />
-                  </div>
-
-                  <div className="f-input-group">
-                    <UserCircle className="f-input-icon" size={18} />
-                    <select 
-                      className="f-form-input custom-p"
-                      value={modal.type === 'add' ? addFormData.role : editFormData.role}
-                      onChange={e => modal.type === 'add' ? setAddFormData({...addFormData, role: e.target.value}) : setEditFormData({...editFormData, role: e.target.value})}
-                    >
-                      <option value="Xodim">Xodim (Foydalanuvchi)</option>
-                      <option value="Admin">Admin</option>
-                    </select>
-                  </div>
-
-                  <div className="f-input-group">
-                    <Send className="f-input-icon" size={18} />
-                    <input 
-                      className="f-form-input custom-p" 
-                      placeholder="Telegram" 
-                      value={modal.type === 'add' ? addFormData.telegram : editFormData.telegram} 
-                      onChange={e => modal.type === 'add' ? setAddFormData({...addFormData, telegram: e.target.value}) : setEditFormData({...editFormData, telegram: e.target.value})} 
-                    />
-                  </div>
-
-                  <div className="f-input-group">
-                    <MapPin className="f-input-icon" size={18} />
-                    <input 
-                      className="f-form-input custom-p" 
-                      placeholder="Manzil" 
-                      value={modal.type === 'add' ? addFormData.address : editFormData.address} 
-                      onChange={e => modal.type === 'add' ? setAddFormData({...addFormData, address: e.target.value}) : setEditFormData({...editFormData, address: e.target.value})} 
-                    />
-                  </div>
+              {modal.type === 'delete' && (
+                <div style={{ textAlign: 'center', padding: '20px' }}>
+                  <AlertTriangle size={48} color="#A12323" />
+                  <p>Haqiqatan ham <b>{modal.user?.full_name}</b>ni o'chirmoqchimisiz?</p>
                 </div>
               )}
 
               {modal.type === 'dostup' && (
-                <div className="perm-list">
+                <div className="permissions-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', padding: '10px' }}>
                   {SECTIONS.map(sec => (
-                    <div key={sec} className={`perm-item ${tempPerms.includes(sec) ? 'active' : ''}`} onClick={() => setTempPerms(prev => prev.includes(sec) ? prev.filter(p => p !== sec) : [...prev, sec])}>
-                      <span>{sec}</span>
-                      <div className={`check-box ${tempPerms.includes(sec) ? 'checked' : ''}`}>{tempPerms.includes(sec) && <Check size={12}/>}</div>
-                    </div>
+                    <label key={sec} style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                      <input 
+                        type="checkbox" 
+                        checked={tempPerms.includes(sec)} 
+                        onChange={e => {
+                          if (e.target.checked) setTempPerms([...tempPerms, sec]);
+                          else setTempPerms(tempPerms.filter(p => p !== sec));
+                        }}
+                      />
+                      {sec}
+                    </label>
                   ))}
-                </div>
-              )}
-
-              {modal.type === 'delete' && (
-                <div className="delete-box">
-                  <AlertTriangle size={48} color="#A12323" style={{ marginBottom: '10px' }} />
-                  <p>Foydalanuvchini o'chirishni tasdiqlaysizmi?</p>
                 </div>
               )}
             </div>
@@ -251,9 +276,15 @@ const Foydalanuvchilar = ({ open }) => {
               <button className="btn-cancel-modal" onClick={closeModal}>Bekor qilish</button>
               <button 
                 className="btn-save-modal" 
-                onClick={modal.type === 'delete' ? handleDeleteConfirm : (modal.type === 'dostup' ? handleDostupSave : (modal.type === 'add' ? handleAddSubmit : handleEditSave))}
+                disabled={loading}
+                onClick={() => {
+                  if (modal.type === 'add') handleAddSubmit();
+                  else if (modal.type === 'edit') handleEditSave();
+                  else if (modal.type === 'dostup') handleDostupSave();
+                  else if (modal.type === 'delete') handleDeleteUser();
+                }}
               >
-                {modal.type === 'delete' ? "O'chirish" : "Saqlash"}
+                {loading ? "Bajarilmoqda..." : "Tasdiqlash"}
               </button>
             </div>
           </div>

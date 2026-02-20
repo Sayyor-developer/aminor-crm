@@ -4,53 +4,56 @@ import {
     Box, TextField, Button, Typography, Paper,
     InputAdornment, IconButton
 } from '@mui/material';
-import { Phone, Lock, Visibility, VisibilityOff } from '@mui/icons-material';
+
+import { supabase } from '../../api/supabaseClient'; 
+import { useNavigate } from 'react-router-dom';
+import { Lock, Visibility, VisibilityOff, Email } from '@mui/icons-material';
 import { toast } from 'react-toastify';
 import './login.css';
 
 const Login = () => {
-    const [phone, setPhone] = useState('+998');
+    const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    // Ko'zcha holati uchun yangi state
+    const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
+    const navigate = useNavigate();
 
-    const handlePhoneChange = (e) => {
-        const value = e.target.value;
-        if (!value.startsWith('+998')) {
-            setPhone('+998');
-            return;
-        }
-        const cleanValue = value.replace(/[^\d+]/g, '');
-        if (cleanValue.length <= 13) {
-            setPhone(cleanValue);
-        }
-    };
-
-    // Ko'zcha bosilganda holatni o'zgartirish
     const handleClickShowPassword = () => setShowPassword(!showPassword);
 
-    const handleLogin = (e) => {
+    const handleLogin = async (e) => {
         e.preventDefault();
+        setLoading(true);
 
-        if (phone.length !== 13) {
-            toast.error("Telefon raqami noto'g'ri kiritilgan!");
-            return;
-        }
+        try {
+            // 1. Supabase orqali kirishga urinish
+            const { data, error } = await supabase.auth.signInWithPassword({
+                email: email.trim(), // Probellarni olib tashlaydi
+                password: password,
+            });
 
-        if (!password) {
-            toast.warning("Iltimos, parolni kiriting!");
-            return;
-        }
+            // 2. Agar Supabase xato qaytarsa
+            if (error) {
+                // Xatoni aniqroq ko'rsatish
+                if (error.message === "Invalid login credentials") {
+                    throw new Error("Email yoki parol noto'g'ri!");
+                } else if (error.message === "Email not confirmed") {
+                    throw new Error("Email tasdiqlanmagan! Supabase-dan 'Confirm email'ni o'chiring.");
+                } else {
+                    throw error;
+                }
+            }
 
-        if (phone === "+998979359707" && password === "12345") {
-            sessionStorage.setItem("token", "true");
-            toast.success("Xush kelibsiz!");
+            // 3. Muvaffaqiyatli kirish
+            if (data.session) {
+                toast.success("Xush kelibsiz!");
+                navigate('/home');
+            }
 
-            setTimeout(() => {
-                window.location.replace("/");
-            }, 500);
-        } else {
-            toast.error("Telefon raqami yoki parol xato!");
+        } catch (error) {
+            console.error("Login xatosi:", error.message);
+            toast.error(error.message);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -67,56 +70,40 @@ const Login = () => {
                 <form className="login-form" onSubmit={handleLogin}>
                     <Typography variant="h5" className="form-title">Kirish</Typography>
 
-                    <Box className="input-group">
+                    <Box className="input-group" sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                         <TextField
                             fullWidth
-                            label="Telefon raqami"
                             variant="outlined"
-                            value={phone}
-                            onChange={handlePhoneChange}
-                            sx={{
-                                mb: 2,
-                                '& label.Mui-focused': { color: 'var(--primary-color)' },
-                                '& .MuiOutlinedInput-root': {
-                                    '&.Mui-focused fieldset': { borderColor: 'var(--primary-color)' },
-                                },
-                            }}
+                            type="email"
+                            label="Email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            required
                             InputProps={{
                                 startAdornment: (
                                     <InputAdornment position="start">
-                                        <Phone />
+                                        <Email />
                                     </InputAdornment>
                                 ),
                             }}
                         />
                         <TextField
                             fullWidth
-                            label="Parol"
-                            // showPassword holatiga qarab type o'zgaradi
-                            type={showPassword ? 'text' : 'password'}
                             variant="outlined"
+                            type={showPassword ? "text" : "password"}
+                            label="Parol"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
-                            sx={{
-                                '& label.Mui-focused': { color: 'var(--primary-color)' },
-                                '& .MuiOutlinedInput-root': {
-                                    '&.Mui-focused fieldset': { borderColor: 'var(--primary-color)' },
-                                },
-                            }}
+                            required
                             InputProps={{
                                 startAdornment: (
                                     <InputAdornment position="start">
                                         <Lock />
                                     </InputAdornment>
                                 ),
-                                // O'ng tomondagi ko'zcha qismi
                                 endAdornment: (
                                     <InputAdornment position="end">
-                                        <IconButton
-                                            aria-label="toggle password visibility"
-                                            onClick={handleClickShowPassword}
-                                            edge="end"
-                                        >
+                                        <IconButton onClick={handleClickShowPassword} edge="end">
                                             {showPassword ? <VisibilityOff /> : <Visibility />}
                                         </IconButton>
                                     </InputAdornment>
@@ -130,10 +117,14 @@ const Login = () => {
                         variant="contained"
                         size="large"
                         type="submit"
-                        className="submit-btn"
-                        sx={{ mt: 3, bgcolor: 'var(--primary-color)', '&:hover': { bgcolor: 'var(--primary-hover-color)' } }}
+                        disabled={loading}
+                        sx={{
+                            mt: 3, py: 1.5, fontWeight: 'bold',
+                            bgcolor: '#9f2728',
+                            '&:hover': { bgcolor: '#751313' }
+                        }}
                     >
-                        Kirish
+                        {loading ? 'Kirilmoqda...' : 'Tizimga kirish'}
                     </Button>
                 </form>
             </Paper>

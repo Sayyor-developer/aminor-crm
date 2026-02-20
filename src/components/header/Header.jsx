@@ -4,14 +4,32 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline'; // Savol belgisi uchun
 import { HeaderContainer } from './Header.styles';
 import './header.css';
+import { useNavigate } from 'react-router-dom';
+import { supabase } from '../../api/supabaseClient';
+import { toast } from 'react-toastify';
 
 const Header = ({ open, title }) => {
   const [showModal, setShowModal] = useState(false);
 
-  const handleLogout = () => {
-    sessionStorage.removeItem("token");
-    window.location.replace('/login');
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      
+      toast.success("Tizimdan chiqildi", {
+        position: "top-right"
+      });
+      navigate('/login');
+    } catch (error) {
+      toast.error("Chiqishda xatolik: " + error.message, {
+        position: "top-right"
+      });
+    }
   };
+
+
 
   return (
     <>
@@ -49,7 +67,7 @@ const Header = ({ open, title }) => {
               </button>
               <button 
                 className="logout-btn-confirm" 
-                onClick={handleLogout}
+               onClick={handleLogout} 
               >
                 Ha, chiqish
               </button>

@@ -269,8 +269,8 @@ const Mijozlar = ({ open }) => {
                     <td className="text-center actions-td">
                       <div className="flex-center">
                       {/*   <button className="btn-blue btn-icon" onClick={() => { setTanlangan(m); setSotishModalOchiq(true); }}><ShoppingCart size={14} /></button> */}
-                        <button className="btn-blue btn-icon" onClick={() => { setTanlangan(m); setTahrirlashModalOchiq(true); }}><Edit size={14} /></button>
-                        <button className="btn-blue btn-red btn-icon" onClick={() => { setTanlangan(m); setOchirishModalOchiq(true); }}><Trash2 size={14} /></button>
+                        <button className="m-btn-blue m-btn-icon" onClick={() => { setTanlangan(m); setTahrirlashModalOchiq(true); }}><Edit size={14} /></button>
+                        <button className="m-btn-blue m-btn-red m-btn-icon" onClick={() => { setTanlangan(m); setOchirishModalOchiq(true); }}><Trash2 size={14} /></button>
                       </div>
                     </td>
                   </tr>

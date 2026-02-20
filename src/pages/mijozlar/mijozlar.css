@@ -116,7 +116,7 @@
 }
 
 /* Tugmalar */
-.btn-blue {
+.m-btn-blue {
     background-color: var(--primary-color);
     color: white;
     padding: 0.5rem 1.25rem;
@@ -126,23 +126,22 @@
     display: flex;
     align-items: center;
     gap: var(--gap-10);
-    width: 100%;
-    font-size: 0.875rem;
+    font-size: var(--font-size-25);
 }
 
-.btn-blue:hover {
+.m-btn-blue:hover {
     background-color: var(--primary-hover-color);
 }
 
-.btn-red {
+.m-btn-red {
     background-color: var(--primary-color);
 }
 
-.btn-red:hover {
+.m-btn-red:hover {
     background-color: var(--primary-hover-color);
 }
 
-.btn-icon {
+.m-btn-icon {
     padding: 5px;
 }
 
@@ -1050,7 +1049,7 @@
     background: white;
     cursor: pointer;
     color: #718096;
-    font-weight: 600;
+    font-weight: var(--font-weight-600);
 }
 
 .btn-save {

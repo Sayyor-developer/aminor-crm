@@ -211,3 +211,7 @@ a {
   100% { transform: rotate(360deg); }
 }
 
+
+.css-1o9s3wi-MuiInputBase-input-MuiOutlinedInput-input:-webkit-autofill{
+    background-color: var(--white) !important;
+}
