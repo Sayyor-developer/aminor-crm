@@ -1,10 +1,12 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import { 
   Search, UserPlus, Pencil, Trash2, ShieldCheck, 
-  User, Phone, Mail, Lock, X, AlertTriangle, ChevronLeft, ChevronRight 
+  User, Phone, Mail, Lock, X, AlertTriangle, ChevronLeft, ChevronRight,
+  Eye, EyeOff, MapPin, Shield
 } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast'; 
-import { supabase } from '../../api/supabaseClient'; 
+// MUHIM: Bu yerda supabaseAdmin ham bo'lishi kerak
+import { supabase, supabaseAdmin } from '../../api/supabaseClient'; 
 import './foydalanuvchilar.css';
 
 const SECTIONS = [
@@ -18,6 +20,7 @@ const Foydalanuvchilar = ({ open }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false); // Ko'zcha uchun state
   const itemsPerPage = 8;
 
   const [modal, setModal] = useState({ type: null, user: null });
@@ -43,7 +46,6 @@ const Foydalanuvchilar = ({ open }) => {
       if (error) throw error;
       setUsers(data.sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0)));
     } catch (err) {
-      console.error("Xatolik:", err.message);
       toast.error("Ma'lumot yuklanmadi");
     } finally { setLoading(false); }
   }, []);
@@ -71,6 +73,7 @@ const Foydalanuvchilar = ({ open }) => {
   // MODAL OCHISH
   const openModal = (type, user = null) => {
     setModal({ type, user });
+    setShowPassword(false); // Modal ochilganda parol yopiq bo'lsin
     if (type === 'edit') setEditFormData({ 
         name: user.full_name, phone: user.phone, email: user.email, 
         address: user.address, role: user.role 
@@ -81,15 +84,15 @@ const Foydalanuvchilar = ({ open }) => {
 
   const closeModal = () => { setModal({ type: null, user: null }); setLoading(false); };
 
-  // 2. YANGI FOYDALANUVCHI QO'SHISH (DUPLICATE HATOSIGA QARSHI)
+  // 2. YANGI FOYDALANUVCHI QO'SHISH (Sessiya almashmasligi uchun supabaseAdmin ishlatildi)
   const handleAddSubmit = async (e) => {
     if (e) e.preventDefault();
     if (!addFormData.email || !addFormData.password) return toast.error("Email va parol majburiy!");
 
     setLoading(true);
     try {
-        // Auth-dan o'tkazamiz
-        const { data: authData, error: authError } = await supabase.auth.signUp({
+        // MUHIM: Bu yerda supabaseAdmin ishlatamiz, shunda seni profilingdan chiqarib yubormaydi
+        const { data: authData, error: authError } = await supabaseAdmin.auth.signUp({
             email: addFormData.email,
             password: addFormData.password,
         });
@@ -97,7 +100,6 @@ const Foydalanuvchilar = ({ open }) => {
         if (authError) throw authError;
 
         if (authData?.user) {
-            // INSERT o'rniga UPSERT ishlatamiz (Duplicate key oldini oladi)
             const { error: profError } = await supabase.from('profiles').upsert([
                 {
                     id: authData.user.id,
@@ -179,6 +181,7 @@ const Foydalanuvchilar = ({ open }) => {
           </button>
         </header>
 
+        {/* JADVAL QISMI */}
         <div className="user-card table-section-card">
           <div className="search-section">
             <div className="search-input-box">
@@ -226,6 +229,7 @@ const Foydalanuvchilar = ({ open }) => {
         </div>
       </div>
 
+      {/* MODALLAR */}
       {modal.type && (
         <div className="modal-overlay" onClick={closeModal}>
           <div className="modal-content" onClick={e => e.stopPropagation()}>
@@ -239,10 +243,46 @@ const Foydalanuvchilar = ({ open }) => {
             <div className="modal-body">
               {(modal.type === 'add' || modal.type === 'edit') && (
                 <form id="userForm" className="edit-form-stack" onSubmit={modal.type === 'add' ? handleAddSubmit : (e) => e.preventDefault()}>
+                   
+                   {/* ROL QISMI (ReadOnly) */}
+                   <div className="f-input-group" style={{ backgroundColor: '#f9f9f9', opacity: 0.8 }}>
+                     <Shield className="f-input-icon" size={18} />
+                     <input className="f-form-input custom-p" value="Rol: admin" disabled style={{ border: 'none', cursor: 'not-allowed', color: '#666' }} />
+                   </div>
+
+                   {/* FIO */}
                    <div className="f-input-group"><User className="f-input-icon" size={18} /><input className="f-form-input custom-p" placeholder="F.I.O" value={modal.type === 'add' ? addFormData.name : editFormData.name} onChange={e => modal.type === 'add' ? setAddFormData({...addFormData, name: e.target.value}) : setEditFormData({...editFormData, name: e.target.value})} required /></div>
+                   
+                   {/* TELEFON */}
                    <div className="f-input-group"><Phone className="f-input-icon" size={18} /><input className="f-form-input custom-p" placeholder="+998" value={modal.type === 'add' ? addFormData.phone : editFormData.phone} onChange={e => handlePhoneInput(e.target.value, modal.type === 'edit')} required /></div>
+                   
+                   {/* EMAIL */}
                    <div className="f-input-group"><Mail className="f-input-icon" size={18} /><input type="email" className="f-form-input custom-p" placeholder="Email" value={modal.type === 'add' ? addFormData.email : editFormData.email} onChange={e => modal.type === 'add' ? setAddFormData({...addFormData, email: e.target.value}) : setEditFormData({...editFormData, email: e.target.value})} disabled={modal.type === 'edit'} required /></div>
-                   {modal.type === 'add' && <div className="f-input-group"><Lock className="f-input-icon" size={18} /><input type="password" placeholder="Parol" className="f-form-input custom-p" value={addFormData.password} onChange={e => setAddFormData({...addFormData, password: e.target.value})} required /></div>}
+                   
+                   {/* MANZIL (Faqat qo'shishda) */}
+                   {modal.type === 'add' && <div className="f-input-group"><MapPin className="f-input-icon" size={18} /><input className="f-form-input custom-p" placeholder="Manzil" value={addFormData.address} onChange={e => setAddFormData({...addFormData, address: e.target.value})} /></div>}
+
+                   {/* PAROL (KO'ZCHA BILAN) */}
+                   {modal.type === 'add' && (
+                    <div className="f-input-group" style={{ position: 'relative' }}>
+                      <Lock className="f-input-icon" size={18} />
+                      <input 
+                        type={showPassword ? "text" : "password"} 
+                        placeholder="Parol" 
+                        className="f-form-input custom-p" 
+                        value={addFormData.password} 
+                        onChange={e => setAddFormData({...addFormData, password: e.target.value})} 
+                        required 
+                        style={{ paddingRight: '40px' }}
+                      />
+                      <div 
+                        onClick={() => setShowPassword(!showPassword)} 
+                        style={{ position: 'absolute', right: '12px', cursor: 'pointer', color: '#666', top: '50%', transform: 'translateY(-50%)', display: 'flex', alignItems: 'center' }}
+                      >
+                        {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                      </div>
+                    </div>
+                   )}
                 </form>
               )}
 

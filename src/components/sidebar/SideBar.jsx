@@ -9,10 +9,32 @@ import { GiChickenOven } from "react-icons/gi";
 import { IoMdPerson } from "react-icons/io";
 import { RiMenu2Fill } from "react-icons/ri";
 
-const SideBar = ({ open, setOpen, userPermissions = [] }) => {
+const SideBar = ({ open, setOpen, userPermissions = [], userRole = '' }) => {
   
-  // Ruxsatni tekshirish funksiyasi
-  const canSee = (name) => userPermissions.includes(name);
+  const canSee = (name) => {
+    // 1. Roli 'director' yoki 'direktor' bo'lsa, hammasini ko'rsat
+    const normalizedRole = userRole?.toString().toLowerCase().trim();
+    if (normalizedRole === 'direktor' || normalizedRole === 'director') {
+      return true;
+    }
+
+    // 2. Adminlar uchun ruxsatnomalar
+    if (!userPermissions) return false;
+
+    if (Array.isArray(userPermissions)) {
+      return userPermissions.includes(name);
+    }
+
+    if (typeof userPermissions === 'object') {
+      // Sening bazangda ruxsatlar kichik harfda ("moliya", "dashboard"), 
+      // shuning uchun .toLowerCase() juda muhim
+      return userPermissions[name] === true || 
+             userPermissions[name.toLowerCase()] === true || 
+             userPermissions[name.replace(/\s+/g, '').toLowerCase()] === true;
+    }
+
+    return false;
+  };
 
   return (
     <div className={`sidebar ${open ? 'open' : 'closed'}`} >

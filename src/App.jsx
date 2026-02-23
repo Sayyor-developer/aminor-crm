@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Route, Routes, useLocation, Navigate } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -25,24 +25,26 @@ import Login from './pages/login/Login';
 function App() {
   const [open, setOpen] = useState(true);
   const [session, setSession] = useState(null);
-  const [userData, setUserData] = useState(null); // Ruxsatnomalar uchun
+  const [userData, setUserData] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [pageLoading, setPageLoading] = useState(false);
   const location = useLocation();
 
-  // Foydalanuvchi profilini yuklash
-  const fetchUserProfile = async (userId) => {
+  const fetchUserProfile = useCallback(async (userId) => {
     try {
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', userId)
         .single();
-      if (!error) setUserData(data);
+      
+      if (!error && data) {
+        setUserData(data);
+      }
     } catch (err) {
       console.error("Profil yuklashda xato:", err);
     }
-  };
+  }, []);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -59,24 +61,41 @@ function App() {
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [fetchUserProfile]);
 
   useEffect(() => {
-    if (session) {
+    if (session && userData) {
       setPageLoading(true);
       const timer = setTimeout(() => setPageLoading(false), 600);
       return () => clearTimeout(timer);
     }
-  }, [location.pathname, session]);
+  }, [location.pathname, session, userData]);
 
-  if (authLoading) return <Loading />;
+  if (authLoading || (session && !userData)) return <Loading />;
 
-  // Ruxsatni tekshirish funksiyasi
   const hasAccess = (sectionName) => {
     if (!userData) return false;
-    // Agar direktor bo'lsa hamma joyga kiradi (yoki role bo'yicha tekshiring)
-    if (userData.role === 'direktor') return true; 
-    return userData.permissions?.includes(sectionName);
+
+    // MUHIM: Bazada 'director' deb yozilgan, shuning uchun ikkala variantni ham tekshiramiz
+    const role = userData.role ? userData.role.toLowerCase().trim() : '';
+    if (role === 'direktor' || role === 'director') {
+      return true; 
+    }
+
+    const perms = userData.permissions;
+    if (!perms) return false;
+
+    if (Array.isArray(perms)) {
+      return perms.includes(sectionName);
+    }
+    
+    if (typeof perms === 'object' && perms !== null) {
+      return perms[sectionName] === true || 
+             perms[sectionName.toLowerCase()] === true ||
+             perms[sectionName.replace(/\s+/g, '').toLowerCase()] === true;
+    }
+
+    return false;
   };
 
   const pageTitles = {
@@ -103,7 +122,12 @@ function App() {
 
         {session && userData && (
           <>
-            <SideBar open={open} setOpen={setOpen} userPermissions={userData.permissions || []} />
+            <SideBar 
+              open={open} 
+              setOpen={setOpen} 
+              userPermissions={userData?.permissions || []} 
+              userRole={userData?.role || ''} 
+            />
             <Header open={open} title={getTitle()} />
           </>
         )}
@@ -118,16 +142,16 @@ function App() {
 
               {session && userData ? (
                 <>
-                  <Route path="/home" element={hasAccess('Dashboard') ? <Home open={open} /> : <Navigate to="/login" />} />
-                  <Route path="/kolbasamaxsulotlar" element={hasAccess('Kolbasa va Maxsulotlar') ? <Kolbasamaxsulotlar open={open} /> : <Navigate to="/home" />} />
-                  <Route path="/mijozlar" element={hasAccess('Mijozlar Bazasi') ? <Mijozlar open={open} /> : <Navigate to="/home" />} />
-                  <Route path="/mijozlar/:id" element={hasAccess('Mijozlar Bazasi') ? <MijozProfil open={open} /> : <Navigate to="/home" />} />
-                  <Route path="/masalliqlar" element={hasAccess('Masalliqlar') ? <Masalliqlar open={open} /> : <Navigate to="/home" />} />
-                  <Route path="/tannarxhisoblash" element={hasAccess('Tannarx hisoblash') ? <Tannarxhisoblash open={open} /> : <Navigate to="/home" />} />
-                  <Route path="/moliya" element={hasAccess('Moliya') ? <Moliya open={open} /> : <Navigate to="/home" />} />
-                  <Route path="/tovuqchiqim" element={hasAccess('Tovuq Chiqimlari') ? <Tovuqchiqim open={open} /> : <Navigate to="/home" />} />
-                  <Route path="/foydalanuvchilar" element={hasAccess('Foydalanuvchilar') ? <Foydalanuvchilar open={open} /> : <Navigate to="/home" />} />
-                  <Route path="/direktor" element={hasAccess('Direktor') ? <Direktor open={open} /> : <Navigate to="/home" />} />
+                  <Route path="/home" element={hasAccess('Dashboard') ? <Home open={open} /> : <Navigate to="/login" replace />} />
+                  <Route path="/kolbasamaxsulotlar" element={hasAccess('Kolbasa va Maxsulotlar') ? <Kolbasamaxsulotlar open={open} /> : <Navigate to="/home" replace />} />
+                  <Route path="/mijozlar" element={hasAccess('Mijozlar Bazasi') ? <Mijozlar open={open} /> : <Navigate to="/home" replace />} />
+                  <Route path="/mijozlar/:id" element={hasAccess('Mijozlar Bazasi') ? <MijozProfil open={open} /> : <Navigate to="/home" replace />} />
+                  <Route path="/masalliqlar" element={hasAccess('Masalliqlar') ? <Masalliqlar open={open} /> : <Navigate to="/home" replace />} />
+                  <Route path="/tannarxhisoblash" element={hasAccess('Tannarx hisoblash') ? <Tannarxhisoblash open={open} /> : <Navigate to="/home" replace />} />
+                  <Route path="/moliya" element={hasAccess('Moliya') ? <Moliya open={open} /> : <Navigate to="/home" replace />} />
+                  <Route path="/tovuqchiqim" element={hasAccess('Tovuq Chiqimlari') ? <Tovuqchiqim open={open} /> : <Navigate to="/home" replace />} />
+                  <Route path="/foydalanuvchilar" element={hasAccess('Foydalanuvchilar') ? <Foydalanuvchilar open={open} /> : <Navigate to="/home" replace />} />
+                  <Route path="/direktor" element={hasAccess('Direktor') ? <Direktor open={open} /> : <Navigate to="/home" replace />} />
                   <Route path="*" element={<Navigate to="/home" replace />} />
                 </>
               ) : (

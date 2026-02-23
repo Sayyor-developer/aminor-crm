@@ -41,7 +41,7 @@ const Header = ({ open, title }) => {
           <div className="account-section" onClick={() => setShowModal(true)}>
             <div className="user-info">
               <AccountCircleIcon className="user-icon" />
-              <span className="user-name">Account</span>
+              <span className="user-name">Sign out</span>
             </div>
             <LogoutIcon className="logout-icon" />
           </div>

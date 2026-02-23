@@ -734,6 +734,93 @@
     gap: var(--gap-10);
 }
 
+/* Pagination Konteyner */
+.pagination-container {
+    display: flex;
+    justify-content: flex-end;
+    /* O'ng burchakka surish */
+    align-items: center;
+    gap: 15px;
+    margin-top: 15px;
+    padding: 10px 0;
+}
+
+.pagination-info {
+    font-size: var(--font-size-12);
+    color: #666;
+    font-weight: var(--font-weight-500);
+}
+
+.pagination-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #f8f9fa;
+    padding: 4px 8px;
+    border-radius: 50px;
+    /* Oval shakl */
+    border: 1px solid #e0e0e0;
+}
+
+/* Navigatsiya tugmalari (< va >) */
+.pag-nav-btn {
+    background: white;
+    border: 1px solid #ddd;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: #333;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.pag-nav-btn:hover:not(:disabled) {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+    transform: scale(1.1);
+}
+
+.pag-nav-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    background: #f0f0f0;
+}
+
+/* Raqam turadigan o'rta qism */
+.pag-current-box {
+    min-width: 35px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.pag-number-display {
+    font-weight: var(--font-weight-700);
+    font-size: var(--font-size-16);
+    color: var(--primary-color);
+    animation: fadeIn 0.3s ease;
+    /* Raqam o'zgarganda effekt */
+}
+
+/* Raqam almashganda kichik animatsiya */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(5px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 .tab-left button.active {
     color: var(--primary-color);
     border-bottom: 2px solid var(--primary-color);
@@ -860,27 +947,33 @@
 
 @media (max-width: 1100px) {
     .profil-grid-wrapper {
-        grid-template-columns: 1fr; /* Ustunlarni bitta qilish */
+        grid-template-columns: 1fr;
+        /* Ustunlarni bitta qilish */
         gap: 20px;
         padding: 10px;
     }
+
     .profil-aside-card {
         width: 100%;
         max-width: 100%;
     }
+
     .inner-card {
         position: static;
-        margin: 0 auto; /* Kartani o'rtaga olish */
+        margin: 0 auto;
+        /* Kartani o'rtaga olish */
     }
 }
 
 @media (max-width: 480px) {
+
     /* Asosiy konteynerni o'rtalash */
     .mijoz-profil-page {
         padding: 10px;
         display: flex;
         flex-direction: column;
-        align-items: center; /* Hamma narsani o'rtaga tekislaydi */
+        align-items: center;
+        /* Hamma narsani o'rtaga tekislaydi */
     }
 
     .profil-main-content {
@@ -893,11 +986,14 @@
     /* Karta ko'rinishidagi qismlar */
     .inner-card,
     .history-table-container {
-        width: 100% !important; /* 80% emas, 100% qilib, padding bilan chetidan joy tashlaymiz */
-        max-width: 400px; /* Haddan tashqari kengayib ketmasligi uchun */
+        width: 100% !important;
+        /* 80% emas, 100% qilib, padding bilan chetidan joy tashlaymiz */
+        max-width: 400px;
+        /* Haddan tashqari kengayib ketmasligi uchun */
         margin: 0 auto 15px auto !important;
         padding: 15px;
-        box-sizing: border-box; /* Padding kenglikka ta'sir qilmasligi uchun */
+        box-sizing: border-box;
+        /* Padding kenglikka ta'sir qilmasligi uchun */
     }
 
     /* Tugmalar rasmdegidek yonma-yon tursin */
@@ -909,30 +1005,35 @@
 
     .tab-right-actions {
         display: flex !important;
-        flex-direction: row !important; /* Tugmalar yonma-yon */
+        flex-direction: row !important;
+        /* Tugmalar yonma-yon */
         justify-content: space-between;
         width: 100%;
         gap: 8px;
     }
 
-    .btn-print, .btn-add-sotuv {
+    .btn-print,
+    .btn-add-sotuv {
         flex: 1;
         justify-content: center;
         padding: 10px 5px;
         font-size: 12px;
-        white-space: nowrap; /* Matn pastga tushib ketmasligi uchun */
+        white-space: nowrap;
+        /* Matn pastga tushib ketmasligi uchun */
     }
 
     /* Jadval skroll bo'lishi */
     .history-table-container {
         overflow-x: auto;
-        display: block; /* Skroll ishlashi uchun */
+        display: block;
+        /* Skroll ishlashi uchun */
         background: white;
         border: 1px solid #eee;
     }
 
     .mijoz-table {
-        min-width: 500px; /* Jadval qisilib ketmasdan skroll bo'lishi uchun */
+        min-width: 500px;
+        /* Jadval qisilib ketmasdan skroll bo'lishi uchun */
     }
 }
 
@@ -946,7 +1047,8 @@
         gap: 5px;
     }
 
-    .btn-print, .btn-add-sotuv {
+    .btn-print,
+    .btn-add-sotuv {
         font-size: 11px;
         padding: 8px 2px;
     }
@@ -1071,9 +1173,8 @@
 
 /* Qolgan barcha CSS avvalgi kod bilan bir xil qoladi */
 
-@media(max-width:380px){
-    .header{
+@media(max-width:380px) {
+    .header {
         flex-direction: column;
     }
 }
-
