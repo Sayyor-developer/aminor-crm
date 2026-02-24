@@ -1,13 +1,13 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, /* useMemo */ } from 'react';
 import {
-  User, Settings, BarChart3, Lock,
-  TrendingUp, Package, Users, DollarSign, Trash2,
+  User, Settings,/*  BarChart3, */ Lock,
+  /* TrendingUp, Package, Users, DollarSign, */ Trash2,
   AlertTriangle, X, Eye, EyeOff
 } from 'lucide-react';
-import {
-  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  AreaChart, Area
-} from 'recharts';
+// import {
+//   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+//   AreaChart, Area
+// } from 'recharts';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { useData } from '../../DataContext';
@@ -15,13 +15,13 @@ import './direktor.css';
 
 const Direktor = ({ open }) => {
   const {
-    mijozlar = [],
-    sotuvlar = [],
+   /*  mijozlar = [],
+    sotuvlar = [], */
     clearAllData
   } = useData();
 
   const [fullname, setFullname] = useState('Alisher Valiyev');
-  const [vaqtFiltr, setVaqtFiltr] = useState('7kun');
+  // const [vaqtFiltr, setVaqtFiltr] = useState('7kun');
   const [activeModal, setActiveModal] = useState(null);
 
   // Modal ichidagi forma uchun state
@@ -33,14 +33,14 @@ const Direktor = ({ open }) => {
   const [showPass, setShowPass] = useState(false);
 
   // --- STATISTIKA ---
-  const stats = useMemo(() => {
+  /* const stats = useMemo(() => {
     const bugun = new Date();
     let filterDate = new Date();
     if (vaqtFiltr === '7kun') filterDate.setDate(bugun.getDate() - 7);
     else if (vaqtFiltr === '1oy') filterDate.setMonth(bugun.getMonth() - 1);
-    else if (vaqtFiltr === '1yil') filterDate.setFullYear(bugun.getFullYear() - 1);
+    else if (vaqtFiltr === '1yil') filterDate.setFullYear(bugun.getFullYear() - 1); */
 
-    const filteredSales = sotuvlar
+   /*  const filteredSales = sotuvlar
       .map(s => ({ sana: new Date(s.sana), summa: parseFloat(s.summa || 0) }))
       .filter(item => item.sana >= filterDate)
       .sort((a, b) => a.sana - b.sana);
@@ -61,7 +61,7 @@ const Direktor = ({ open }) => {
       chartData: chartData.length > 0 ? chartData : [{ label: 'Ma\'lumot yo\'q', qiymat: 0 }],
       chartWidth: chartData.length > 6 ? `${chartData.length * 100}px` : '100%'
     };
-  }, [sotuvlar, mijozlar, vaqtFiltr]);
+  }, [sotuvlar, mijozlar, vaqtFiltr]); */
 
   // Modalni ochishda joriy ma'lumotlarni yuklash
   const openProfileModal = () => {
@@ -115,7 +115,7 @@ const Direktor = ({ open }) => {
         </header>
 
         {/* Statistik Kartalar */}
-        <div className="d-stats-container">
+     {/*    <div className="d-stats-container">
           {[
             { label: 'Umumiy Savdo', value: `${stats.daromad} so'm`, icon: DollarSign, color: 'emerald' },
             { label: 'Jami Mijozlar', value: stats.mijozlar, icon: Users, color: 'blue' },
@@ -130,10 +130,10 @@ const Direktor = ({ open }) => {
               </div>
             </div>
           ))}
-        </div>
+        </div> */}
 
         {/* Grafik qismi */}
-        <div className="main-card">
+       {/*  <div className="main-card">
           <div className="card-top">
             <div className="title-box">
               <BarChart3 size={20} className="red-icon" />
@@ -169,7 +169,7 @@ const Direktor = ({ open }) => {
               </div>
             </div>
           </div>
-        </div>
+        </div> */}
 
         <div className="main-card danger-zone-card">
           <div className="card-top">

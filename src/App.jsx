@@ -75,26 +75,19 @@ function App() {
 
   const hasAccess = (sectionName) => {
     if (!userData) return false;
-
-    // MUHIM: Bazada 'director' deb yozilgan, shuning uchun ikkala variantni ham tekshiramiz
     const role = userData.role ? userData.role.toLowerCase().trim() : '';
-    if (role === 'direktor' || role === 'director') {
-      return true; 
-    }
+    if (role === 'direktor' || role === 'director') return true; 
 
     const perms = userData.permissions;
     if (!perms) return false;
 
-    if (Array.isArray(perms)) {
-      return perms.includes(sectionName);
-    }
+    if (Array.isArray(perms)) return perms.includes(sectionName);
     
     if (typeof perms === 'object' && perms !== null) {
       return perms[sectionName] === true || 
              perms[sectionName.toLowerCase()] === true ||
              perms[sectionName.replace(/\s+/g, '').toLowerCase()] === true;
     }
-
     return false;
   };
 

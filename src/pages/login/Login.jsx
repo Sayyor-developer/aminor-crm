@@ -25,25 +25,21 @@ const Login = () => {
         setLoading(true);
 
         try {
-            // 1. Supabase orqali kirishga urinish
             const { data, error } = await supabase.auth.signInWithPassword({
-                email: email.trim(), // Probellarni olib tashlaydi
+                email: email.trim(),
                 password: password,
             });
 
-            // 2. Agar Supabase xato qaytarsa
             if (error) {
-                // Xatoni aniqroq ko'rsatish
                 if (error.message === "Invalid login credentials") {
                     throw new Error("Email yoki parol noto'g'ri!");
                 } else if (error.message === "Email not confirmed") {
-                    throw new Error("Email tasdiqlanmagan! Supabase-dan 'Confirm email'ni o'chiring.");
+                    throw new Error("Email tasdiqlanmagan!");
                 } else {
                     throw error;
                 }
             }
 
-            // 3. Muvaffaqiyatli kirish
             if (data.session) {
                 toast.success("Xush kelibsiz!");
                 navigate('/home');
@@ -67,7 +63,7 @@ const Login = () => {
                     </Typography>
                 </div>
 
-                <form className="login-form" onSubmit={handleLogin}>
+                <form className="login-form" onSubmit={handleLogin} autoComplete="off">
                     <Typography variant="h5" className="form-title">Kirish</Typography>
 
                     <Box className="input-group" sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -79,6 +75,7 @@ const Login = () => {
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             required
+                            autoComplete="off" // Brauzerga saqlangan ma'lumotni qo'yma deydi
                             InputProps={{
                                 startAdornment: (
                                     <InputAdornment position="start">
@@ -95,6 +92,7 @@ const Login = () => {
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             required
+                            autoComplete="new-password" // Eski parollarni chiqarishni cheklaydi
                             InputProps={{
                                 startAdornment: (
                                     <InputAdornment position="start">

@@ -624,6 +624,7 @@
     cursor: pointer;
     color: #718096;
     transition: 0.2s;
+    display: flex;
 }
 
 .edit-icon-btn:hover,
@@ -1000,7 +1001,7 @@
     .content-tabs {
         flex-direction: column;
         width: 100%;
-        gap: 10px;
+        gap: var(--gap-10);
     }
 
     .tab-right-actions {
@@ -1017,7 +1018,7 @@
         flex: 1;
         justify-content: center;
         padding: 10px 5px;
-        font-size: 12px;
+        font-size: var(--font-size-12);
         white-space: nowrap;
         /* Matn pastga tushib ketmasligi uchun */
     }
@@ -1040,7 +1041,7 @@
 /* 380px va undan kichik ekranlar uchun maxsus */
 @media (max-width: 380px) {
     .user-main-info h2 {
-        font-size: 16px;
+        font-size: var(--font-size-16);
     }
 
     .tab-right-actions {
@@ -1049,7 +1050,7 @@
 
     .btn-print,
     .btn-add-sotuv {
-        font-size: 11px;
+        font-size: var(--font-size-12);
         padding: 8px 2px;
     }
 
