@@ -330,28 +330,43 @@ const MijozProfil = ({ open }) => {
             </div>
           )}
 
-          {/* 1. TASDIQLASH TUGMASI ENDI TEPADA (Jadvaldan keyin) */}
           <div className="bottom-action-bar no-print" style={{ display: 'flex', gap: '15px', marginTop: '20px', justifyContent: 'flex-end' }}>
             <button className="btn-confirm-all" style={{ background: 'var(--primary-color)', color: '#fff', padding: '10px 20px', borderRadius: '8px', border: 'none', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontWeight: 'bold' }} onClick={handleConfirmMonth}>
               <MdDoneAll size={20} /> Oyni tasdiqlash
             </button>
           </div>
 
-          {/* 2. RO'YXATLAR (TARIX) ENDI ENG PASTDA */}
-          {oydanQolganQarzVal > 0 && (
+          {/* TARIX MODALINI OCHUVCHI QISM - ENDI HAR DOIM AGAR ESKI SOTUVLAR BO'LSA KO'RINADI */}
+          {eskiSotuvlarList.length > 0 && (
             <div className="history-link-box no-print" 
                 onClick={() => setShowHistoryModal(true)}
-                style={{ marginTop: '20px', padding: '15px', background: '#fff5f5', borderRadius: '10px', border: '1px dashed #feb2b2', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer' }}>
+                style={{ 
+                  marginTop: '20px', 
+                  padding: '15px', 
+                  background: '#f8fafc', 
+                  borderRadius: '10px', 
+                  border: '1px dashed #cbd5e0', 
+                  display: 'flex', 
+                  justifyContent: 'space-between', 
+                  alignItems: 'center', 
+                  cursor: 'pointer' 
+                }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <MdHistory size={24} color="#e53e3e" />
+                <MdHistory size={24} color="#64748b" />
                 <div>
-                  <div style={{ fontWeight: 'bold', color: '#c53030' }}>Ro'yxatlar (Tarix)</div>
-                  <div style={{ fontSize: '12px', color: '#9b2c2c' }}>Barcha eski oylardagi xaridlar ro'yxati</div>
+                  <div style={{ fontWeight: 'bold', color: '#1e293b' }}>Ro'yxatlar (Tarix)</div>
+                  <div style={{ fontSize: '12px', color: '#64748b' }}>Barcha eski oylardagi xaridlar ro'yxati</div>
                 </div>
               </div>
               <div style={{ textAlign: 'right' }}>
-                <div style={{ fontWeight: 'bold', fontSize: '18px', color: '#c53030' }}>+{Number(oydanQolganQarzVal).toLocaleString()} UZS</div>
-                <div style={{ fontSize: '12px', color: '#c53030', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px' }}>
+                <div style={{ 
+                    fontWeight: 'bold', 
+                    fontSize: '18px', 
+                    color: oydanQolganQarzVal > 0 ? '#ef4444' : '#22c55e' 
+                  }}>
+                  {oydanQolganQarzVal > 0 ? `+${Number(oydanQolganQarzVal).toLocaleString()}` : '0'} UZS
+                </div>
+                <div style={{ fontSize: '12px', color: '#64748b', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px' }}>
                   Ko'rish <MdVisibility />
                 </div>
               </div>
@@ -360,7 +375,7 @@ const MijozProfil = ({ open }) => {
         </main>
       </div>
 
-      {/* MODALLAR QISMI O'ZGARISHSIZ QOLDI */}
+      {/* MODALLAR */}
       {showHistoryModal && (
         <div className="logout-modal-overlay" onClick={() => setShowHistoryModal(false)}>
           <div className="edit-modal-content" style={{ maxWidth: '850px', width: '95%', maxHeight: '90vh', display: 'flex', flexDirection: 'column' }} onClick={(e) => e.stopPropagation()}>

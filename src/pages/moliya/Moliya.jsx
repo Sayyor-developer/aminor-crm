@@ -105,7 +105,7 @@ const Moliya = ({ open }) => {
         <section className="content-grid">
           <div className="white-card">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-              <h3 className="card-title" style={{ margin: 0 }}>Tushum Dinamikasi (Har bir sotuv)</h3>
+              <h3 className="card-title" style={{ margin: 0 }}>Sotuv grafigi (Har bir sotuv)</h3>
               <select 
                 value={vaqtFiltr} 
                 onChange={(e) => setVaqtFiltr(e.target.value)}
@@ -151,7 +151,7 @@ const Moliya = ({ open }) => {
                           const data = payload[0].payload;
                           return (
                             <div style={{ background: '#fff', padding: '12px', borderRadius: '12px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', border: 'none' }}>
-                              <p style={{ margin: 0, fontWeight: 'bold', fontSize: '13px' }}>{data.label} {data.soat}</p>
+                              <p style={{ margin: 0, fontWeight: 'bold', fontSize: 'var(--font-size-14)' }}>{data.label} {data.soat}</p>
                               <p style={{ margin: '5px 0 0', color: 'var(--primary-color)', fontWeight: '600' }}>Tushum: {formatMoney(data.sotuv)} so'm</p>
                               <p style={{ margin: 0, fontSize: '11px', color: '#64748b' }}>Mijoz: {data.mijoz}</p>
                             </div>
