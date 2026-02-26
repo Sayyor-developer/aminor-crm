@@ -147,7 +147,19 @@
     background: var(--primary-color);
     color: var(--white);
 }
+.m-cancel-btn{
+    border-radius: 10px;
+    background-color: var(--white);
+    color: black;
+    border: none;
 
+}
+.m-delete-confirm-btn{
+     border-radius: 10px;
+    background-color: var(--primary-color);
+    color: var(--white);
+    border: none;
+}
 .m-delete:hover {
     background-color: var(--primary-hover-color);
 }

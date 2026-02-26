@@ -9,8 +9,13 @@ import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
 export default function Kolbasamaxsulotlar({ open }) {
-  // Context-dan kerakli funksiya va ma'lumotlarni olamiz
-  const { products = [], setProducts } = useData();
+  // Supabase funksiyalarini Context-dan olamiz
+  const { 
+    products = [], 
+    productQoshish,      // Yangi qo'shilgan funksiya
+    setProducts, 
+    supabase           // Supabase client to'g'ridan-to'g'ri kerak bo'lishi mumkin
+  } = useData();
 
   const [searchQuery, setSearchQuery] = useState('');
   const [newProduct, setNewProduct] = useState({ name: '', unit: 'kg', price: '', stock: '' });
@@ -32,12 +37,10 @@ export default function Kolbasamaxsulotlar({ open }) {
     return str.replace(/\s/g, "");
   };
 
-  // --- JAMI QOLDIQNI HISOBLASH ---
   const jamiQoldiq = useMemo(() => {
     return (products || []).reduce((sum, item) => sum + Number(item.stock || 0), 0);
   }, [products]);
 
-  // --- QIDIRUV VA FILTRLASH ---
   const filteredItems = useMemo(() => {
     return (products || []).filter(p => {
       const productName = p && p.name ? String(p.name).toLowerCase() : "";
@@ -46,14 +49,12 @@ export default function Kolbasamaxsulotlar({ open }) {
     });
   }, [products, searchQuery]);
 
-  // --- PAGINATION ---
   const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
   const currentItems = useMemo(() => {
     const startIndex = (currentPage - 1) * itemsPerPage;
     return filteredItems.slice(startIndex, startIndex + itemsPerPage);
   }, [filteredItems, currentPage]);
 
-  // --- PDF EXPORT ---
   const exportToPDF = () => {
     try {
       if (filteredItems.length === 0) {
@@ -91,72 +92,90 @@ export default function Kolbasamaxsulotlar({ open }) {
     }
   };
 
-  // --- HOLATNI O'ZGARTIRISH (ACTIVE/INACTIVE) ---
-  const toggleStatus = useCallback((id) => {
-    setProducts(prev => (prev || []).map(p => 
-      p.id === id ? { ...p, active: !p.active } : p
-    ));
-  }, [setProducts]);
+  // --- SUPABASE: HOLATNI O'ZGARTIRISH ---
+  const toggleStatus = async (id, currentStatus) => {
+    try {
+      const { error } = await supabase.from('products').update({ active: !currentStatus }).eq('id', id);
+      if (error) throw error;
+      setProducts(prev => prev.map(p => p.id === id ? { ...p, active: !currentStatus } : p));
+      toast.info("Holat yangilandi");
+    } catch (err) {
+      toast.error("Xatolik: " + err.message);
+    }
+  };
 
-  // --- YANGI MAHSULOT QO'SHISH ---
-  const handleAddProduct = () => {
+  // --- SUPABASE: YANGI MAHSULOT QO'SHISH ---
+  const handleAddProduct = async () => {
     if (!newProduct.name.trim() || !newProduct.price || !newProduct.stock) {
       toast.error("Ma'lumotlarni to'liq kiriting!");
       return;
     }
 
-    const productPrice = Number(cleanNumber(newProduct.price));
-    const productStock = Number(newProduct.stock);
+    try {
+      const item = {
+        name: newProduct.name.trim(),
+        unit: newProduct.unit,
+        active: true,
+        price: Number(cleanNumber(newProduct.price)),
+        stock: Number(newProduct.stock)
+      };
 
-    const item = {
-      id: Date.now(),
-      name: newProduct.name.trim(),
-      unit: newProduct.unit,
-      active: true,
-      price: productPrice,
-      stock: productStock,
-      date: new Date().toISOString() 
-    };
-
-    setProducts(prev => [item, ...(prev || [])]);
-    setNewProduct({ name: '', unit: 'kg', price: '', stock: '' });
-    setIsAddModalOpen(false); 
-    toast.success("Mahsulot omborga qo'shildi!");
+      // DataContext dagi funksiyani chaqiramiz
+      await productQoshish(item);
+      
+      setNewProduct({ name: '', unit: 'kg', price: '', stock: '' });
+      setIsAddModalOpen(false); 
+      toast.success("Mahsulot omborga qo'shildi!");
+    } catch (err) {
+      toast.error("Xatolik: " + err.message);
+    }
   };
 
-  // --- TAHRIRLASHNI SAQLASH ---
-  const handleUpdateProduct = () => {
+  // --- SUPABASE: TAHRIRLASHNI SAQLASH ---
+  const handleUpdateProduct = async () => {
     if (!selectedProduct.name.trim() || !selectedProduct.price || !selectedProduct.stock) {
       toast.error("Ma'lumotlarni to'ldiring!");
       return;
     }
 
-    setProducts(products.map(p => 
-      p.id === selectedProduct.id 
-      ? { ...selectedProduct, price: Number(cleanNumber(String(selectedProduct.price))), stock: Number(selectedProduct.stock) } 
-      : p
-    ));
-    setIsEditModalOpen(false);
-    toast.info("Ma'lumot yangilandi");
+    try {
+      const updatedData = {
+        name: selectedProduct.name.trim(),
+        price: Number(cleanNumber(String(selectedProduct.price))),
+        stock: Number(selectedProduct.stock),
+        unit: selectedProduct.unit
+      };
+
+      const { error } = await supabase.from('products').update(updatedData).eq('id', selectedProduct.id);
+      if (error) throw error;
+
+      setProducts(products.map(p => p.id === selectedProduct.id ? { ...p, ...updatedData } : p));
+      setIsEditModalOpen(false);
+      toast.info("Ma'lumot yangilandi");
+    } catch (err) {
+      toast.error("Xatolik: " + err.message);
+    }
   };
 
-  // --- O'CHIRISHNI TASDIQLASH ---
-  const handleConfirmDelete = () => {
-    if (selectedProduct) {
-      setProducts(prev => (prev || []).filter(p => p.id !== selectedProduct.id));
+  // --- SUPABASE: O'CHIRISH ---
+  const handleConfirmDelete = async () => {
+    if (!selectedProduct) return;
+    try {
+      const { error } = await supabase.from('products').delete().eq('id', selectedProduct.id);
+      if (error) throw error;
+
+      setProducts(prev => prev.filter(p => p.id !== selectedProduct.id));
       setIsDeleteModalOpen(false);
       setSelectedProduct(null);
       toast.error("Mahsulot o'chirildi");
+    } catch (err) {
+      toast.error("Xatolik: " + err.message);
     }
   };
 
   return (
     <div className={`mijozlar-sahifa ${open ? 'sidebar-ochiq' : 'sidebar-yopiq'}`}>
-      <ToastContainer position="top-right" autoClose={1500}
-      containerStyle={{
-    zIndex: 99999, // Hamma narsadan tepada turishi uchun
-  }}
-      />
+      <ToastContainer position="top-right" autoClose={1500} containerStyle={{ zIndex: 99999 }} />
 
       <div className="konteyner">
         <div className="header-main">
@@ -212,7 +231,10 @@ export default function Kolbasamaxsulotlar({ open }) {
                     <td style={{ fontWeight: 'bold' }}>{Number(p.stock || 0).toLocaleString()}</td>
                     <td>{Number(p.price || 0).toLocaleString()} so'm</td>
                     <td className="text-center">
-                      <button className={`switch ${p.active ? 'switch-on' : 'switch-off'}`} onClick={() => toggleStatus(p.id)}>
+                      <button 
+                        className={`switch ${p.active ? 'switch-on' : 'switch-off'}`} 
+                        onClick={() => toggleStatus(p.id, p.active)}
+                      >
                         <div className={`knopka ${p.active ? 'knopka-on' : 'knopka-off'}`}></div>
                       </button>
                     </td>
@@ -245,6 +267,10 @@ export default function Kolbasamaxsulotlar({ open }) {
         </div>
       </div>
 
+      {/* MODALLAR (Add, Edit, Delete) - O'zgarishsiz qoldi */}
+      {/* ... (Sizning kodingizdagi modallar shu yerda) ... */}
+      {/* (Kodingiz juda uzun bo'lgani uchun modallarni qisqartirdim, lekin ular tepada bog'langan funksiyalar bilan ishlayveradi) */}
+      
       {/* MODAL: QO'SHISH */}
       {isAddModalOpen && (
         <div className="modal-parda" onClick={() => setIsAddModalOpen(false)}>
@@ -266,7 +292,7 @@ export default function Kolbasamaxsulotlar({ open }) {
                   </select>
                 </div>
                 <div>
-                  <label className="input-label">Miqdori(kg)</label>
+                  <label className="input-label">Miqdori</label>
                   <input className="input-style w-full" type="number" placeholder="0" value={newProduct.stock} onChange={e => setNewProduct({ ...newProduct, stock: e.target.value })} />
                 </div>
               </div>

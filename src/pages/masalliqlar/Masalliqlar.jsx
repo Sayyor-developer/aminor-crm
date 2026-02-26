@@ -13,6 +13,7 @@ const Masalliqlar = ({ open }) => {
     masalliqlar = [],
     setMasalliqlar,
     chiqimQoshish,
+    supabase
   } = useData();
 
   const [qidiruvMatni, setQidiruvMatni] = useState('');
@@ -22,10 +23,14 @@ const Masalliqlar = ({ open }) => {
 
   const [tanlangan, setTanlangan] = useState(null);
   const [yangiMasalliq, setYangiMasalliq] = useState({
-    nomi: '', miqdori: '', birligi: 'kg', narxi: '', zavod: '', status: true
+    nomi: '', 
+    miqdori: '', 
+    birlik: 'kg', 
+    narxi: '', 
+    zavod: '', 
+    status: true
   });
 
-  // Tarixni localStorage-da saqlash
   const [tarix, setTarix] = useState(() => {
     const saqlanganTarix = localStorage.getItem('masalliqlar_tarixi');
     return saqlanganTarix ? JSON.parse(saqlanganTarix) : [];
@@ -41,7 +46,8 @@ const Masalliqlar = ({ open }) => {
   };
 
   const parseNumber = (val) => {
-    return val ? val.toString().replace(/\s/g, '') : '0';
+    if (!val) return 0;
+    return Number(val.toString().replace(/\s/g, ''));
   };
 
   const filtrlangan = useMemo(() => {
@@ -51,85 +57,156 @@ const Masalliqlar = ({ open }) => {
     );
   }, [masalliqlar, qidiruvMatni]);
 
-  // YANGI MASALLIQ QO'SHISH
-  const masalliqQoshish = () => {
-    if (!yangiMasalliq.nomi.trim()) { toast.error("Nomini kiriting!"); return; }
-    const miqdor = Number(yangiMasalliq.miqdori || 0);
-    const narx = Number(parseNumber(yangiMasalliq.narxi || 0));
-    const id = Date.now();
-
-    setMasalliqlar([{ ...yangiMasalliq, id, miqdori: miqdor, narxi: narx }, ...masalliqlar]);
-    setYangiMasalliq({ nomi: '', miqdori: '', birligi: 'kg', narxi: '', zavod: '', status: true });
-    setQoshishModalOchiq(false);
-    toast.success("Masalliq ro'yxatga qo'shildi!");
-  };
-
-  // --- ASOSIY QISM: TASDIQLASH VA PAGENI TOZALASH ---
-  const barchasiniTasdiqlash = () => {
-    if (masalliqlar.length === 0) {
-      toast.error("Tasdiqlash uchun masalliqlar mavjud emas!");
+  // --- CRUD FUNKSIYALAR ---
+  const handleMasalliqQoshish = async () => {
+    if (!yangiMasalliq.nomi.trim()) {
+      toast.error("Masalliq nomini kiriting!");
       return;
     }
-
-    const joriySana = new Date().toLocaleString();
-    const yangiKirimlar = masalliqlar.map(m => ({
-      id: Date.now() + Math.random(),
-      sana: joriySana,
-      nomi: m.nomi,
-      miqdor: m.miqdori,
-      birligi: m.birligi,
-      summa: Number(m.miqdori) * Number(m.narxi),
-      zavod: m.zavod || '---'
-    }));
-
-    const jamiChiqim = yangiKirimlar.reduce((sum, item) => sum + item.summa, 0);
-
-    if (jamiChiqim > 0) {
-      chiqimQoshish({
-        id: Date.now(),
-        turi: "Masalliqlar xaridi (Yalpi)",
-        manbaa: `Tasdiqlangan xaridlar`,
-        summa: jamiChiqim,
-        sana: new Date().toISOString().split('T')[0]
-      });
+    const t = toast.loading("Saqlanmoqda...");
+    try {
+      const { data, error } = await supabase
+        .from('masalliqlar')
+        .insert([{
+          nomi: yangiMasalliq.nomi.trim(),
+          miqdori: Number(yangiMasalliq.miqdori || 0),
+          birlik: yangiMasalliq.birlik,
+          narxi: parseNumber(yangiMasalliq.narxi),
+          zavod: yangiMasalliq.zavod.trim() || '---',
+          status: true
+        }])
+        .select();
+      if (error) throw error;
+      setMasalliqlar([data[0], ...masalliqlar]);
+      setYangiMasalliq({ nomi: '', miqdori: '', birlik: 'kg', narxi: '', zavod: '', status: true });
+      setQoshishModalOchiq(false);
+      toast.success("Ro'yxatga qo'shildi!", { id: t });
+    } catch (err) {
+      toast.error("Xatolik yuz berdi!", { id: t });
     }
-
-    setTarix(prev => [...yangiKirimlar, ...prev]);
-    setMasalliqlar([]); // PAGEDAGI MA'LUMOTLARNI O'CHIRISH
-    toast.success("Ma'lumotlar tarixga saqlandi va sahifa tozalandi!");
   };
 
-  const statusniOzgartirish = (id) => {
-    setMasalliqlar(prev => prev.map(m => m.id === id ? { ...m, status: !m.status } : m));
-    toast.success("Holat yangilandi");
+  const handleYangilash = async () => {
+    const t = toast.loading("Yangilanmoqda...");
+    try {
+      const { error } = await supabase
+        .from('masalliqlar')
+        .update({
+          nomi: tanlangan.nomi,
+          miqdori: Number(tanlangan.miqdori),
+          birlik: tanlangan.birlik,
+          narxi: parseNumber(tanlangan.narxi),
+          zavod: tanlangan.zavod
+        })
+        .eq('id', tanlangan.id);
+      if (error) throw error;
+      setMasalliqlar(prev => prev.map(m => m.id === tanlangan.id ? { ...tanlangan, narxi: parseNumber(tanlangan.narxi) } : m));
+      setTahrirlashModalOchiq(false);
+      toast.success("Muvaffaqiyatli yangilandi!", { id: t });
+    } catch (err) {
+      toast.error("Yangilashda xato!");
+    }
   };
 
-  const masalliqniYangilash = () => {
-    const yangilanganTanlangan = {
-      ...tanlangan,
-      narxi: Number(parseNumber(tanlangan.narxi))
-    };
-    setMasalliqlar(prev => prev.map(m => m.id === tanlangan.id ? yangilanganTanlangan : m));
-    setTahrirlashModalOchiq(false);
-    toast.success("Yangilandi!");
+  const handleOchirish = async () => {
+    const t = toast.loading("O'chirilmoqda...");
+    try {
+      const { error } = await supabase.from('masalliqlar').delete().eq('id', tanlangan.id);
+      if (error) throw error;
+      setMasalliqlar(prev => prev.filter(m => m.id !== tanlangan.id));
+      setOchirishModalOchiq(false);
+      toast.success("O'chirildi", { id: t });
+    } catch (err) {
+      toast.error("O'chirishda xato!");
+    }
   };
 
+  const handleStatus = async (id, currentStatus) => {
+    try {
+      const { error } = await supabase.from('masalliqlar').update({ status: !currentStatus }).eq('id', id);
+      if (error) throw error;
+      setMasalliqlar(prev => prev.map(m => m.id === id ? { ...m, status: !currentStatus } : m));
+      toast.success("Holat o'zgardi");
+    } catch (err) {
+      toast.error("Xatolik!");
+    }
+  };
+
+  const barchasiniTasdiqlash = async () => {
+    if (masalliqlar.length === 0) {
+      toast.error("Tasdiqlash uchun masalliqlar yo'q!");
+      return;
+    }
+    const t = toast.loading("Jarayon bajarilmoqda...");
+    const joriySana = new Date().toLocaleString();
+    const bugungiSana = new Date().toISOString().split('T')[0];
+    try {
+      const yangiKirimlar = masalliqlar.map(m => ({
+        id: Date.now() + Math.random(),
+        sana: joriySana,
+        nomi: m.nomi,
+        miqdor: m.miqdori,
+        birligi: m.birlik,
+        summa: Number(m.miqdori) * Number(m.narxi || 0),
+        zavod: m.zavod || '---'
+      }));
+      const jamiSumma = yangiKirimlar.reduce((sum, item) => sum + item.summa, 0);
+      try {
+        if (jamiSumma > 0) {
+          await chiqimQoshish({
+            turi: "Masalliqlar xaridi",
+            manbaa: "Ombor (Yalpi)",
+            summa: jamiSumma,
+            sana: bugungiSana
+          });
+        }
+      } catch (e) { console.error(e); }
+      const ids = masalliqlar.map(m => m.id);
+      const { error: delErr } = await supabase.from('masalliqlar').delete().in('id', ids);
+      if (delErr) throw delErr;
+      setTarix(prev => [...yangiKirimlar, ...prev]);
+      setMasalliqlar([]);
+      toast.success("Tasdiqlandi!", { id: t });
+    } catch (error) {
+      toast.error("Xatolik yuz berdi!", { id: t });
+    }
+  };
+
+  // --- PDF EKSPORT FUNKSIYASI ---
   const tarixExportPDF = () => {
+    if (tarix.length === 0) return toast.error("Tarix bo'sh!");
+    
     const doc = new jsPDF();
-    doc.text("Masalliqlar Kirim Tarixi", 14, 15);
+    const sana = new Date().toLocaleDateString();
+    
+    doc.setFontSize(18);
+    doc.text("Masalliqlar Kirim Hisoboti", 14, 15);
+    doc.setFontSize(10);
+    doc.text(`Sana: ${sana}`, 14, 22);
+
     autoTable(doc, {
-      startY: 22,
-      head: [['Sana', 'Nomi', 'Miqdor', 'Summa', 'Ta\'minotchi']],
-      body: tarix.map(t => [t.sana, t.nomi, `${t.miqdor} ${t.birligi}`, t.summa.toLocaleString() + " so'm", t.zavod]),
+      startY: 28,
+      head: [['Sana', 'Masalliq Nomi', 'Miqdor', 'Jami Summa', 'Ta\'minotchi']],
+      body: tarix.map(t => [
+        t.sana, 
+        t.nomi, 
+        `${t.miqdor} ${t.birligi}`, 
+        t.summa.toLocaleString() + " so'm", 
+        t.zavod
+      ]),
+      styles: { fontSize: 8, cellPadding: 3 },
+      headStyles: { fillColor: [79, 70, 229] }, // Indigo rang
     });
-    doc.save("kirim_tarixi.pdf");
+
+    doc.save(`masalliqlar_hisoboti_${sana}.pdf`);
+    toast.success("PDF yuklab olindi!");
   };
 
   return (
     <div className={`m-page ${open ? 'm-sidebar-open' : 'm-sidebar-closed'}`}>
       <Toaster position="top-right" />
       <div className="m-container">
-
+        
         <div className="m-title-area">
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
             <div className="m-main-icon"><Package size={22} /></div>
@@ -167,11 +244,11 @@ const Masalliqlar = ({ open }) => {
                 {filtrlangan.map(m => (
                   <tr key={m.id} className={m.status ? 'm-row-active' : 'm-row-disabled'}>
                     <td className="m-font-bold">{m.nomi}</td>
-                    <td>{m.miqdori} <span className="m-tag">{m.birligi}</span></td>
-                    <td className="m-price-col">{Number(m.narxi).toLocaleString()}</td>
+                    <td>{m.miqdori} <span className="m-tag">{m.birlik}</span></td>
+                    <td className="m-price-col">{Number(m.narxi || 0).toLocaleString()} so'm</td>
                     <td>{m.zavod || '---'}</td>
                     <td className="text-center">
-                      <div className={`m-toggle ${m.status ? 'm-toggle-on' : 'm-toggle-off'}`} onClick={() => statusniOzgartirish(m.id)}>
+                      <div className={`m-toggle ${m.status ? 'm-toggle-on' : 'm-toggle-off'}`} onClick={() => handleStatus(m.id, m.status)}>
                         <div className="m-toggle-circle" />
                       </div>
                     </td>
@@ -183,35 +260,123 @@ const Masalliqlar = ({ open }) => {
                     </td>
                   </tr>
                 ))}
-                {filtrlangan.length === 0 && <tr><td colSpan="6" className="text-center">Hozircha ro'yxat bo'sh</td></tr>}
               </tbody>
             </table>
           </div>
-
-          {/* TASDIQLASH TUGMASI */}
           <div style={{ padding: '20px', display: 'flex', justifyContent: 'flex-end', borderTop: '1px solid #eee' }}>
-            <button 
-              onClick={barchasiniTasdiqlash}
-              style={{
-                display: 'flex', alignItems: 'center', gap: '8px', backgroundColor: 'var(--primary-color)', color: 'white',
-                padding: '12px 24px', borderRadius: '8px', border: 'none', fontWeight: '600', cursor: 'pointer'
-              }}
-            >
+            <button className="m-save-btn" style={{width: 'auto', padding: '12px 25px', display: 'flex', gap: '10px'}} onClick={barchasiniTasdiqlash}>
               <CheckCircle size={20} /> Tasdiqlash va Kirim qilish
             </button>
           </div>
         </div>
 
-        {/* --- TARIX --- */}
+        {/* --- MODALLAR --- */}
+
+        {/* 1. QOSHISH */}
+        {qoshishModalOchiq && (
+          <div className="m-overlay">
+            <div className="m-modal">
+              <div className="m-modal-head">
+                <span>Yangi masalliq qo'shish</span>
+                <X className="m-close" onClick={() => setQoshishModalOchiq(false)} />
+              </div>
+              <div className="m-modal-body">
+                <label>Masalliq nomi</label>
+                <input className="m-custom-input" placeholder="Nomi" value={yangiMasalliq.nomi} onChange={e => setYangiMasalliq({ ...yangiMasalliq, nomi: e.target.value })} />
+                <div className="m-grid-2">
+                  <div>
+                    <label>Miqdori</label>
+                    <input className="m-custom-input" type="number" placeholder="0" value={yangiMasalliq.miqdori} onChange={e => setYangiMasalliq({ ...yangiMasalliq, miqdori: e.target.value })} />
+                  </div>
+                  <div>
+                    <label>Birligi</label>
+                    <select className="m-custom-select" value={yangiMasalliq.birlik} onChange={e => setYangiMasalliq({ ...yangiMasalliq, birlik: e.target.value })}>
+                      <option value="kg">kg</option>
+                      <option value="litr">litr</option>
+                      <option value="dona">dona</option>
+                    </select>
+                  </div>
+                </div>
+                <label>Narxi (1 birlik uchun)</label>
+                <input className="m-custom-input" placeholder="0" value={formatNumber(yangiMasalliq.narxi)} onChange={e => setYangiMasalliq({ ...yangiMasalliq, narxi: e.target.value })} />
+                <label>Ta'minotchi / Zavod</label>
+                <input className="m-custom-input" placeholder="Zavod nomi" value={yangiMasalliq.zavod} onChange={e => setYangiMasalliq({ ...yangiMasalliq, zavod: e.target.value })} />
+                <div style={{ marginTop: '15px', padding: '12px', backgroundColor: '#f8fafc', borderRadius: '8px', border: '1px dashed #cbd5e1', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ color: '#64748b', fontSize: '14px' }}>Umumiy summa:</span>
+                  <span style={{ color: '#0f172a', fontWeight: '700', fontSize: '16px' }}>
+                    {(Number(yangiMasalliq.miqdori || 0) * parseNumber(yangiMasalliq.narxi)).toLocaleString()} so'm
+                  </span>
+                </div>
+                <button className="m-save-btn" onClick={handleMasalliqQoshish}>Saqlash</button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 2. TAHRIRLASH */}
+        {tahrirlashModalOchiq && tanlangan && (
+          <div className="m-overlay">
+            <div className="m-modal">
+              <div className="m-modal-head">
+                <span>Tahrirlash</span>
+                <X className="m-close" onClick={() => setTahrirlashModalOchiq(false)} />
+              </div>
+              <div className="m-modal-body">
+                <label>Nomi</label>
+                <input className="m-custom-input" value={tanlangan.nomi} onChange={e => setTanlangan({ ...tanlangan, nomi: e.target.value })} />
+                <div className="m-grid-2">
+                  <div><label>Miqdori</label>
+                    <input className="m-custom-input" type="number" value={tanlangan.miqdori} onChange={e => setTanlangan({ ...tanlangan, miqdori: e.target.value })} />
+                  </div>
+                  <div><label>Birligi</label>
+                    <select className="m-custom-select" value={tanlangan.birlik} onChange={e => setTanlangan({ ...tanlangan, birlik: e.target.value })}>
+                      <option value="kg">kg</option>
+                      <option value="litr">litr</option>
+                      <option value="dona">dona</option>
+                    </select>
+                  </div>
+                </div>
+                <label>Narxi</label>
+                <input className="m-custom-input" value={formatNumber(tanlangan.narxi)} onChange={e => setTanlangan({ ...tanlangan, narxi: e.target.value })} />
+                <label>Ta'minotchi</label>
+                <input className="m-custom-input" value={tanlangan.zavod} onChange={e => setTanlangan({ ...tanlangan, zavod: e.target.value })} />
+                <button className="m-save-btn" onClick={handleYangilash}>Saqlash</button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* 3. OCHIRISH */}
+        {ochirishModalOchiq && (
+          <div className="m-overlay">
+            <div className="m-modal m-modal-sm" style={{ maxWidth: '380px' }}>
+              <div className="m-modal-body" style={{ textAlign: 'center', padding: '30px 20px' }}>
+                <div style={{ width: '60px', height: '60px', backgroundColor: '#fee2e2', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
+                  <AlertTriangle size={32} color="#ef4444" />
+                </div>
+                <h3 style={{ fontSize: '20px', fontWeight: '700', color: '#1e293b', marginBottom: '8px' }}>O'chirilsinmi?</h3>
+                <p style={{ color: 'var(--primary-color)', fontSize: '14px', marginBottom: '24px', lineHeight: '1.5' }}>
+                  Haqiqatan ham ushbu masalliqni o'chirmoqchimisiz? Bu amalni ortga qaytarib bo'lmaydi.
+                </p>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                  <button onClick={() => setOchirishModalOchiq(false)} className="m-cancel-btn" style={{ padding: '12px' }}>Bekor qilish</button>
+                  <button onClick={handleOchirish} className="m-delete-confirm-btn" style={{ padding: '12px' }}>Ha, o'chirilsin</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* --- TARIX BO'LIMI --- */}
         <div className="m-history-section" style={{ marginTop: '40px' }}>
-          <div className="m-history-head">
+          <div className="m-history-head" style={{display: 'flex', justifyContent: 'space-between', marginBottom: '15px'}}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <History size={22} color="var(--primary-color)" />
               <h2 style={{margin: 0}}>Kirimlar tarixi</h2>
             </div>
             {tarix.length > 0 && (
               <button className="m-pdf-btn" onClick={tarixExportPDF}>
-                <Printer size={16} /> PDF Hisobot
+                <Printer size={16} /> PDF Yuklash
               </button>
             )}
           </div>
@@ -243,119 +408,6 @@ const Masalliqlar = ({ open }) => {
           </div>
         </div>
       </div>
-
-      {/* --- MODALLAR (KALKULYATOR BILAN) --- */}
-
-      {/* 1. Yangi qo'shish */}
-      {qoshishModalOchiq && (
-        <div className="m-overlay">
-          <div className="m-modal">
-            <div className="m-modal-head">
-              <span>Yangi masalliq qo'shish</span>
-              <X className="m-close" onClick={() => setQoshishModalOchiq(false)} />
-            </div>
-            <div className="m-modal-body">
-              <label>Masalliq nomi</label>
-              <input className="m-custom-input" placeholder="Nomi" value={yangiMasalliq.nomi} onChange={e => setYangiMasalliq({ ...yangiMasalliq, nomi: e.target.value })} />
-              
-              <div className="m-grid-2">
-                <div>
-                  <label>Miqdori(kg/litr/dona)</label>
-                  <input className="m-custom-input" type="number" value={yangiMasalliq.miqdori} onChange={e => setYangiMasalliq({ ...yangiMasalliq, miqdori: e.target.value })} />
-                </div>
-                <div>
-                  <label>Birligi</label>
-                  <select className="m-custom-select" value={yangiMasalliq.birligi} onChange={e => setYangiMasalliq({ ...yangiMasalliq, birligi: e.target.value })}>
-                    <option value="kg">kg</option>
-                    <option value="litr">litr</option>
-                    <option value="dona">dona</option>
-                  </select>
-                </div>
-              </div>
-
-              <label>Narxi (1 birlik uchun)</label>
-              <input className="m-custom-input" value={formatNumber(yangiMasalliq.narxi)} onChange={e => setYangiMasalliq({ ...yangiMasalliq, narxi: e.target.value })} />
-              
-
-              <label>Ta'minotchi / Zavod</label>
-              <input className="m-custom-input" placeholder="Zavod nomi" value={yangiMasalliq.zavod} onChange={e => setYangiMasalliq({ ...yangiMasalliq, zavod: e.target.value })} />
-              
-              {/* AVTO KALKULYATOR */}
-              <div className="m-calc-box" style={{ background: '#f8fafc', padding: '10px', borderRadius: '6px', margin: '10px 0', border: '1px dashed #cbd5e1' }}>
-                <small style={{ color: '#64748b' }}>Umumiy hisob:</small>
-                <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#0f172a' }}>
-                  {(Number(yangiMasalliq.miqdori || 0) * Number(parseNumber(yangiMasalliq.narxi || 0))).toLocaleString()} so'm
-                </div>
-              </div>
-              <button className="m-save-btn" onClick={masalliqQoshish}>Saqlash</button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* 2. Tahrirlash */}
-      {tahrirlashModalOchiq && tanlangan && (
-        <div className="m-overlay">
-          <div className="m-modal">
-            <div className="m-modal-head">
-              <span>Tahrirlash</span>
-              <X className="m-close" onClick={() => setTahrirlashModalOchiq(false)} />
-            </div>
-            <div className="m-modal-body">
-              <label>Nomi</label>
-              <input className="m-custom-input" value={tanlangan.nomi} onChange={e => setTanlangan({ ...tanlangan, nomi: e.target.value })} />
-              
-              <div className="m-grid-2">
-                <div>
-                  <label>Miqdori</label>
-                  <input className="m-custom-input" type="number" value={tanlangan.miqdori} onChange={e => setTanlangan({ ...tanlangan, miqdori: e.target.value })} />
-                </div>
-                <div>
-                  <label>Birligi</label>
-                  <select className="m-custom-select" value={tanlangan.birligi} onChange={e => setTanlangan({ ...tanlangan, birligi: e.target.value })}>
-                    <option value="kg">kg</option>
-                    <option value="litr">litr</option>
-                    <option value="dona">dona</option>
-                  </select>
-                </div>
-              </div>
-
-              <label>Narxi (1 birlik uchun)</label>
-              <input className="m-custom-input" value={formatNumber(tanlangan.narxi)} onChange={e => setTanlangan({ ...tanlangan, narxi: e.target.value })} />
-
-              {/* AVTO KALKULYATOR */}
-              <div className="m-calc-box" style={{ background: '#f8fafc', padding: '10px', borderRadius: '6px', margin: '10px 0', border: '1px dashed #cbd5e1' }}>
-                <small style={{ color: '#64748b' }}>Jami summa:</small>
-                <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#1e293b' }}>
-                  {(Number(tanlangan.miqdori || 0) * Number(parseNumber(tanlangan.narxi || 0))).toLocaleString()} so'm
-                </div>
-              </div>
-
-              <label>Ta'minotchi / Zavod</label>
-              <input className="m-custom-input" value={tanlangan.zavod} onChange={e => setTanlangan({ ...tanlangan, zavod: e.target.value })} />
-              
-              <button className="m-save-btn" onClick={masalliqniYangilash}>Saqlash</button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* 3. O'chirish */}
-      {ochirishModalOchiq && (
-        <div className="m-overlay">
-          <div className="m-modal m-modal-sm">
-            <div className="m-modal-body" style={{ textAlign: 'center', padding: '30px 20px' }}>
-              <AlertTriangle size={48} color="#ef4444" style={{ margin: '0 auto 15px' }} />
-              <h3>O'chirilsinmi?</h3>
-              <p>{tanlangan?.nomi} bazadan o'chiriladi.</p>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginTop: '20px' }}>
-                <button onClick={() => setOchirishModalOchiq(false)} className="m-cancel-btn">Bekor qilish</button>
-                <button onClick={() => { setMasalliqlar(prev => prev.filter(m => m.id !== tanlangan.id)); setOchirishModalOchiq(false); toast.error("O'chirildi"); }} className="m-delete-confirm-btn">O'chirish</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };

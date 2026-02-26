@@ -1,19 +1,13 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Pencil, Trash2, Search, Plus, ChevronLeft, ChevronRight, AlertTriangle, X } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
+import { useData } from '../../DataContext'; // Supabase obyektini context'dan olish
 import './tannarxhisoblash.css';
 
 const Tannarxhisoblash = ({ open }) => {
-  const [tannarxlar, setTannarxlar] = useState(
-    Array.from({ length: 15 }, (_, i) => ({
-      id: i + 1,
-      materialTuri: ['Plastik', 'Metall', 'Qog\'oz', 'Shisha'][i % 4],
-      miqdor: 100 + i,
-      birlik: 'kg',
-      narx: 50000 + i * 500,
-      sana: '2025-01-28',
-    }))
-  );
+  const { supabase } = useData();
+  const [tannarxlar, setTannarxlar] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -27,21 +21,47 @@ const Tannarxhisoblash = ({ open }) => {
     materialTuri: '', miqdor: '', birlik: 'kg', narx: ''
   });
 
-  // --- NARXNI FORMATLASH FUNKSIYALARI ---
+  // --- SUPABASE DAN MA'LUMOTLARNI YUKLASH ---
+  const fetchTannarxlar = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('tannarxlar')
+        .select('*')
+        .order('id', { ascending: false });
+
+      if (error) throw error;
+      setTannarxlar(data || []);
+    } catch (err) {
+      console.error("Yuklashda xato:", err.message);
+      toast.error("Ma'lumotlarni yuklab bo'lmadi");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchTannarxlar();
+  }, []);
+
+  // --- FORMATLASH ---
   const formatNumber = (val) => {
-    if (!val) return '';
+    if (val === null || val === undefined || val === '') return '';
     return val.toString().replace(/\D/g, '').replace(/\B(?=(\d{3})+(?!\d))/g, " ");
   };
 
   const parseNumber = (val) => {
-    return val.toString().replace(/\s/g, '');
+    return val ? val.toString().replace(/\s/g, '') : '0';
   };
 
-  const filteredData = tannarxlar.filter(item =>
-    item.materialTuri.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredData = useMemo(() => {
+    return tannarxlar.filter(item =>
+      (item.materialTuri || '').toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [tannarxlar, searchTerm]);
 
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+  
   const currentItems = useMemo(() => {
     const lastIdx = currentPage * itemsPerPage;
     const firstIdx = lastIdx - itemsPerPage;
@@ -51,7 +71,12 @@ const Tannarxhisoblash = ({ open }) => {
   const handleOpenModal = (item = null) => {
     if (item) {
       setEditingItem(item);
-      setFormData({ ...item });
+      setFormData({ 
+        materialTuri: item.materialTuri, 
+        miqdor: item.miqdor, 
+        birlik: item.birlik, 
+        narx: item.narx.toString() 
+      });
     } else {
       setEditingItem(null);
       setFormData({ materialTuri: '', miqdor: '', birlik: 'kg', narx: '' });
@@ -59,24 +84,57 @@ const Tannarxhisoblash = ({ open }) => {
     setIsModalOpen(true);
   };
 
-  const handleSubmit = (e) => {
+  // --- QO'SHISH VA TAHRIRLASH ---
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    const loadingToast = toast.loading("Saqlanmoqda...");
+    
     const finalData = { 
-      ...formData, 
-      narx: Number(parseNumber(formData.narx)) 
+      materialTuri: formData.materialTuri,
+      miqdor: parseFloat(formData.miqdor),
+      birlik: formData.birlik,
+      narx: parseInt(parseNumber(formData.narx)),
+      sana: editingItem ? editingItem.sana : new Date().toISOString().split('T')[0]
     };
 
-    if (editingItem) {
-      setTannarxlar(tannarxlar.map(t => t.id === editingItem.id ? { ...finalData, id: t.id } : t));
-      toast.success('Muvaffaqiyatli tahrirlandi!');
-    } else {
-      const newItem = { ...finalData, id: Date.now(), sana: new Date().toISOString().split('T')[0] };
-      const newTannarxlar = [...tannarxlar, newItem];
-      setTannarxlar(newTannarxlar);
-      toast.success('Qo’shildi!');
-      setCurrentPage(Math.ceil(newTannarxlar.length / itemsPerPage));
+    try {
+      if (editingItem) {
+        const { error } = await supabase
+          .from('tannarxlar')
+          .update(finalData)
+          .eq('id', editingItem.id);
+        if (error) throw error;
+        toast.success('Tahrirlandi!', { id: loadingToast });
+      } else {
+        const { error } = await supabase
+          .from('tannarxlar')
+          .insert([finalData]);
+        if (error) throw error;
+        toast.success('Qo’shildi!', { id: loadingToast });
+      }
+      setIsModalOpen(false);
+      fetchTannarxlar();
+    } catch (err) {
+      toast.error("Xatolik: " + err.message, { id: loadingToast });
     }
-    setIsModalOpen(false);
+  };
+
+  // --- O'CHIRISH ---
+  const confirmDelete = async () => {
+    const loadingToast = toast.loading("O'chirilmoqda...");
+    try {
+      const { error } = await supabase
+        .from('tannarxlar')
+        .delete()
+        .eq('id', deletingId);
+      
+      if (error) throw error;
+      toast.success("O'chirildi!", { id: loadingToast });
+      setIsDeleteModalOpen(false);
+      fetchTannarxlar();
+    } catch (err) {
+      toast.error("O'chirishda xato!", { id: loadingToast });
+    }
   };
 
   return (
@@ -108,33 +166,37 @@ const Tannarxhisoblash = ({ open }) => {
 
         <div className="table-card-container">
           <div className="scroll-wrapper">
-            <table>
-              <thead>
-                <tr>
-                  <th>Material Turi</th>
-                  <th>Miqdor</th>
-                  <th>Narx (so'm)</th>
-                  <th>Sana</th>
-                  <th className="right-text">Amallar</th>
-                </tr>
-              </thead>
-              <tbody>
-                {currentItems.map((item) => (
-                  <tr key={item.id}>
-                    <td className="bold-td">{item.materialTuri}</td>
-                    <td>{item.miqdor} <span className="birlik-tag" style={{fontSize: '12px', color: '#64748b'}}>{item.birlik}</span></td>
-                    <td style={{fontWeight: '600'}}>{formatNumber(item.narx)}</td>
-                    <td className="gray-td">{item.sana}</td>
-                    <td>
-                      <div className="action-btns-flex">
-                        <button className="edit-action-btn" onClick={() => handleOpenModal(item)}><Pencil size={16} /></button>
-                        <button className="delete-action-btn" onClick={() => { setDeletingId(item.id); setIsDeleteModalOpen(true); }}><Trash2 size={16} /></button>
-                      </div>
-                    </td>
+            {loading ? (
+              <div className="loading-state" style={{padding: '40px', textAlign: 'center', color: '#64748b'}}>Yuklanmoqda...</div>
+            ) : (
+              <table>
+                <thead>
+                  <tr>
+                    <th>Material Turi</th>
+                    <th>Miqdor</th>
+                    <th>Narx (so'm)</th>
+                    <th>Sana</th>
+                    <th className="right-text">Amallar</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {currentItems.map((item) => (
+                    <tr key={item.id}>
+                      <td className="bold-td">{item.materialTuri}</td>
+                      <td>{item.miqdor} <span className="birlik-tag" style={{fontSize: '12px', color: '#64748b'}}>{item.birlik}</span></td>
+                      <td style={{fontWeight: '600'}}>{formatNumber(item.narx)}</td>
+                      <td className="gray-td">{item.sana}</td>
+                      <td>
+                        <div className="action-btns-flex">
+                          <button className="edit-action-btn" onClick={() => handleOpenModal(item)}><Pencil size={16} /></button>
+                          <button className="delete-action-btn" onClick={() => { setDeletingId(item.id); setIsDeleteModalOpen(true); }}><Trash2 size={16} /></button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
           </div>
 
           <div className="pagination-box">
@@ -142,10 +204,9 @@ const Tannarxhisoblash = ({ open }) => {
             <div className="nav-controls">
               <button disabled={currentPage === 1} onClick={() => setCurrentPage(p => p - 1)}><ChevronLeft size={20} /></button>
               <span className="page-count">{currentPage} / {totalPages || 1}</span>
-              <button disabled={currentPage === totalPages} onClick={() => setCurrentPage(p => p + 1)}><ChevronRight size={20} /></button>
+              <button disabled={currentPage === totalPages || totalPages === 0} onClick={() => setCurrentPage(p => p + 1)}><ChevronRight size={20} /></button>
             </div>
           </div>
-          
         </div>
       </div>
 
@@ -207,11 +268,7 @@ const Tannarxhisoblash = ({ open }) => {
             <h3>O'chirib tashlaysizmi?</h3>
             <div className="modal-footer-btns center-btns">
               <button className="cancel-action-btn" onClick={() => setIsDeleteModalOpen(false)}>Yo'q</button>
-              <button className="confirm-del-btn" onClick={() => {
-                setTannarxlar(tannarxlar.filter(i => i.id !== deletingId));
-                toast.error('O\'chirildi!');
-                setIsDeleteModalOpen(false);
-              }}>Ha, o'chirilsin</button>
+              <button className="confirm-del-btn" onClick={confirmDelete}>Ha, o'chirilsin</button>
             </div>
           </div>
         </div>

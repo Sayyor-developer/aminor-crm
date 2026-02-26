@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Search, UserPlus, Edit, Trash2, X, AlertTriangle,
-  Printer, History, /* ShoppingCart, */ TrendingDown, TrendingUp, CheckCircle2, Plus
+  Printer, History, TrendingDown, TrendingUp, CheckCircle2, Plus
 } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
 import html2pdf from 'html2pdf.js';
@@ -16,9 +16,6 @@ const Mijozlar = ({ open }) => {
     mijozQoshish, 
     mijozOchirish, 
     mijozYangilash, 
-    // sotuvQoshish, 
-    // products = [],
-    // setProducts 
   } = useData();
 
   // --- FORMATLASH VA TOZALASH FUNKSIYALARI ---
@@ -47,10 +44,7 @@ const Mijozlar = ({ open }) => {
   const [tahrirlashModalOchiq, setTahrirlashModalOchiq] = useState(false);
   const [ochirishModalOchiq, setOchirishModalOchiq] = useState(false);
   const [profilModalOchiq, setProfilModalOchiq] = useState(false);
-  // const [sotishModalOchiq, setSotishModalOchiq] = useState(false);
   const [yangiMijozModalOchiq, setYangiMijozModalOchiq] = useState(false);
-
-  // const [sotuvData, setSotuvData] = useState({ mahsulot: '', miqdor: '', narx: '' });
 
   const [yangiMijozState, setYangiMijozState] = useState({
     ism: '',
@@ -61,16 +55,6 @@ const Mijozlar = ({ open }) => {
   });
 
   // --- FUNKSIYALAR ---
- /*  const handleMahsulotSelect = (e) => {
-    const nomi = e.target.value;
-    const topilgan = products.find(p => p.name === nomi);
-    if (topilgan) {
-      setSotuvData({ ...sotuvData, mahsulot: nomi, narx: topilgan.price });
-    } else {
-      setSotuvData({ ...sotuvData, mahsulot: nomi, narx: '' });
-    }
-  }; */
-
   const handleDownloadPDF = () => {
     const element = document.getElementById('pdf-content');
     if (!element) return;
@@ -85,108 +69,64 @@ const Mijozlar = ({ open }) => {
     toast.success("PDF yuklab olinmoqda...");
   };
 
-  const handleToggleStatus = (e, m) => {
+  const handleToggleStatus = async (e, m) => {
     e.stopPropagation();
-    mijozYangilash({ ...m, status: !m.status });
-    toast.success(m.status ? "Mijoz nofaol qilindi" : "Mijoz faollashtirildi");
+    try {
+      await mijozYangilash({ ...m, status: !m.status });
+      toast.success(m.status ? "Mijoz nofaol qilindi" : "Mijoz faollashtirildi");
+    } catch (err) {
+      toast.error("Statusni o'zgartirishda xato!");
+    }
   };
 
-  const handleMijozQoshish = () => {
+  const handleMijozQoshish = async () => {
     const ism = yangiMijozState.ism.trim();
     const tel = yangiMijozState.telefon.trim();
 
     if (!ism) return toast.error("Ismni kiriting!");
-    if (!tel.startsWith('+998')) return toast.error("Raqam +998 bilan boshlanishi shart!");
-    if (tel.length !== 13) return toast.error("Raqam 13 ta belgidan iborat bo'lishi shart!");
 
-    const qarz = yangiMijozState.qarzdorlik === '' ? 0 : Number(cleanNumber(yangiMijozState.qarzdorlik));
-
-    const yangi = {
-      ...yangiMijozState,
-      id: Date.now(),
+    // Bazadagi kichik harfli ustunlarga moslangan obyekt
+    const obyekt = {
       ism: ism,
-      qarzdorlik: qarz,
-      oxirgiXarid: yangiMijozState.oxirgiXarid || getBugungiSana(),
-      tolovTarixi: []
+      telefon: tel,
+      qarzdorlik: yangiMijozState.qarzdorlik === '' ? 0 : Number(cleanNumber(yangiMijozState.qarzdorlik)),
+      status: true,
+      manzil: '', 
+      oxirgixarid: yangiMijozState.oxirgiXarid || getBugungiSana(), 
     };
 
-    mijozQoshish(yangi);
-    setYangiMijozState({ ism: '', telefon: '+998', qarzdorlik: '', oxirgiXarid: getBugungiSana(), status: true });
-    setYangiMijozModalOchiq(false);
-    toast.success("Mijoz qo'shildi!");
+    try {
+      await mijozQoshish(obyekt); 
+      setYangiMijozState({
+        ism: '',
+        telefon: '+998',
+        qarzdorlik: '',
+        oxirgiXarid: getBugungiSana(),
+        status: true
+      });
+      setYangiMijozModalOchiq(false);
+      toast.success("Mijoz muvaffaqiyatli qo'shildi!");
+    } catch (error) {
+       console.error("Qo'shishda xato:", error.message);
+       toast.error("Xato: " + error.message);
+    }
   };
 
-  const handleMijozYangilash = () => {
+  const handleMijozYangilash = async () => {
     if (!tanlangan.ism.trim()) return toast.error("Ism bo'sh bo'lmasin");
-    mijozYangilash({ ...tanlangan, qarzdorlik: Number(cleanNumber(tanlangan.qarzdorlik)) });
-    setTahrirlashModalOchiq(false);
-    toast.success("Ma'lumotlar yangilandi");
-  };
-
-  // --- SOTUVNI TO'G'IRLANGAN VARIANTI ---
-  /* const handleSotuvBajarish = () => {
-    const sotishMiqdori = parseFloat(sotuvData.miqdor);
-    const sotishNarxi = parseFloat(cleanNumber(sotuvData.narx));
-
-    if (!sotuvData.mahsulot || isNaN(sotishMiqdori) || sotishMiqdori <= 0) {
-      return toast.error("Miqdorni to'g'ri kiriting!");
-    }
-
-    // Ombordagi mahsulotni topish
-    const omborMahsulot = products.find(p => p.name === sotuvData.mahsulot);
     
-    if (!omborMahsulot) {
-      return toast.error("Mahsulot omborda topilmadi!");
+    try {
+      // Yangilashda ham kichik harfli 'qarzdorlik' ishlatiladi
+      await mijozYangilash({ 
+        ...tanlangan, 
+        qarzdorlik: Number(cleanNumber(tanlangan.qarzdorlik)) 
+      });
+      setTahrirlashModalOchiq(false);
+      toast.success("Ma'lumotlar yangilandi");
+    } catch (error) {
+      toast.error("Yangilashda xatolik: " + error.message);
     }
-
-    // MUHIM: parseFloat ishlatish zaxira bilan matematik xatoni oldini oladi
-    const joriyZaxira = parseFloat(omborMahsulot.stock);
-
-    if (joriyZaxira < sotishMiqdori) {
-      return toast.error(`Omborda yetarli emas! Hozirgi qoldiq: ${joriyZaxira} kg`);
-    }
-
-    const jamiSumma = sotishMiqdori * sotishNarxi;
-    const joriySana = getBugungiSana();
-
-    // 1. OMBORNI YANGILASH (Qat'iy matematik ayirish)
-    const yangiQoldiq = joriyZaxira - sotishMiqdori;
-    const yangiProductsList = products.map(p => 
-      p.id === omborMahsulot.id ? { ...p, stock: yangiQoldiq } : p
-    );
-    setProducts(yangiProductsList);
-
-    // 2. MIJOZ QARZINI YANGILASH
-    const yangilanganMijoz = {
-      ...tanlangan,
-      qarzdorlik: parseFloat(tanlangan.qarzdorlik) + jamiSumma,
-      oxirgiXarid: joriySana,
-      tolovTarixi: [
-        {
-          sana: new Date().toLocaleDateString(),
-          miqdor: `+${jamiSumma.toLocaleString()} so'm`,
-          izoh: `${sotuvData.mahsulot} (${sotishMiqdori} kg)`
-        },
-        ...(tanlangan.tolovTarixi || [])
-      ]
-    };
-    mijozYangilash(yangilanganMijoz);
-
-    // 3. UMUMIY SOTUVLARGA QO'SHISH
-    sotuvQoshish({
-      id: Date.now(),
-      mijozId: tanlangan.id,
-      mijozIsmi: tanlangan.ism,
-      mahsulot: sotuvData.mahsulot,
-      miqdor: sotishMiqdori,
-      summa: jamiSumma,
-      sana: joriySana
-    });
-
-    setSotishModalOchiq(false);
-    setSotuvData({ mahsulot: '', miqdor: '', narx: '' });
-    toast.success(`Sotildi! Yangi qoldiq: ${yangiQoldiq} kg`);
-  }; */
+  };
 
   const getBalansHolati = (miqdor) => {
     const val = Number(miqdor);
@@ -204,7 +144,8 @@ const Mijozlar = ({ open }) => {
 
   const filtrlangan = useMemo(() => {
     return (mijozlar || []).filter(m => {
-      const qidiruvMos = m.ism.toLowerCase().includes(qidiruvMatni.toLowerCase()) || m.telefon.includes(qidiruvMatni);
+      const qidiruvMos = (m.ism || "").toLowerCase().includes(qidiruvMatni.toLowerCase()) || 
+                         (m.telefon || "").includes(qidiruvMatni);
       if (filtrStatus === 'debt') return qidiruvMos && m.qarzdorlik > 0;
       if (filtrStatus === 'no-debt') return qidiruvMos && m.qarzdorlik === 0;
       return qidiruvMos;
@@ -260,7 +201,7 @@ const Mijozlar = ({ open }) => {
                         <small className="flex-center" style={{ gap: '4px' }}>{getBalansHolati(m.qarzdorlik).icon} {getBalansHolati(m.qarzdorlik).tekst}</small>
                       </div>
                     </td>
-                    <td>{m.oxirgiXarid || '---'}</td>
+                    <td>{m.oxirgixarid || '---'}</td>
                     <td className="text-center switch-td">
                       <button className={`switch ${m.status ? 'switch-on' : 'switch-off'}`} onClick={(e) => handleToggleStatus(e, m)}>
                         <span className={`knopka ${m.status ? 'knopka-on' : 'knopka-off'}`} />
@@ -268,7 +209,6 @@ const Mijozlar = ({ open }) => {
                     </td>
                     <td className="text-center actions-td">
                       <div className="flex-center">
-                      {/*   <button className="btn-blue btn-icon" onClick={() => { setTanlangan(m); setSotishModalOchiq(true); }}><ShoppingCart size={14} /></button> */}
                         <button className="m-btn-blue m-btn-icon" onClick={() => { setTanlangan(m); setTahrirlashModalOchiq(true); }}><Edit size={14} /></button>
                         <button className="m-btn-blue m-btn-red m-btn-icon" onClick={() => { setTanlangan(m); setOchirishModalOchiq(true); }}><Trash2 size={14} /></button>
                       </div>
@@ -335,90 +275,16 @@ const Mijozlar = ({ open }) => {
               <p><b>{tanlangan.ism}</b> bazadan o'chiriladi.</p>
               <div className="flex-center delete-btns" style={{ marginTop: '20px', gap: 'var(--gap-10)' }}>
                 <button className="btn-cancel" onClick={() => setOchirishModalOchiq(false)}>Bekor qilish</button>
-                <button className="btn-red-confirm" onClick={() => { mijozOchirish(tanlangan.id); setOchirishModalOchiq(false); toast.error("Mijoz o'chirildi"); }}>Ha, o'chirilsin</button>
+                <button className="btn-red-confirm" onClick={async () => { 
+                  try {
+                    await mijozOchirish(tanlangan.id); 
+                    setOchirishModalOchiq(false); 
+                    toast.error("Mijoz o'chirildi"); 
+                  } catch (err) {
+                    toast.error("O'chirishda xato!");
+                  }
+                }}>Ha, o'chirilsin</button>
               </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* {sotishModalOchiq && tanlangan && (
-        <div className="modal-parda">
-          <div className="modal-oyna">
-            <div className="modal-header">
-              <span>Yangi Sotuv: {tanlangan.ism}</span>
-              <X className="cursor-pointer" onClick={() => setSotishModalOchiq(false)} />
-            </div>
-            <div className="modal-body">
-              <label className="text-gray">Mahsulot</label>
-              <select className="input-style mb-2 select-sotuv" value={sotuvData.mahsulot} onChange={handleMahsulotSelect}>
-                <option value="">Tanlang...</option>
-                {products.map(p => (
-                  <option key={p.id} value={p.name}>{p.name} ({p.stock} kg qoldi)</option>
-                ))}
-              </select>
-              <div className="input-guruhi mb-2" style={{ display: 'flex', gap: 'var(--gap-10)' }}>
-                <div style={{ flex: 1 }}>
-                  <label className="text-gray">Miqdori (kg)</label>
-                  <input type="number" className="input-style" style={{ width: '100%' }} placeholder="0.0" value={sotuvData.miqdor} onChange={e => setSotuvData({ ...sotuvData, miqdor: e.target.value })} />
-                </div>
-                <div style={{ flex: 1 }}>
-                  <label className="text-gray">Narxi (1kg)</label>
-                  <input type="text" className="input-style" style={{ width: '100%' }} placeholder="0" value={formatNumber(sotuvData.narx)} onChange={e => setSotuvData({ ...sotuvData, narx: cleanNumber(e.target.value) })} />
-                </div>
-              </div>
-              <div className="total-box">
-                Jami: {(Number(sotuvData.miqdor) * Number(cleanNumber(sotuvData.narx))).toLocaleString()} so'm
-              </div>
-              <button className="btn-blue btn-full" onClick={handleSotuvBajarish}>Sotuvni yakunlash</button>
-            </div>
-          </div>
-        </div>
-      )} */}
-
-      {profilModalOchiq && tanlangan && (
-        <div className="modal-parda" onClick={() => setProfilModalOchiq(false)}>
-          <div className="modal-oyna profil-modal" onClick={e => e.stopPropagation()}>
-            <div className="modal-header">
-              <span>Mijoz Ma'lumotlari</span>
-              <X className="cursor-pointer" onClick={() => setProfilModalOchiq(false)} />
-            </div>
-            <div className="modal-body">
-              <div id="pdf-content">
-                <div className="profil-grid">
-                  <div className="profil-info-card text-center">
-                    <div className="avatar-big" style={{ margin: '0 auto 15px' }}>{tanlangan.ism?.[0] || 'M'}</div>
-                    <h2 style={{ fontSize: '1.4rem' }}>{tanlangan.ism}</h2>
-                    <p className="text-gray">{tanlangan.telefon}</p>
-                    <div className={`total-box ${getBalansHolati(tanlangan.qarzdorlik).rang}`} style={{ fontSize: '1.3rem', marginTop: '15px' }}>
-                      {formatBalans(tanlangan.qarzdorlik)} so'm
-                    </div>
-                  </div>
-                  <div className="profil-history-card">
-                    <h4 style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '15px' }}>
-                      <History size={18} /> Amallar tarixi
-                    </h4>
-                    <div className="history-list">
-                      {tanlangan.tolovTarixi?.length > 0 ? (
-                        tanlangan.tolovTarixi.map((t, i) => (
-                          <div key={i} className="history-item flex-between" style={{ borderLeft: '3px solid var(--primary-color)', padding: 'var(--gap-10)', marginBottom: '8px', background: '#f8fafc' }}>
-                            <div className="flex-col">
-                              <span style={{ fontWeight: 'var(--font-weight-600)' }}>{t.sana}</span>
-                              <small className="text-gray">{t.izoh}</small>
-                            </div>
-                            <b className="text-red">{t.miqdor}</b>
-                          </div>
-                        ))
-                      ) : (
-                        <p className="no-data">Hozircha amallar mavjud emas</p>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <button className="btn-blue btn-full" style={{ marginTop: '20px', gap: '8px' }} onClick={handleDownloadPDF}>
-                <Printer size={16} /> PDF variantda yuklab olish
-              </button>
             </div>
           </div>
         </div>
