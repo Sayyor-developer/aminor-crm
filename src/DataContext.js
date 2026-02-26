@@ -55,7 +55,7 @@ export const DataProvider = ({ children }) => {
         localStorage.setItem('masalliqlar', JSON.stringify(masalliqlar));
     }, [mijozlar, products, sotuvlar, chiqimlar, masalliqlar]);
 
-    // --- CHIQIM QOSHISH (MOLIYA BILAN BOG'LASH UCHUN) ---
+    // --- CHIQIM QOSHISH ---
     const chiqimQoshish = async (yangiChiqim) => {
         try {
             const { data, error } = await supabase
@@ -148,7 +148,7 @@ export const DataProvider = ({ children }) => {
         setMijozlar(prev => prev.filter(m => m.id !== id));
     };
 
-    // --- SOTUVLAR ---
+    // --- SOTUVLAR (YANGILASH VA OCHIRISH QO'SHILDI) ---
     const sotuvQoshish = async (yangiSotuv) => {
         try {
             const mahsulot = products.find(p => p.name.trim().toLowerCase() === yangiSotuv.mahsulot.trim().toLowerCase());
@@ -184,6 +184,34 @@ export const DataProvider = ({ children }) => {
         }
     };
 
+    const sotuvYangilash = async (updated) => {
+        try {
+            const toBase = {
+                mijozid: updated.mijozId,
+                mahsulot: updated.mahsulot,
+                miqdor: updated.miqdor,
+                summa: updated.summa,
+                tulangan: updated.tulangan,
+                sana: updated.sana
+            };
+            const { error } = await supabase.from('sotuvlar').update(toBase).eq('id', updated.id);
+            if (error) throw error;
+            setSotuvlar(prev => prev.map(s => s.id === updated.id ? updated : s));
+        } catch (err) {
+            console.error("Sotuvni yangilashda xato:", err.message);
+        }
+    };
+
+    const sotuvOchirish = async (id) => {
+        try {
+            const { error } = await supabase.from('sotuvlar').delete().eq('id', id);
+            if (error) throw error;
+            setSotuvlar(prev => prev.filter(s => s.id !== id));
+        } catch (err) {
+            console.error("Sotuvni o'chirishda xato:", err.message);
+        }
+    };
+
     // --- TOZALASH ---
     const clearAllData = async () => {
         if (window.confirm("DIQQAT! Barcha ma'lumotlar o'chib ketadi. Rozimisiz?")) {
@@ -212,19 +240,16 @@ export const DataProvider = ({ children }) => {
         }
     };
 
-    // --- CALCULATIONS (MOLIYA ZANJIRI) ---
+    // --- CALCULATIONS ---
     const jamiKirim = useMemo(() => sotuvlar.reduce((sum, s) => sum + parseFloat(s.tulangan || 0), 0), [sotuvlar]);
     
-    // Chiqimlar ichiga endi masalliq xaridlari ham kiradi
-   const jamiChiqim = useMemo(() => {
-    const xarajatlar = chiqimlar.reduce((sum, c) => sum + parseFloat(c.summa || 0), 0);
-    const masalliqXarajat = masalliqlar.reduce((sum, m) => sum + (parseFloat(m.narxi || 0) * parseFloat(m.miqdori || 1)), 0);
-    return xarajatlar + masalliqXarajat;
-}, [chiqimlar, masalliqlar]);
+    const jamiChiqim = useMemo(() => {
+        const xarajatlar = chiqimlar.reduce((sum, c) => sum + parseFloat(c.summa || 0), 0);
+        const masalliqXarajat = masalliqlar.reduce((sum, m) => sum + (parseFloat(m.narxi || 0) * parseFloat(m.miqdori || 1)), 0);
+        return xarajatlar + masalliqXarajat;
+    }, [chiqimlar, masalliqlar]);
     
     const jamiQarzlar = useMemo(() => mijozlar.reduce((sum, m) => sum + parseFloat(m.qarzdorlik || 0), 0), [mijozlar]);
-    
-    // Sof foyda: Kirimdan barcha chiqimlarni ayiramiz
     const sofFoyda = useMemo(() => jamiKirim - jamiChiqim, [jamiKirim, jamiChiqim]);
 
     return (
@@ -234,7 +259,8 @@ export const DataProvider = ({ children }) => {
             mijozQoshish, mijozOchirish, mijozYangilash,
             productQoshish,
             masalliqQoshish, masalliqOchirish,
-            sotuvQoshish, chiqimQoshish, // <-- Chiqim qo'shish export qilindi
+            sotuvQoshish, sotuvYangilash, sotuvOchirish, // <-- ENDI BU FUNKSIYALAR MAVJUD
+            chiqimQoshish,
             clearAllData, fetchData, jamiKirim, jamiChiqim, jamiQarzlar, sofFoyda
         }}>
             {children}

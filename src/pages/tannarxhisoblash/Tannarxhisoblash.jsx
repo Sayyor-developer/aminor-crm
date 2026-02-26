@@ -1,7 +1,7 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react'; // 1. useCallback qo'shildi
 import { Pencil, Trash2, Search, Plus, ChevronLeft, ChevronRight, AlertTriangle, X } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
-import { useData } from '../../DataContext'; // Supabase obyektini context'dan olish
+import { useData } from '../../DataContext'; 
 import './tannarxhisoblash.css';
 
 const Tannarxhisoblash = ({ open }) => {
@@ -21,8 +21,8 @@ const Tannarxhisoblash = ({ open }) => {
     materialTuri: '', miqdor: '', birlik: 'kg', narx: ''
   });
 
-  // --- SUPABASE DAN MA'LUMOTLARNI YUKLASH ---
-  const fetchTannarxlar = async () => {
+  // --- SUPABASE DAN MA'LUMOTLARNI YUKLASH (useCallback bilan o'raldi) ---
+  const fetchTannarxlar = useCallback(async () => {
     try {
       setLoading(true);
       const { data, error } = await supabase
@@ -38,11 +38,12 @@ const Tannarxhisoblash = ({ open }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [supabase]); // Supabase o'zgarsagina funksiya qayta yaratiladi
 
+  // --- useEffect endi warning bermaydi ---
   useEffect(() => {
     fetchTannarxlar();
-  }, []);
+  }, [fetchTannarxlar]);
 
   // --- FORMATLASH ---
   const formatNumber = (val) => {
@@ -54,6 +55,7 @@ const Tannarxhisoblash = ({ open }) => {
     return val ? val.toString().replace(/\s/g, '') : '0';
   };
 
+  // --- FILTER & PAGINATION (Optimallashgan) ---
   const filteredData = useMemo(() => {
     return tannarxlar.filter(item =>
       (item.materialTuri || '').toLowerCase().includes(searchTerm.toLowerCase())
@@ -113,7 +115,7 @@ const Tannarxhisoblash = ({ open }) => {
         toast.success('Qo’shildi!', { id: loadingToast });
       }
       setIsModalOpen(false);
-      fetchTannarxlar();
+      fetchTannarxlar(); // Callback funksiyani chaqirish
     } catch (err) {
       toast.error("Xatolik: " + err.message, { id: loadingToast });
     }

@@ -98,7 +98,6 @@ const Moliya = ({ open }) => {
                 onChange={(e) => setVaqtFiltr(e.target.value)}
                 className="moliya-select"
               >
-                <option value="7kun">7 kun</option>
                 <option value="1oy">1 oy</option>
                 <option value="1yil">1 yil</option>
               </select>

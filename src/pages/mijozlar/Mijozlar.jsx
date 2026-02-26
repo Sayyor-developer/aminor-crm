@@ -2,10 +2,9 @@ import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Search, UserPlus, Edit, Trash2, X, AlertTriangle,
-  Printer, History, TrendingDown, TrendingUp, CheckCircle2, Plus
+  TrendingDown, TrendingUp, CheckCircle2, Plus
 } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast';
-import html2pdf from 'html2pdf.js';
 import { useData } from '../../DataContext';
 import './mijozlar.css';
 
@@ -43,7 +42,6 @@ const Mijozlar = ({ open }) => {
 
   const [tahrirlashModalOchiq, setTahrirlashModalOchiq] = useState(false);
   const [ochirishModalOchiq, setOchirishModalOchiq] = useState(false);
-  const [profilModalOchiq, setProfilModalOchiq] = useState(false);
   const [yangiMijozModalOchiq, setYangiMijozModalOchiq] = useState(false);
 
   const [yangiMijozState, setYangiMijozState] = useState({
@@ -55,19 +53,7 @@ const Mijozlar = ({ open }) => {
   });
 
   // --- FUNKSIYALAR ---
-  const handleDownloadPDF = () => {
-    const element = document.getElementById('pdf-content');
-    if (!element) return;
-    const opt = {
-      margin: 10,
-      filename: `${tanlangan.ism}_hisobot.pdf`,
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2 },
-      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-    };
-    html2pdf().set(opt).from(element).save();
-    toast.success("PDF yuklab olinmoqda...");
-  };
+ 
 
   const handleToggleStatus = async (e, m) => {
     e.stopPropagation();

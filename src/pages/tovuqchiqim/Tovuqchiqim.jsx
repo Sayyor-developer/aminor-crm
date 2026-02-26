@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { 
   Search, Plus, Trash2, Edit, ChevronLeft, ChevronRight, X, Calculator, AlertTriangle, Download 
 } from 'lucide-react';
@@ -22,14 +22,17 @@ const Tovuqchiqim = ({ open }) => {
   
   const itemsPerPage = 7; 
   const yieldFactor = 0.85;
-  const TOVUQ_NARXI = 25000; // 1 dona tovuq narxi
+  const TOVUQ_NARXI = 25000; 
 
   const [formData, setFormData] = useState({
-    tovuqSoni: '', mahsulotSoni: '', taminotchi: '', sana: new Date().toISOString().split('T')[0]
+    tovuqSoni: '', 
+    mahsulotSoni: '', 
+    taminotchi: '', 
+    sana: new Date().toISOString().split('T')[0]
   });
 
-  // --- DATA FETCHING ---
-  const fetchData = async () => {
+  // --- DATA FETCHING (useCallback bilan warningni yo'qotamiz) ---
+  const fetchData = useCallback(async () => {
     try {
       setLoading(true);
       const { data: bData, error } = await supabase
@@ -39,20 +42,24 @@ const Tovuqchiqim = ({ open }) => {
       if (error) throw error;
       setData(bData || []);
     } catch (err) {
+      console.error("Fetch error:", err);
       toast.error("Ma'lumotni yuklashda xato!");
     } finally {
       setLoading(false);
     }
-  };
+  }, [supabase]); // Supabase o'zgarsagina funksiya qayta yaratiladi
 
-  useEffect(() => { fetchData(); }, []);
+  useEffect(() => { 
+    fetchData(); 
+  }, [fetchData]); // Endi bu yerda sarg'ish warning chiqmaydi
 
+  // --- PDF GENERATION ---
   const downloadPDF = () => {
     const doc = new jsPDF();
     doc.text("Tovuq Chiqimlari Hisoboti", 14, 15);
     autoTable(doc, {
       head: [["Tovuq soni", "Tayyor mahsulot", "Sana", "Ta'minotchi"]],
-      body: data.map(item => [item.tovuqSoni, item.mahsulotSoni, item.sana, item.taminotchi]),
+      body: data.map(item => [item.tovuqsoni, item.mahsulotsoni, item.sana, item.taminotchi]),
       startY: 20,
       theme: 'grid',
       headStyles: { fillColor: [155, 28, 28] }
@@ -61,6 +68,7 @@ const Tovuqchiqim = ({ open }) => {
     toast.success("PDF saqlandi!");
   };
 
+  // --- TOGGLE STATUS ---
   const toggleStatus = async (item) => {
     const { error } = await supabase
       .from('tovuq_chiqim')
@@ -68,66 +76,82 @@ const Tovuqchiqim = ({ open }) => {
       .eq('id', item.id);
     
     if (!error) {
-      setData(data.map(i => i.id === item.id ? { ...i, holat: !item.holat } : i));
+      setData(prevData => prevData.map(i => i.id === item.id ? { ...i, holat: !item.holat } : i));
       toast.success("Holat yangilandi");
     }
   };
 
+  // --- HANDLE SUBMIT ---
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const xarajatSummasi = Number(formData.tovuqSoni) * TOVUQ_NARXI;
+    
+    const baseData = {
+      tovuqsoni: Number(formData.tovuqSoni),
+      mahsulotsoni: Number(formData.mahsulotSoni),
+      taminotchi: formData.taminotchi,
+      sana: formData.sana
+    };
 
     try {
       if (editingItem) {
-        // TAHRIRLASH
         const { error } = await supabase
           .from('tovuq_chiqim')
-          .update(formData)
+          .update(baseData)
           .eq('id', editingItem.id);
+
         if (error) throw error;
         toast.success("O'zgarish saqlandi");
       } else {
-        // YANGI QO'SHISH
-        const { data: newRow, error } = await supabase
+        const { error: insertError } = await supabase
           .from('tovuq_chiqim')
-          .insert([formData])
-          .select();
+          .insert([{ ...baseData, holat: true }]);
         
-        if (error) throw error;
+        if (insertError) throw insertError;
 
-        // Moliya bo'limiga chiqim sifatida yozish
-        await chiqimQoshish({
-          turi: "Tovuq xaridi",
-          manbaa: formData.taminotchi,
-          summa: xarajatSummasi,
-          sana: formData.sana
-        });
-
-        toast.success("Muvaffaqiyatli qo'shildi va xarajat qayd etildi");
+        if (chiqimQoshish) {
+          await chiqimQoshish({
+            turi: "Tovuq xaridi",
+            manbaa: formData.taminotchi,
+            summa: Number(formData.tovuqSoni) * TOVUQ_NARXI,
+            sana: formData.sana
+          });
+        }
+        toast.success("Muvaffaqiyatli qo'shildi");
       }
+
       fetchData();
       setIsModalOpen(false);
+      setFormData({tovuqSoni:'', mahsulotSoni:'', taminotchi:'', sana: new Date().toISOString().split('T')[0]});
+      setEditingItem(null);
     } catch (err) {
-      toast.error("Xatolik yuz berdi");
+      console.error("Submit error:", err);
+      toast.error(err.message || "Xatolik yuz berdi");
     }
   };
 
+  // --- DELETE ITEM ---
   const handleConfirmDelete = async () => {
     if (itemToDelete) {
       const { error } = await supabase.from('tovuq_chiqim').delete().eq('id', itemToDelete.id);
       if (!error) {
-        setData(data.filter(i => i.id !== itemToDelete.id));
-        toast.error("Ma'lumot o'chirildi");
+        setData(prev => prev.filter(i => i.id !== itemToDelete.id));
+        toast.success("Ma'lumot o'chirildi");
+      } else {
+        toast.error("O'chirishda xato bo'ldi");
       }
       setIsDeleteModalOpen(false);
     }
   };
 
+  // --- PAGINATION & SEARCH ---
   const filteredData = useMemo(() => {
     return data.filter(item => item.taminotchi?.toLowerCase().includes(searchTerm.toLowerCase()));
   }, [data, searchTerm]);
 
-  const paginatedData = filteredData.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+  const paginatedData = useMemo(() => {
+    return filteredData.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+  }, [filteredData, currentPage, itemsPerPage]);
+
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
 
   return (
@@ -138,34 +162,58 @@ const Tovuqchiqim = ({ open }) => {
         <div className="tovuqchiqim-header">
           <div className="tovuqchiqim-title-box">
             <h1>Tovuq Chiqimlari</h1>
-            <p>Xomashyo nazorati va mahsulot unumdorligi (Supabase)</p>
+            <p>Xomashyo nazorati va mahsulot unumdorligi</p>
           </div>
           <div className="tovuqchiqim-header-btns">
-            <button className="tovuqchiqim-print-btn" onClick={downloadPDF}><Download size={18} /> Chop etish</button>
-            <button className="tovuqchiqim-add-btn" onClick={() => {setEditingItem(null); setFormData({tovuqSoni:'', mahsulotSoni:'', taminotchi:'', sana: new Date().toISOString().split('T')[0]}); setIsModalOpen(true)}}><Plus size={18} /> Yangi qo'shish</button>
+            <button className="tovuqchiqim-print-btn" onClick={downloadPDF}><Download size={18} /> PDF</button>
+            <button className="tovuqchiqim-add-btn" onClick={() => {
+              setEditingItem(null); 
+              setFormData({tovuqSoni:'', mahsulotSoni:'', taminotchi:'', sana: new Date().toISOString().split('T')[0]}); 
+              setIsModalOpen(true);
+            }}><Plus size={18} /> Yangi qo'shish</button>
           </div>
         </div>
 
+        {/* Stats Section */}
         <div className="tovuqchiqim-stats-container">
           <div className="tovuqchiqim-stat-card">
-            <div className="tovuqchiqim-info"><span>JAMI TOVUQLAR</span><h3>{data.reduce((a, b) => a + Number(b.tovuqSoni || 0), 0).toLocaleString()}</h3></div>
+            <div className="tovuqchiqim-info">
+                <span>JAMI TOVUQ</span>
+                <h3>{data.reduce((a, b) => a + Number(b.tovuqsoni || 0), 0).toLocaleString()}</h3>
+            </div>
           </div>
           <div className="tovuqchiqim-stat-card">
-            <div className="tovuqchiqim-info"><span>TAYYOR MAHSULOT</span><h3>{data.reduce((a, b) => a + Number(b.mahsulotSoni || 0), 0).toLocaleString()}</h3></div>
+            <div className="tovuqchiqim-info">
+                <span>MAHSULOT</span>
+                <h3>{data.reduce((a, b) => a + Number(b.mahsulotsoni || 0), 0).toLocaleString()}</h3>
+            </div>
           </div>
           <div className="tovuqchiqim-stat-card">
-            <div className="tovuqchiqim-info"><span>UNUMDORLIK</span><h3>{((data.reduce((a, b) => a + Number(b.mahsulotSoni || 0), 0) / data.reduce((a, b) => a + Number(b.tovuqSoni || 0), 1)) * 100).toFixed(1)}%</h3></div>
+            <div className="tovuqchiqim-info">
+              <span>UNUMDORLIK</span>
+              <h3>
+                {data.length > 0 
+                  ? ((data.reduce((a, b) => a + Number(b.mahsulotsoni || 0), 0) / 
+                      data.reduce((a, b) => a + Number(b.tovuqsoni || 1), 1)) * 100).toFixed(1) 
+                  : 0}%
+              </h3>
+            </div>
           </div>
         </div>
 
+        {/* Calculator Banner */}
         <div className="tovuqchiqim-calc-banner">
-          <div className="tovuqchiqim-calc-info"><Calculator size={24} /><div><h4>Tezkor Kalkulyator</h4><p>Prognoz (85%)</p></div></div>
+          <div className="tovuqchiqim-calc-info"><Calculator size={24} /><div><h4>Kalkulyator</h4><p>Prognoz (85%)</p></div></div>
           <input type="number" placeholder="Soni..." value={calcInput} onChange={(e) => setCalcInput(e.target.value)} />
           <div className="tovuqchiqim-calc-res">Tayyor: <span>{Math.round(Number(calcInput) * yieldFactor) || 0}</span> dona</div>
         </div>
 
         <div className="tovuqchiqim-main-card">
-          <div className="tovuqchiqim-search"><Search size={18} /><input type="text" placeholder="Ta'minotchi bo'yicha..." onChange={(e) => {setSearchTerm(e.target.value); setCurrentPage(1)}} /></div>
+          <div className="tovuqchiqim-search">
+            <Search size={18} />
+            <input type="text" placeholder="Ta'minotchi bo'yicha..." onChange={(e) => {setSearchTerm(e.target.value); setCurrentPage(1)}} />
+          </div>
+          
           <div className="tovuqchiqim-table-responsive">
             <table className="tovuqchiqim-table">
               <thead>
@@ -175,10 +223,10 @@ const Tovuqchiqim = ({ open }) => {
               </thead>
               <tbody>
                 {loading ? <tr><td colSpan="6" style={{textAlign:'center'}}>Yuklanmoqda...</td></tr> : 
-                 paginatedData.map((item) => (
+                  paginatedData.map((item) => (
                   <tr key={item.id} className={item.holat ? "row-active" : "row-disabled"}>
-                    <td className="tovuqchiqim-bold">{item.tovuqSoni}</td>
-                    <td><span className="tovuqchiqim-prod-val">{item.mahsulotSoni}</span></td>
+                    <td className="tovuqchiqim-bold">{item.tovuqsoni} ta</td>
+                    <td><span className="tovuqchiqim-prod-val">{item.mahsulotsoni} ta</span></td>
                     <td>{item.sana}</td>
                     <td><span className="tovuqchiqim-vendor">{item.taminotchi}</span></td>
                     <td>
@@ -188,7 +236,16 @@ const Tovuqchiqim = ({ open }) => {
                     </td>
                     <td className="tovuqchiqim-text-right">
                       <div className="action-btns">
-                        <button className="tovuqchiqim-edit" onClick={() => {setEditingItem(item); setFormData(item); setIsModalOpen(true)}}><Edit size={16}/></button>
+                        <button className="tovuqchiqim-edit" onClick={() => {
+                            setEditingItem(item); 
+                            setFormData({
+                                tovuqSoni: item.tovuqsoni,
+                                mahsulotSoni: item.mahsulotsoni,
+                                taminotchi: item.taminotchi,
+                                sana: item.sana
+                            }); 
+                            setIsModalOpen(true)
+                        }}><Edit size={16}/></button>
                         <button className="tovuqchiqim-del" onClick={() => {setItemToDelete(item); setIsDeleteModalOpen(true)}}><Trash2 size={16}/></button>
                       </div>
                     </td>
@@ -197,6 +254,8 @@ const Tovuqchiqim = ({ open }) => {
               </tbody>
             </table>
           </div>
+
+          {/* Pagination */}
           <div className="tovuqchiqim-pagination">
             <p>{currentPage} / {totalPages || 1}</p>
             <div className="pag-btns">
@@ -211,14 +270,29 @@ const Tovuqchiqim = ({ open }) => {
       {isModalOpen && (
         <div className="modal-parda" onClick={() => setIsModalOpen(false)}>
           <div className="modal-oyna" onClick={e => e.stopPropagation()}>
-            <div className="modal-header"><h3>{editingItem ? 'Tahrirlash' : 'Yangi qo\'shish'}</h3><X className="cursor-pointer" onClick={() => setIsModalOpen(false)} /></div>
+            <div className="modal-header">
+                <h3>{editingItem ? 'Tahrirlash' : 'Yangi qo\'shish'}</h3>
+                <X className="cursor-pointer" onClick={() => setIsModalOpen(false)} />
+            </div>
             <form onSubmit={handleSubmit} className="modal-body">
               <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '10px'}}>
-                <input className="input-style" type="number" placeholder="Tovuq soni" value={formData.tovuqSoni} onChange={e => setFormData({...formData, tovuqSoni: e.target.value})} required />
-                <input className="input-style" type="number" placeholder="Mahsulot soni" value={formData.mahsulotSoni} onChange={e => setFormData({...formData, mahsulotSoni: e.target.value})} required />
+                <div className="input-group">
+                    <label>Tovuq soni</label>
+                    <input className="input-style" type="number" value={formData.tovuqSoni} onChange={e => setFormData({...formData, tovuqSoni: e.target.value})} required />
+                </div>
+                <div className="input-group">
+                    <label>Mahsulot soni</label>
+                    <input className="input-style" type="number" value={formData.mahsulotSoni} onChange={e => setFormData({...formData, mahsulotSoni: e.target.value})} required />
+                </div>
               </div>
-              <input className="input-style w-full mb-3" type="text" placeholder="Ta'minotchi nomi" value={formData.taminotchi} onChange={e => setFormData({...formData, taminotchi: e.target.value})} required />
-              <input className="input-style w-full mb-3" type="date" value={formData.sana} onChange={e => setFormData({...formData, sana: e.target.value})} required />
+              <div className="input-group mb-3">
+                <label>Ta'minotchi nomi</label>
+                <input className="input-style w-full" type="text" value={formData.taminotchi} onChange={e => setFormData({...formData, taminotchi: e.target.value})} required />
+              </div>
+              <div className="input-group mb-3">
+                <label>Sana</label>
+                <input className="input-style w-full" type="date" value={formData.sana} onChange={e => setFormData({...formData, sana: e.target.value})} required />
+              </div>
               <div className="modal-footer">
                 <button type="button" className="btn-cancel" onClick={() => setIsModalOpen(false)}>Bekor qilish</button>
                 <button type="submit" className="btn-blue">Saqlash</button>
@@ -233,9 +307,9 @@ const Tovuqchiqim = ({ open }) => {
         <div className="modal-parda" onClick={() => setIsDeleteModalOpen(false)}>
           <div className="modal-oyna modal-delete" onClick={e => e.stopPropagation()}>
             <div className="delete-icon-center"><AlertTriangle size={48} color="#ef4444" /></div>
-            <h3 className="delete-title">O'chirilsinmi?</h3>
+            <h3 className="delete-title">Ushbu ma'lumotni o'chirishga aminmisiz?</h3>
             <div className="modal-footer-btns">
-              <button className="btn-cancel" onClick={() => setIsDeleteModalOpen(false)}>Yo'q</button>
+              <button className="btn-cancel" onClick={() => setIsDeleteModalOpen(false)}>Bekor qilish</button>
               <button className="btn-red-confirm" onClick={handleConfirmDelete}>O'chirish</button>
             </div>
           </div>
