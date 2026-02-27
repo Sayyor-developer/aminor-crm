@@ -35,7 +35,7 @@ const Header = ({ open, title }) => {
     <>
       <HeaderContainer open={open}>
         <div className="header-wrapper">
-          <h2 className="page-title">Dashboard - {title}</h2>
+          <h2 className="page-title">{title}</h2>
           
           {/* onClick endi modalni ochadi */}
           <div className="account-section" onClick={() => setShowModal(true)}>

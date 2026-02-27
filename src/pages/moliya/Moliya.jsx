@@ -54,7 +54,7 @@ const Moliya = ({ open }) => {
     <div className={`moliya-wrapper ${open ? 'sidebar-moliya-open' : 'sidebar-moliya-closed'}`}>
       <div className="moliya-container">
         <header className="header-section">
-          <h2 className="header-title">Moliya Analitikasi</h2>
+          <h2 className="header-title">Moliya bo'limi</h2>
           <p className="header-subtitle">Direktor boshqaruvi bilan sinxronlangan</p>
         </header>
 
