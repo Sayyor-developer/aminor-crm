@@ -31,8 +31,9 @@ const Login = () => {
             });
 
             if (error) {
+                // Xatolik xabarini moslashtirish
                 if (error.message === "Invalid login credentials") {
-                    throw new Error("Email yoki parol noto'g'ri!");
+                    throw new Error("Login yoki Parol xato!");
                 } else if (error.message === "Email not confirmed") {
                     throw new Error("Email tasdiqlanmagan!");
                 } else {
@@ -41,13 +42,13 @@ const Login = () => {
             }
 
             if (data.session) {
-                toast.success("Xush kelibsiz!");
+                toast.success("Muvaffaqiyatli kirildi!"); // Xabar yangilandi
                 navigate('/home');
             }
 
         } catch (error) {
             console.error("Login xatosi:", error.message);
-            toast.error(error.message);
+            toast.error(error.message); // Moslashtirilgan xato xabarini ko'rsatish
         } finally {
             setLoading(false);
         }

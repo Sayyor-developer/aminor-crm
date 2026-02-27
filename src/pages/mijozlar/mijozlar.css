@@ -976,18 +976,27 @@
         align-items: center;
         /* Hamma narsani o'rtaga tekislaydi */
     }
+    .history-link-box{
+        width: 70%;
+    }
 
     .profil-main-content {
         width: 100%;
         display: flex;
         flex-direction: column;
         align-items: center;
+        gap: inherit;
     }
+    .header{
+        flex-direction: column;
+
+    }
+   
 
     /* Karta ko'rinishidagi qismlar */
     .inner-card,
     .history-table-container {
-        width: 100% !important;
+        width: 70% !important;
         /* 80% emas, 100% qilib, padding bilan chetidan joy tashlaymiz */
         max-width: 400px;
         /* Haddan tashqari kengayib ketmasligi uchun */
@@ -1000,8 +1009,7 @@
     /* Tugmalar rasmdegidek yonma-yon tursin */
     .content-tabs {
         flex-direction: column;
-        width: 100%;
-        gap: var(--gap-10);
+        
     }
 
     .tab-right-actions {
@@ -1046,6 +1054,9 @@
 
     .tab-right-actions {
         gap: 5px;
+    }
+    .header{
+        width: 30%;
     }
 
     .btn-print,
