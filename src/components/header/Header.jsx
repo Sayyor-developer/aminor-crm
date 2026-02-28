@@ -33,18 +33,17 @@ const Header = ({ open, title }) => {
 
   return (
     <>
-      <HeaderContainer open={open}>
+      <HeaderContainer  open={open}>
         <div className="header-wrapper">
           <h2 className="page-title">{title}</h2>
           
           {/* onClick endi modalni ochadi */}
-          <div className="account-section" onClick={() => setShowModal(true)}>
-            <div className="user-info">
+          <button className="account-section" onClick={() => setShowModal(true)}>
               <AccountCircleIcon className="user-icon" />
               <span className="user-name">Sign out</span>
-            </div>
+      
             <LogoutIcon className="logout-icon" />
-          </div>
+          </button>
         </div>
       </HeaderContainer>
 

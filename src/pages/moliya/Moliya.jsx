@@ -109,8 +109,8 @@ const Moliya = ({ open }) => {
                   <AreaChart data={moliyaStatistika.chartData}>
                     <defs>
                       <linearGradient id="colorSotuv" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3}/>
-                        <stop offset="95%" stopColor="#3b82f6" stopOpacity={0}/>
+                        <stop offset="5%" stopColor="var(--primary-color)" stopOpacity={0.3}/>
+                        <stop offset="95%" stopColor="var(--primary-color)" stopOpacity={0}/>
                       </linearGradient>
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" vertical={true} stroke="#f1f5f9" />
@@ -127,7 +127,7 @@ const Moliya = ({ open }) => {
                           return (
                             <div className="custom-tooltip" style={{ background: '#fff', padding: '10px', borderRadius: '8px', boxShadow: '0 2px 10px rgba(0,0,0,0.1)' }}>
                               <p style={{ margin: 0, fontWeight: 'bold' }}>{d.label}</p>
-                              <p style={{ margin: 0, color: '#3b82f6' }}>{formatMoney(d.sotuv)} so'm</p>
+                              <p style={{ margin: 0, color: 'var(--primary-color)' }}>{formatMoney(d.sotuv)} so'm</p>
                             </div>
                           );
                         }
@@ -137,7 +137,7 @@ const Moliya = ({ open }) => {
                     <Area 
                       type="monotone" 
                       dataKey="sotuv" 
-                      stroke="#3b82f6" 
+                      stroke="var(--primary-color)" 
                       fill="url(#colorSotuv)" 
                       strokeWidth={3} 
                     />
