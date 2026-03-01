@@ -5,7 +5,7 @@ import {
     InputAdornment, IconButton
 } from '@mui/material';
 
-import { supabase } from '../../api/supabaseClient'; 
+import { supabase } from '../../api/supabaseClient';
 import { useNavigate } from 'react-router-dom';
 import { Lock, Visibility, VisibilityOff, Email } from '@mui/icons-material';
 import { toast } from 'react-toastify';
@@ -22,33 +22,46 @@ const Login = () => {
 
     const handleLogin = async (e) => {
         e.preventDefault();
+        if (loading) return;
+
         setLoading(true);
 
         try {
-            const { data, error } = await supabase.auth.signInWithPassword({
+            const { error } = await supabase.auth.signInWithPassword({
                 email: email.trim(),
                 password: password,
             });
 
             if (error) {
-                // Xatolik xabarini moslashtirish
                 if (error.message === "Invalid login credentials") {
                     throw new Error("Login yoki Parol xato!");
-                } else if (error.message === "Email not confirmed") {
-                    throw new Error("Email tasdiqlanmagan!");
-                } else {
-                    throw error;
                 }
+                if (error.message === "Email not confirmed") {
+                    throw new Error("Email tasdiqlanmagan!");
+                }
+                throw error;
             }
 
-            if (data.session) {
-                toast.success("Muvaffaqiyatli kirildi!"); // Xabar yangilandi
-                navigate('/home');
+            // Session yozilishini kutamiz (browserga qarab kechikishi mumkin)
+            let session = null;
+
+            for (let i = 0; i < 6; i++) {
+                const { data } = await supabase.auth.getSession();
+                session = data.session;
+                if (session) break;
+                await new Promise(res => setTimeout(res, 250));
             }
+
+            if (!session) {
+                throw new Error("Session saqlanmadi. Qaytadan urinib ko‘ring.");
+            }
+
+            toast.success("Muvaffaqiyatli kirildi!");
+            navigate('/home');
 
         } catch (error) {
             console.error("Login xatosi:", error.message);
-            toast.error(error.message); // Moslashtirilgan xato xabarini ko'rsatish
+            toast.error(error.message);
         } finally {
             setLoading(false);
         }
@@ -76,7 +89,7 @@ const Login = () => {
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             required
-                            autoComplete="off" // Brauzerga saqlangan ma'lumotni qo'yma deydi
+                            autoComplete="off"
                             InputProps={{
                                 startAdornment: (
                                     <InputAdornment position="start">
@@ -93,7 +106,7 @@ const Login = () => {
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             required
-                            autoComplete="new-password" // Eski parollarni chiqarishni cheklaydi
+                            autoComplete="new-password"
                             InputProps={{
                                 startAdornment: (
                                     <InputAdornment position="start">
@@ -118,7 +131,9 @@ const Login = () => {
                         type="submit"
                         disabled={loading}
                         sx={{
-                            mt: 3, py: 1.5, fontWeight: 'bold',
+                            mt: 3,
+                            py: 1.5,
+                            fontWeight: 'bold',
                             bgcolor: '#9f2728',
                             '&:hover': { bgcolor: '#751313' }
                         }}
