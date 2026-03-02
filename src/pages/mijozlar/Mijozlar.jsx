@@ -52,18 +52,7 @@ const Mijozlar = ({ open }) => {
     status: true
   });
 
-  // --- FUNKSIYALAR ---
- 
-
-  const handleToggleStatus = async (e, m) => {
-    e.stopPropagation();
-    try {
-      await mijozYangilash({ ...m, status: !m.status });
-      toast.success(m.status ? "Mijoz nofaol qilindi" : "Mijoz faollashtirildi");
-    } catch (err) {
-      toast.error("Statusni o'zgartirishda xato!");
-    }
-  };
+  // --- ASOSIY FUNKSIYALAR ---
 
   const handleMijozQoshish = async () => {
     const ism = yangiMijozState.ism.trim();
@@ -94,7 +83,11 @@ const Mijozlar = ({ open }) => {
       toast.success("Mijoz muvaffaqiyatli qo'shildi!");
     } catch (error) {
        console.error("Qo'shishda xato:", error.message);
-       toast.error("Xato: " + error.message);
+       if (error.message.includes('row-level security')) {
+         toast.error("Baza ruxsat bermadi (RLS Policy xatosi)!");
+       } else {
+         toast.error("Xato: " + error.message);
+       }
     }
   };
 
@@ -102,7 +95,6 @@ const Mijozlar = ({ open }) => {
     if (!tanlangan.ism.trim()) return toast.error("Ism bo'sh bo'lmasin");
     
     try {
-      // Yangilashda ham kichik harfli 'qarzdorlik' ishlatiladi
       await mijozYangilash({ 
         ...tanlangan, 
         qarzdorlik: Number(cleanNumber(tanlangan.qarzdorlik)) 
@@ -111,6 +103,16 @@ const Mijozlar = ({ open }) => {
       toast.success("Ma'lumotlar yangilandi");
     } catch (error) {
       toast.error("Yangilashda xatolik: " + error.message);
+    }
+  };
+
+  const handleToggleStatus = async (e, m) => {
+    e.stopPropagation();
+    try {
+      await mijozYangilash({ ...m, status: !m.status });
+      toast.success(m.status ? "Mijoz nofaol qilindi" : "Mijoz faollashtirildi");
+    } catch (err) {
+      toast.error("Statusni o'zgartirishda xato!");
     }
   };
 
@@ -207,6 +209,8 @@ const Mijozlar = ({ open }) => {
         </div>
       </div>
 
+      {/* --- MODALLAR --- */}
+
       {yangiMijozModalOchiq && (
         <div className="modal-parda">
           <div className="modal-oyna">
@@ -217,8 +221,10 @@ const Mijozlar = ({ open }) => {
             <div className="modal-body">
               <label className="text-gray">Ism sharifi</label>
               <input className="input-style mb-2" placeholder="F.I.O" value={yangiMijozState.ism} onChange={e => setYangiMijozState({ ...yangiMijozState, ism: e.target.value })} />
+              
               <label className="text-gray">Telefon raqami</label>
               <input className="input-style mb-2" placeholder="Telefon (+998XXXXXXXXX)" maxLength={13} value={yangiMijozState.telefon} onChange={e => setYangiMijozState({ ...yangiMijozState, telefon: e.target.value })} />
+              
               <div className="input-guruhi mb-2" style={{ display: 'flex', gap: 'var(--gap-10)' }}>
                 <div style={{ flex: 1 }}>
                   <label className="text-gray">Boshlang'ich qarz</label>
@@ -242,10 +248,13 @@ const Mijozlar = ({ open }) => {
             <div className="modal-body">
               <label className="text-gray">Ism sharifi</label>
               <input className="input-style mb-2" value={tanlangan.ism} onChange={e => setTanlangan({ ...tanlangan, ism: e.target.value })} />
+              
               <label className="text-gray">Telefon</label>
               <input className="input-style mb-2" value={tanlangan.telefon} onChange={e => setTanlangan({ ...tanlangan, telefon: e.target.value })} />
+              
               <label className="text-gray">Joriy Qarz (so'm)</label>
               <input className="input-style mb-4" type="text" value={formatNumber(tanlangan.qarzdorlik)} onChange={e => setTanlangan({ ...tanlangan, qarzdorlik: cleanNumber(e.target.value) })} />
+              
               <button className="btn-blue btn-full" onClick={handleMijozYangilash}>O'zgarishlarni Saqlash</button>
             </div>
           </div>
@@ -265,7 +274,7 @@ const Mijozlar = ({ open }) => {
                   try {
                     await mijozOchirish(tanlangan.id); 
                     setOchirishModalOchiq(false); 
-                    toast.error("Mijoz o'chirildi"); 
+                    toast.success("Mijoz o'chirildi"); 
                   } catch (err) {
                     toast.error("O'chirishda xato!");
                   }

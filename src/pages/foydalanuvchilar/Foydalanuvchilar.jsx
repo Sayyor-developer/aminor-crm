@@ -119,7 +119,12 @@ const Foydalanuvchilar = ({ open }) => {
             closeModal();
         }
     } catch (err) {
-        toast.error(err.message);
+        console.error("Xatolik tafsiloti:", err); // Konsolga chiqarish
+        if (err.message.includes('row-level security')) {
+            toast.error("Baza ruxsat bermadi (RLS Policy). SQL Editor-da qoidalarni tekshiring!");
+        } else {
+            toast.error("Xatolik: " + err.message);
+        }
     } finally { setLoading(false); }
   };
 

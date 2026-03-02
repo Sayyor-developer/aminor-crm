@@ -1,4 +1,4 @@
-import React, { useState, useMemo, /* useCallback */ } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Search, Edit, Trash2, Plus, ChevronRight, ChevronLeft, X, AlertTriangle, FileText, PackageOpen, Database } from 'lucide-react';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -14,7 +14,7 @@ export default function Kolbasamaxsulotlar({ open }) {
     products = [], 
     productQoshish,      // Yangi qo'shilgan funksiya
     setProducts, 
-    supabase           // Supabase client to'g'ridan-to'g'ri kerak bo'lishi mumkin
+    supabase             // Supabase client to'g'ridan-to'g'ri kerak bo'lishi mumkin
   } = useData();
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -127,7 +127,12 @@ export default function Kolbasamaxsulotlar({ open }) {
       setIsAddModalOpen(false); 
       toast.success("Mahsulot omborga qo'shildi!");
     } catch (err) {
-      toast.error("Xatolik: " + err.message);
+      // RLS xatolarini aniqroq ko'rsatish
+      if (err.message.includes('row-level security')) {
+        toast.error("Baza ruxsat bermadi (RLS Policy xatosi)!");
+      } else {
+        toast.error("Xatolik: " + err.message);
+      }
     }
   };
 
@@ -267,9 +272,7 @@ export default function Kolbasamaxsulotlar({ open }) {
         </div>
       </div>
 
-      {/* MODALLAR (Add, Edit, Delete) - O'zgarishsiz qoldi */}
-      {/* ... (Sizning kodingizdagi modallar shu yerda) ... */}
-      {/* (Kodingiz juda uzun bo'lgani uchun modallarni qisqartirdim, lekin ular tepada bog'langan funksiyalar bilan ishlayveradi) */}
+      {/* --- MODALLAR --- */}
       
       {/* MODAL: QO'SHISH */}
       {isAddModalOpen && (

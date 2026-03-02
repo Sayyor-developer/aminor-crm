@@ -1,27 +1,27 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { TbMoneybag, TbMeat, TbUsers, TbUserExclamation } from "react-icons/tb";
-import { 
-  AreaChart, 
-  Area, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  ResponsiveContainer 
+import {
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer
 } from 'recharts';
-import { useData } from '../../DataContext'; 
+import { useData } from '../../DataContext';
 import './home.css';
 
 const Home = ({ open }) => {
   const navigate = useNavigate();
-  
+
   // DataContext'dan ma'lumotlarni olish
-  const { 
-    mijozlar = [], 
-    sotuvlar = [], 
+  const {
+    mijozlar = [],
+    sotuvlar = [],
     products = []
-  } = useData(); 
+  } = useData();
 
   const [period, setPeriod] = useState('week');
 
@@ -59,22 +59,22 @@ const Home = ({ open }) => {
       .map((item, index) => {
         const sanaObj = new Date(item.sana);
         const kun = sanaObj.toLocaleDateString('uz-UZ', { day: '2-digit', month: 'short' });
-        
+
         return {
           // 'fullKey' unikal bo'lishi kerak, aks holda nuqtalar ustma-ust tushadi
-          fullKey: `${item.sana}-${index}`, 
+          fullKey: `${item.sana}-${index}`,
           sanaLabel: kun,
           value: parseFloat(item.tulangan || 0),
           mijoz: item.mijozIsm || "Noma'lum",
-          soat: item.vaqt || "" 
+          soat: item.vaqt || ""
         };
       });
 
     // Agar ma'lumot ko'p bo'lsa scroll paydo bo'lishi uchun kenglikni hisoblaymiz
     const dynamicWidth = Math.max(100, sortedData.length * 80);
-    
+
     return {
-      chartData: sortedData, 
+      chartData: sortedData,
       chartWidth: sortedData.length > 8 ? `${dynamicWidth}px` : '100%'
     };
   }, [sotuvlar, period]);
@@ -83,7 +83,7 @@ const Home = ({ open }) => {
   const stats = useMemo(() => {
     const qarzdorlar = mijozlar.filter(m => parseFloat(m.qarzdorlik || 0) > 0);
     const jamiQarz = mijozlar.reduce((sum, m) => sum + parseFloat(m.qarzdorlik || 0), 0);
-    
+
     const salesMap = {};
     sotuvlar.forEach(s => {
       salesMap[s.mijozId] = (salesMap[s.mijozId] || 0) + parseFloat(s.tulangan || 0);
@@ -98,7 +98,7 @@ const Home = ({ open }) => {
     return {
       jamiMijozlar: mijozlar.length,
       qarzdorlarSoni: qarzdorlar.length,
-      jamiQarzSumma: jamiQarz, 
+      jamiQarzSumma: jamiQarz,
       topQarzdorlar: [...qarzdorlar].sort((a, b) => parseFloat(b.qarzdorlik || 0) - parseFloat(a.qarzdorlik || 0)).slice(0, 5),
       topMijozlar: topMijozlar
     };
@@ -114,7 +114,7 @@ const Home = ({ open }) => {
   return (
     <div className={`home-page ${!open ? 'sidebar-h-closed' : ''}`}>
       <div className="main-wrapper">
-        
+
         {/* Yuqori statistik kartochkalar */}
         <div className="stats-container">
           <div className="stat-card clickable-card" onClick={() => navigate('/kolbasamaxsulotlar')}>
@@ -155,7 +155,7 @@ const Home = ({ open }) => {
                 <div className="icon-box orange-bg"><TbUserExclamation className="icon-svg" /></div>
                 <span className="stat-label">Qarzdorlar soni</span>
               </div>
-              <h2 className="stat-value" style={{color: 'black'}}>{stats.qarzdorlarSoni} <span className="unit">ta</span></h2>
+              <h2 className="stat-value" style={{ color: 'black' }}>{stats.qarzdorlarSoni} <span className="unit">ta</span></h2>
             </div>
           </div>
 
@@ -175,12 +175,12 @@ const Home = ({ open }) => {
           <div className="chart-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
             <h3 className="section-title">Savdo Tarixi (Xaridlar kesimida)</h3>
             <select className="period-select" value={period} onChange={(e) => setPeriod(e.target.value)}>
-              
+
               <option value="month">1 Oy</option>
               <option value="year">1 Yil</option>
             </select>
           </div>
-          
+
           <div className="chart-scroll-holder" style={{ width: '100%', overflowX: 'auto', paddingBottom: '10px' }}>
             {chartData.length > 0 ? (
               <div style={{ width: chartWidth, minWidth: '100%', height: '350px' }}>
@@ -188,28 +188,28 @@ const Home = ({ open }) => {
                   <AreaChart data={chartData} margin={{ top: 10, right: 30, left: 0, bottom: 60 }}>
                     <defs>
                       <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="var(--primary-color)" stopOpacity={0.3}/>
-                        <stop offset="95%" stopColor="var(--primary-color)" stopOpacity={0}/>
+                        <stop offset="5%" stopColor="var(--primary-color)" stopOpacity={0.3} />
+                        <stop offset="95%" stopColor="var(--primary-color)" stopOpacity={0} />
                       </linearGradient>
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" vertical={true} stroke="#f1f5f9" />
-                    <XAxis 
-                      dataKey="fullKey" 
-                      interval={0} 
-                      tickFormatter={(val, i) => chartData[i]?.sanaLabel || ""} 
-                      angle={-35} 
-                      textAnchor="end" 
+                    <XAxis
+                      dataKey="fullKey"
+                      interval={0}
+                      tickFormatter={(val, i) => chartData[i]?.sanaLabel || ""}
+                      angle={-35}
+                      textAnchor="end"
                       height={70}
-                      tick={{fill: '#94a3b8', fontSize: 10}} 
+                      tick={{ fill: '#94a3b8', fontSize: 10 }}
                     />
-                    <YAxis 
-                      axisLine={false} 
-                      tickLine={false} 
-                      tick={{fill: '#94a3b8', fontSize: 11}} 
+                    <YAxis
+                      axisLine={false}
+                      tickLine={false}
+                      tick={{ fill: '#94a3b8', fontSize: 11 }}
                       width={55}
-                      tickFormatter={formatYAxis} 
+                      tickFormatter={formatYAxis}
                     />
-                    <Tooltip 
+                    <Tooltip
                       contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }}
                       content={({ active, payload }) => {
                         if (active && payload && payload.length) {
@@ -225,13 +225,13 @@ const Home = ({ open }) => {
                         return null;
                       }}
                     />
-                    <Area 
-                      type="monotone" 
-                      dataKey="value" 
-                      stroke="var(--primary-color)" 
-                      strokeWidth={3} 
-                      fillOpacity={1} 
-                      fill="url(#colorValue)" 
+                    <Area
+                      type="monotone"
+                      dataKey="value"
+                      stroke="var(--primary-color)"
+                      strokeWidth={3}
+                      fillOpacity={1}
+                      fill="url(#colorValue)"
                       dot={{ r: 5, fill: 'var(--primary-color)', strokeWidth: 2, stroke: '#fff' }}
                       activeDot={{ r: 8 }}
                     />
@@ -239,7 +239,7 @@ const Home = ({ open }) => {
                 </ResponsiveContainer>
               </div>
             ) : (
-              <div style={{height: '350px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8'}}>
+              <div style={{ height: '350px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#94a3b8' }}>
                 Ma'lumotlar mavjud emas
               </div>
             )}
@@ -247,7 +247,7 @@ const Home = ({ open }) => {
         </div>
 
         {/* Pastki Ro'yxatlar */}
-        <div className="lists-grid" style={{display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px', marginTop: '20px'}}>
+        <div className="lists-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px', marginTop: '20px' }}>
           <div className="stat-card">
             <div className="stat-header">
               <div className="icon-box blue-bg"><TbUsers className="icon-svg" /></div>
@@ -255,9 +255,9 @@ const Home = ({ open }) => {
             </div>
             <div className="list-content">
               {stats.topMijozlar.map((customer, idx) => (
-                <div key={customer.id || idx} className="list-row" style={{display:'flex', justifyContent:'space-between', padding:'10px 0', borderBottom:'1px solid #f1f5f9'}}>
+                <div key={customer.id || idx} className="list-row" style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0', borderBottom: '1px solid #f1f5f9' }}>
                   <span>{customer.ism}</span>
-                  <strong style={{color: '#10b981'}}>{parseFloat(customer.jamiXarid).toLocaleString()}</strong>
+                  <strong style={{ color: '#10b981' }}>{parseFloat(customer.jamiXarid).toLocaleString()}</strong>
                 </div>
               ))}
             </div>
@@ -270,9 +270,9 @@ const Home = ({ open }) => {
             </div>
             <div className="list-content">
               {stats.topQarzdorlar.map((debtor, idx) => (
-                <div key={debtor.id || idx} className="list-row" style={{display:'flex', justifyContent:'space-between', padding:'10px 0', borderBottom:'1px solid #f1f5f9'}}>
+                <div key={debtor.id || idx} className="list-row" style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0', borderBottom: '1px solid #f1f5f9' }}>
                   <span>{debtor.ism}</span>
-                  <strong style={{color: '#ef4444'}}>{parseFloat(debtor.qarzdorlik).toLocaleString()}</strong>
+                  <strong style={{ color: '#ef4444' }}>{parseFloat(debtor.qarzdorlik).toLocaleString()}</strong>
                 </div>
               ))}
             </div>
