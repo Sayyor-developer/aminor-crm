@@ -1,6 +1,7 @@
 /* login.css */
 
 .loginPage {
+    margin: 0px 10px;
     background: var(--white);
     /* Facebook uslubidagi toza fon */
     display: flex;
