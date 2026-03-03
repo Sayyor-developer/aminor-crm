@@ -68,6 +68,7 @@ const Login = () => {
     };
 
     return (
+        <div className='max-width'>
         <div className='loginPage'>
             <Paper elevation={10} className="login-card">
                 <div className="login-header">
@@ -142,6 +143,7 @@ const Login = () => {
                     </Button>
                 </form>
             </Paper>
+        </div>
         </div>
     );
 };
