@@ -16,7 +16,7 @@
 
 .login-card {
     width: 100%;
-    max-width: 400px;
+    max-width: 500px;
     border-radius: 20px !important;
     overflow: hidden;
     animation: fadeIn 0.5s ease-in-out;
@@ -144,4 +144,12 @@ input:-webkit-autofill:active {
 /* Agar input fonini shaffof yoki oq holda saqlamoqchi bo'lsangiz */
 .login-form input {
     background-color: transparent !important;
+}
+
+
+/* ?  */
+@media (max-width: 600px) {
+    .login-card {
+        margin: 20px;
+    }
 }
