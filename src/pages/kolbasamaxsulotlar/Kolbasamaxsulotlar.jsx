@@ -295,7 +295,7 @@ export default function Kolbasamaxsulotlar({ open }) {
                   </select>
                 </div>
                 <div>
-                  <label className="input-label">Miqdori</label>
+                  <label className="input-label">Miqdori(kg)</label>
                   <input className="input-style w-full" type="number" placeholder="0" value={newProduct.stock} onChange={e => setNewProduct({ ...newProduct, stock: e.target.value })} />
                 </div>
               </div>
