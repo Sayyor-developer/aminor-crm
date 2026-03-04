@@ -60,7 +60,6 @@ const Mijozlar = ({ open }) => {
 
     if (!ism) return toast.error("Ismni kiriting!");
 
-    // Bazadagi kichik harfli ustunlarga moslangan obyekt
     const obyekt = {
       ism: ism,
       telefon: tel,
@@ -176,13 +175,20 @@ const Mijozlar = ({ open }) => {
               </thead>
               <tbody>
                 {filtrlangan.map(m => (
-                  <tr key={m.id} className={m.status ? '' : 'inactive-row'}>
-                    <td className={`font-medium ${m.status ? 'ism-active' : ''}`}
-                      style={{ cursor: 'pointer' }}
-                      onClick={() => { if (m.status) navigate(`/mijozlar/${m.id}`); }}>
+                  <tr 
+                    key={m.id} 
+                    className={`${m.status ? 'mijoz-row-active' : 'inactive-row'}`}
+                    style={{ cursor: m.status ? 'pointer' : 'default' }}
+                  >
+                    <td 
+                      className={`font-medium ${m.status ? 'ism-active' : ''}`}
+                      onClick={() => { if (m.status) navigate(`/mijozlar/${m.id}`); }}
+                    >
                       {m.ism}
                     </td>
-                    <td>{m.telefon}</td>
+                    <td onClick={() => { if (m.status) navigate(`/mijozlar/${m.id}`); }}>
+                      {m.telefon}
+                    </td>
                     <td>
                       <div className={`flex-col ${getBalansHolati(m.qarzdorlik).rang}`}>
                         <span className="font-bold">{formatBalans(m.qarzdorlik)} so'm</span>
@@ -197,8 +203,8 @@ const Mijozlar = ({ open }) => {
                     </td>
                     <td className="text-center actions-td">
                       <div className="flex-center">
-                        <button className="m-btn-blue m-btn-icon" onClick={() => { setTanlangan(m); setTahrirlashModalOchiq(true); }}><Edit size={14} /></button>
-                        <button className="m-btn-blue m-btn-red m-btn-icon" onClick={() => { setTanlangan(m); setOchirishModalOchiq(true); }}><Trash2 size={14} /></button>
+                        <button className="m-btn-blue m-btn-icon" onClick={(e) => { e.stopPropagation(); setTanlangan(m); setTahrirlashModalOchiq(true); }}><Edit size={14} /></button>
+                        <button className="m-btn-blue m-btn-red m-btn-icon" onClick={(e) => { e.stopPropagation(); setTanlangan(m); setOchirishModalOchiq(true); }}><Trash2 size={14} /></button>
                       </div>
                     </td>
                   </tr>
@@ -210,7 +216,6 @@ const Mijozlar = ({ open }) => {
       </div>
 
       {/* --- MODALLAR --- */}
-
       {yangiMijozModalOchiq && (
         <div className="modal-parda">
           <div className="modal-oyna">

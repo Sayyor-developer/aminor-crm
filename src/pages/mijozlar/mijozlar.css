@@ -916,7 +916,16 @@
     background-color: var(--primary-color);
     color: white;
 }
+/* Butun qator uchun hover effekti */
+.mijoz-row-active:hover {
+    background-color: #f4f4f4 !important; /* Oqdan biroz xiraroq kulrang */
+    transition: background-color 0.2s ease;
+}
 
+
+
+
+/* Edit va Delete tugmalari bosilganda butun qator bosilib ketmasligi uchun e.stopPropagation qo'shildi */
 .old-debt-box {
     background: #fff7ed;
     border: 1px solid #ffedd5;
@@ -979,6 +988,7 @@
     .history-link-box{
         width: 70%;
     }
+    
 
     .profil-main-content {
         width: 100%;
@@ -991,7 +1001,14 @@
         flex-direction: column;
 
     }
-   
+   .bottom-action-bar{
+    flex-direction: column;
+    
+   }
+   .btn-confirm-all{
+    width: 100%;
+    justify-content: center;
+   }
 
     /* Karta ko'rinishidagi qismlar */
     .inner-card,
