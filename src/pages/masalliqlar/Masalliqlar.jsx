@@ -264,8 +264,8 @@ const Masalliqlar = ({ open }) => {
             </table>
           </div>
           <div style={{ padding: '20px', display: 'flex', justifyContent: 'flex-end', borderTop: '1px solid #eee' }}>
-            <button className="m-save-btn" style={{width: 'auto', padding: '12px 25px', display: 'flex', gap: '10px'}} onClick={barchasiniTasdiqlash}>
-              <CheckCircle size={20} /> Tasdiqlash va Kirim qilish
+            <button className="m-save-btn" style={{width: 'auto', padding: '10px 15px', display: 'flex', gap: 'var(--gap-10)'}} onClick={barchasiniTasdiqlash}>
+              <CheckCircle size={20} /> Tasdiqlash 
             </button>
           </div>
         </div>

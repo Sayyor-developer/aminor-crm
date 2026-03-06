@@ -130,7 +130,7 @@
     background: var(--white);
     border-radius: 20px;
     border: 1px solid var(--light-gray);
-    margin-left: 60px;
+    margin-left: 50px;
 
     overflow: hidden;
     box-shadow: 0 4px 6px -1px var(--white);
@@ -150,13 +150,14 @@
     width: 100%;
     padding: 12px 12px 12px 45px;
     border-radius: 12px;
+    margin: 10px;
     border: 1px solid #e2e8f0;
 }
 
 .tovuqchiqim-search svg {
     position: absolute;
-    left: 15px;
-    top: 13px;
+   left: 30px;
+    top: 24px;
     color: var(--light-gray);
 }
 
@@ -280,7 +281,7 @@
         gap: var(--gap-15);
     }
 
-  
+    
 
     .tovuqchiqim-calc-banner {
         flex-direction: column;

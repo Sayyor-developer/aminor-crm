@@ -20,18 +20,20 @@ export const DataProvider = ({ children }) => {
     const [sotuvlar, setSotuvlar] = useState(getLocal('sotuvlar', []));
     const [chiqimlar, setChiqimlar] = useState(getLocal('chiqimlar', []));
     const [masalliqlar, setMasalliqlar] = useState(getLocal('masalliqlar', [])); 
+    const [tannarxlar, setTannarxlar] = useState(getLocal('tannarxlar', [])); // Tannarx qo'shildi
     const [loading, setLoading] = useState(true);
 
     // --- DATA FETCHING (Barcha ma'lumotlarni bazadan olish) ---
     const fetchData = async () => {
         try {
             setLoading(true);
-            const [mRes, sRes, pRes, cRes, masRes] = await Promise.all([
+            const [mRes, sRes, pRes, cRes, masRes, tRes] = await Promise.all([
                 supabase.from('mijozlar').select('*').order('id', { ascending: false }),
                 supabase.from('sotuvlar').select('*').order('id', { ascending: false }),
                 supabase.from('products').select('*').order('id', { ascending: false }),
                 supabase.from('chiqimlar').select('*').order('id', { ascending: false }),
-                supabase.from('masalliqlar').select('*').order('id', { ascending: false })
+                supabase.from('masalliqlar').select('*').order('id', { ascending: false }),
+                supabase.from('tannarxlar').select('*').order('id', { ascending: false }) // Tannarx yuklash
             ]);
 
             if (mRes.data) setMijozlar(mRes.data.map(m => ({ ...m, oxirgiXarid: m.oxirgixarid })));
@@ -39,6 +41,7 @@ export const DataProvider = ({ children }) => {
             if (pRes.data) setProducts(pRes.data);
             if (cRes.data) setChiqimlar(cRes.data);
             if (masRes.data) setMasalliqlar(masRes.data); 
+            if (tRes.data) setTannarxlar(tRes.data); // Tannarx state-ga yozish
         } catch (err) {
             console.error("Yuklashda xato:", err);
         } finally {
@@ -56,8 +59,9 @@ export const DataProvider = ({ children }) => {
             localStorage.setItem('sotuvlar', JSON.stringify(sotuvlar));
             localStorage.setItem('chiqimlar', JSON.stringify(chiqimlar));
             localStorage.setItem('masalliqlar', JSON.stringify(masalliqlar));
+            localStorage.setItem('tannarxlar', JSON.stringify(tannarxlar)); // Sync tannarx
         }
-    }, [mijozlar, products, sotuvlar, chiqimlar, masalliqlar, loading]);
+    }, [mijozlar, products, sotuvlar, chiqimlar, masalliqlar, tannarxlar, loading]);
 
     // --- MIJOZLAR FUNKSIYALARI ---
     const mijozQoshish = async (yangi) => {
@@ -158,6 +162,19 @@ export const DataProvider = ({ children }) => {
         setSotuvlar(prev => prev.filter(s => s.id !== id));
     };
 
+    // --- TANNARX FUNKSIYALARI ---
+    const tannarxQoshish = async (yangi) => {
+        const { data, error } = await supabase.from('tannarxlar').insert([yangi]).select();
+        if (error) throw error;
+        setTannarxlar(prev => [data[0], ...prev]);
+    };
+
+    const tannarxOchirish = async (id) => {
+        const { error } = await supabase.from('tannarxlar').delete().eq('id', id);
+        if (error) throw error;
+        setTannarxlar(prev => prev.filter(t => t.id !== id));
+    };
+
     // --- MASALLIQLAR & CHIQIMLAR FUNKSIYALARI ---
     const masalliqQoshish = async (yangi) => {
         const { data, error } = await supabase.from('masalliqlar').insert([yangi]).select();
@@ -171,24 +188,13 @@ export const DataProvider = ({ children }) => {
         setChiqimlar(prev => [data[0], ...prev]);
     };
 
-    // --- HAMMA NARSANI O'CHIRISH (DIREKTOR UCHUN) ---
+    // --- HAMMA NARSANI O'CHIRISH ---
     const clearAllData = async () => {
         try {
-            // Jadvallar ro'yxati (Tannarxlar qo'shildi)
             const tables = ['sotuvlar', 'mijozlar', 'products', 'chiqimlar', 'masalliqlar', 'tannarxlar'];
-            
-            await Promise.all(
-                tables.map(table => supabase.from(table).delete().neq('id', 0))
-            );
-
-            // LocalStorage va State-larni tozalash
+            await Promise.all(tables.map(table => supabase.from(table).delete().neq('id', 0)));
             localStorage.clear();
-            setMijozlar([]);
-            setSotuvlar([]);
-            setProducts([]);
-            setChiqimlar([]);
-            setMasalliqlar([]);
-
+            setMijozlar([]); setSotuvlar([]); setProducts([]); setChiqimlar([]); setMasalliqlar([]); setTannarxlar([]);
             return true;
         } catch (err) {
             console.error("Tozalashda xato:", err);
@@ -196,7 +202,7 @@ export const DataProvider = ({ children }) => {
         }
     };
 
-    // --- MOLIYAVIY HISOB-KITOB (REAL-TIME) ---
+    // --- MOLIYAVIY HISOB-KITOB ---
     const jamiKirim = useMemo(() => {
         return sotuvlar.reduce((sum, s) => sum + parseFloat(s.tulangan || 0), 0);
     }, [sotuvlar]);
@@ -217,11 +223,12 @@ export const DataProvider = ({ children }) => {
 
     return (
         <DataContext.Provider value={{
-            mijozlar, products, sotuvlar, chiqimlar, masalliqlar, loading,
-            setProducts, setMasalliqlar, setChiqimlar, setMijozlar, setSotuvlar, fetchData,
+            mijozlar, products, sotuvlar, chiqimlar, masalliqlar, tannarxlar, loading,
+            setProducts, setMasalliqlar, setChiqimlar, setMijozlar, setSotuvlar, setTannarxlar, fetchData,
             mijozQoshish, mijozOchirish, mijozYangilash,
             productQoshish, productYangilash,
             masalliqQoshish, sotuvQoshish, sotuvYangilash, sotuvOchirish,
+            tannarxQoshish, tannarxOchirish,
             chiqimQoshish, clearAllData,
             jamiKirim, jamiChiqim, jamiQarzlar, sofFoyda,
             supabase 

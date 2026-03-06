@@ -361,7 +361,7 @@ const MijozProfil = ({ open }) => {
 
         <main className="profil-main-content">
           <div className="content-tabs no-print" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div className="tab-left"><button className="active"><MdHistory /> Sotuvlar (Joriy oy)</button></div>
+            <div className="tab-left"><button className="active"><MdHistory size={22}  /> Sotuvlar (Joriy oy)</button></div>
             <div className="tab-right-actions">
               <button className="btn-add-sotuv" style={{background:'var(--primary-color)'}} onClick={() => { setIsEditMode(false); setSotuvData({ mahsulot: '', miqdor: '', narx: '' }); setShowSotuvModal(true); }}>
                 <MdAddShoppingCart /> Yangi sotuv
@@ -410,12 +410,12 @@ const MijozProfil = ({ open }) => {
               <div style={{ fontSize: 'var(--font-size-20)', fontWeight: 'var(--font-weight-700)', color: '#1e293b' }}>{Number(joriyOyJamiSumma).toLocaleString()} UZS</div>
             </div>
             
-            <button className="btn-confirm-all" style={{ background: 'var(--primary-color)', color: '#fff', padding: '12px 25px', borderRadius: '10px', border: 'none', display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', fontWeight: 'bold', fontSize: 'var(--font-size-16)' }} 
+            <button className="btn-confirm-all" style={{ background: 'var(--primary-color)', color: '#fff', padding: '10px 20px', borderRadius: '10px', border: 'none', display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', fontWeight: 'var(--font-weight-700)', fontSize: 'var(--font-size-16)' }} 
               onClick={() => { setTolovData({ tolovTuri: 'naqd', tulanganSumma: '' }); setShowTolovModal(true); }}>
               <MdPayments size={22} /> To'lov qilish
             </button>
             
-            <button className="btn-confirm-all" style={{ background: 'var(--primary-color)', color: '#fff', padding: '12px 20px', borderRadius: '10px', border: 'none', display: 'flex', alignItems: 'center', gap: 'var(--gap-10)', cursor: 'pointer', fontWeight: 'bold' }} onClick={handleConfirmMonth}>
+            <button className="btn-confirm-all" style={{ background: 'var(--primary-color)', color: '#fff', padding: '12px 20px', borderRadius: '10px', border: 'none', display: 'flex', alignItems: 'center', gap: 'var(--gap-10)', cursor: 'pointer', fontWeight: 'var(--font-weight-700)' }} onClick={handleConfirmMonth}>
               <MdDoneAll size={20} /> Oyni yopish
             </button>
           </div>

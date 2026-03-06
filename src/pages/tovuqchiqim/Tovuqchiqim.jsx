@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { 
-  Search, Plus, Trash2, Edit, ChevronLeft, ChevronRight, X, Calculator, AlertTriangle, Download 
+  Search, Plus, Trash2, Edit, ChevronLeft, ChevronRight, X,  AlertTriangle, Download 
 } from 'lucide-react';
 import toast, { Toaster } from 'react-hot-toast'; 
 import { jsPDF } from 'jspdf';
@@ -18,10 +18,8 @@ const Tovuqchiqim = ({ open }) => {
   const [editingItem, setEditingItem] = useState(null);
   const [itemToDelete, setItemToDelete] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [calcInput, setCalcInput] = useState('');
   
   const itemsPerPage = 7; 
-  const yieldFactor = 0.85;
   const TOVUQ_NARXI = 25000; 
 
   const [formData, setFormData] = useState({
@@ -162,7 +160,6 @@ const Tovuqchiqim = ({ open }) => {
         <div className="tovuqchiqim-header">
           <div className="tovuqchiqim-title-box">
             <h1>Tovuq Chiqimlari</h1>
-            <p>Xomashyo nazorati va mahsulot unumdorligi</p>
           </div>
           <div className="tovuqchiqim-header-btns">
             <button className="tovuqchiqim-print-btn" onClick={downloadPDF}><Download size={18} /> PDF</button>
@@ -201,17 +198,12 @@ const Tovuqchiqim = ({ open }) => {
           </div>
         </div>
 
-        {/* Calculator Banner */}
-        <div className="tovuqchiqim-calc-banner">
-          <div className="tovuqchiqim-calc-info"><Calculator size={24} /><div><h4>Kalkulyator</h4><p>Prognoz (85%)</p></div></div>
-          <input type="number" placeholder="Soni..." value={calcInput} onChange={(e) => setCalcInput(e.target.value)} />
-          <div className="tovuqchiqim-calc-res">Tayyor: <span>{Math.round(Number(calcInput) * yieldFactor) || 0}</span> dona</div>
-        </div>
+        
 
         <div className="tovuqchiqim-main-card">
           <div className="tovuqchiqim-search">
             <Search size={18} />
-            <input type="text" placeholder="Ta'minotchi bo'yicha..." onChange={(e) => {setSearchTerm(e.target.value); setCurrentPage(1)}} />
+            <input type="text" placeholder="Ta'minotchi bo'yicha qidirish..." onChange={(e) => {setSearchTerm(e.target.value); setCurrentPage(1)}} />
           </div>
           
           <div className="tovuqchiqim-table-responsive">

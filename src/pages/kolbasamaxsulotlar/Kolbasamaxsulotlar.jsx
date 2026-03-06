@@ -10,10 +10,10 @@ import autoTable from 'jspdf-autotable';
 
 export default function Kolbasamaxsulotlar({ open }) {
   // Supabase funksiyalarini Context-dan olamiz
-  const { 
-    products = [], 
+  const {
+    products = [],
     productQoshish,      // Yangi qo'shilgan funksiya
-    setProducts, 
+    setProducts,
     supabase             // Supabase client to'g'ridan-to'g'ri kerak bo'lishi mumkin
   } = useData();
 
@@ -21,7 +21,7 @@ export default function Kolbasamaxsulotlar({ open }) {
   const [newProduct, setNewProduct] = useState({ name: '', unit: 'kg', price: '', stock: '' });
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false); 
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
@@ -64,7 +64,7 @@ export default function Kolbasamaxsulotlar({ open }) {
       const doc = new jsPDF();
       const tableColumn = ["Nomi", "Birlik", "Qoldiq", "Narxi (so'm)", "Umumiy Qiymati"];
       const tableRows = [];
-      
+
       filteredItems.forEach(p => {
         tableRows.push([
           p.name || "Nomsiz",
@@ -122,9 +122,9 @@ export default function Kolbasamaxsulotlar({ open }) {
 
       // DataContext dagi funksiyani chaqiramiz
       await productQoshish(item);
-      
+
       setNewProduct({ name: '', unit: 'kg', price: '', stock: '' });
-      setIsAddModalOpen(false); 
+      setIsAddModalOpen(false);
       toast.success("Mahsulot omborga qo'shildi!");
     } catch (err) {
       // RLS xatolarini aniqroq ko'rsatish
@@ -190,7 +190,8 @@ export default function Kolbasamaxsulotlar({ open }) {
           </div>
           <div className="header-actions">
             <button className="btn-export kolbasa-qoshish-modal-style" onClick={() => setIsAddModalOpen(true)}>
-              <Plus size={16} /> Yangi mahsulot
+              {/* size={16} edi, 20 qildik. Agar yana ham katta kerak bo'lsa 22 yoki 24 qilib ko'r */}
+              <Plus size={24} strokeWidth={5.5} /> Yangi mahsulot
             </button>
             <button className="btn-export pdf" onClick={exportToPDF}>
               <FileText size={16} /> PDF Export
@@ -202,11 +203,11 @@ export default function Kolbasamaxsulotlar({ open }) {
           <div className="search-stat-grid">
             <div className="flex-center" style={{ flex: 1, marginBottom: 0 }}>
               <Search size={18} color="#64748b" />
-              <input 
-                className="input-style w-full" 
-                placeholder="Mahsulot nomi bo'yicha qidirish..." 
+              <input
+                className="input-style w-full"
+                placeholder="Mahsulot nomi bo'yicha qidirish..."
                 value={searchQuery}
-                onChange={e => { setSearchQuery(e.target.value); setCurrentPage(1); }} 
+                onChange={e => { setSearchQuery(e.target.value); setCurrentPage(1); }}
               />
             </div>
 
@@ -236,8 +237,8 @@ export default function Kolbasamaxsulotlar({ open }) {
                     <td style={{ fontWeight: 'bold' }}>{Number(p.stock || 0).toLocaleString()}</td>
                     <td>{Number(p.price || 0).toLocaleString()} so'm</td>
                     <td className="text-center">
-                      <button 
-                        className={`switch ${p.active ? 'switch-on' : 'switch-off'}`} 
+                      <button
+                        className={`switch ${p.active ? 'switch-on' : 'switch-off'}`}
                         onClick={() => toggleStatus(p.id, p.active)}
                       >
                         <div className={`knopka ${p.active ? 'knopka-on' : 'knopka-off'}`}></div>
@@ -273,7 +274,7 @@ export default function Kolbasamaxsulotlar({ open }) {
       </div>
 
       {/* --- MODALLAR --- */}
-      
+
       {/* MODAL: QO'SHISH */}
       {isAddModalOpen && (
         <div className="modal-parda" onClick={() => setIsAddModalOpen(false)}>
@@ -329,10 +330,10 @@ export default function Kolbasamaxsulotlar({ open }) {
             <div className="modal-body">
               <label className="input-label">Nomi</label>
               <input className="input-style w-full mb-3" value={selectedProduct.name} onChange={e => setSelectedProduct({ ...selectedProduct, name: e.target.value })} />
-              
+
               <label className="input-label">Qoldiq miqdori</label>
               <input className="input-style w-full mb-3" type="number" value={selectedProduct.stock} onChange={e => setSelectedProduct({ ...selectedProduct, stock: e.target.value })} />
-              
+
               <label className="input-label">Narxi</label>
               <input
                 className="input-style w-full mb-3"
