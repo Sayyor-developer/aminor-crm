@@ -467,6 +467,9 @@
     .m-container{
         margin-left: 80px;
     }
+    .m-save-btn{
+        width: 100%;
+    }
 
     .m-grid-2 {
         grid-template-columns: 1fr;

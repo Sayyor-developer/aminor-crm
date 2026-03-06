@@ -231,7 +231,7 @@ const Tannarxhisoblash = ({ open }) => {
           </div>
 
           <div className="pagination-box">
-            <span className="total-label">Jami: {filteredData.length} ta yozuv</span>
+            <span className="total-label">{filteredData.length} ta</span>
             <div className="nav-controls">
               <button disabled={currentPage === 1} onClick={() => setCurrentPage(p => p - 1)}><ChevronLeft size={20} /></button>
               <span className="page-count">{currentPage} / {totalPages || 1}</span>

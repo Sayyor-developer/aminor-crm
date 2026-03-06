@@ -264,7 +264,7 @@ const Masalliqlar = ({ open }) => {
             </table>
           </div>
           <div style={{ padding: '20px', display: 'flex', justifyContent: 'flex-end', borderTop: '1px solid #eee' }}>
-            <button className="m-save-btn" style={{width: 'auto', padding: '10px 15px', display: 'flex', gap: 'var(--gap-10)'}} onClick={barchasiniTasdiqlash}>
+            <button className="m-save-btn" style={{ padding: '10px 15px', display: 'flex', gap: 'var(--gap-10)'}} onClick={barchasiniTasdiqlash}>
               <CheckCircle size={20} /> Tasdiqlash 
             </button>
           </div>
