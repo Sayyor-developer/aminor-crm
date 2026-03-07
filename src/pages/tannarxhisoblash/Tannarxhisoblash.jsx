@@ -17,8 +17,8 @@ const Tannarxhisoblash = ({ open }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  // Masalliqlar ro'yxati (Default bo'sh qiymatlar bilan)
-  const [masalliqlarList, setMasalliqlarList] = useState([{ nomi: '', miqdori: '', narxi: '' }]);
+  // Masalliqlar ro'yxati (Birlik qo'shildi)
+  const [masalliqlarList, setMasalliqlarList] = useState([{ nomi: '', birlik: 'kg', miqdori: '', narxi: '' }]);
 
   const [formData, setFormData] = useState({
     materialTuri: '', miqdor: '', birlik: 'kg', narx: '0'
@@ -58,7 +58,7 @@ const Tannarxhisoblash = ({ open }) => {
   };
 
   // --- MASALLIQLARNI BOSHQARISH ---
-  const addRow = () => setMasalliqlarList([...masalliqlarList, { nomi: '', miqdori: '', narxi: '' }]);
+  const addRow = () => setMasalliqlarList([...masalliqlarList, { nomi: '', birlik: 'kg', miqdori: '', narxi: '' }]);
   
   const removeRow = (index) => {
     const newList = masalliqlarList.filter((_, i) => i !== index);
@@ -106,11 +106,11 @@ const Tannarxhisoblash = ({ open }) => {
         birlik: item.birlik, 
         narx: item.narx.toString() 
       });
-      setMasalliqlarList(item.masalliqlar || [{ nomi: '', miqdori: '', narxi: '' }]);
+      setMasalliqlarList(item.masalliqlar || [{ nomi: '', birlik: 'kg', miqdori: '', narxi: '' }]);
     } else {
       setEditingItem(null);
       setFormData({ materialTuri: '', miqdor: '', birlik: 'kg', narx: '0' });
-      setMasalliqlarList([{ nomi: '', miqdori: '', narxi: '' }]);
+      setMasalliqlarList([{ nomi: '', birlik: 'kg', miqdori: '', narxi: '' }]);
     }
     setIsModalOpen(true);
   };
@@ -205,12 +205,11 @@ const Tannarxhisoblash = ({ open }) => {
                     <tr key={item.id}>
                       <td className="bold-td">{item.materialTuri}</td>
                       <td>{item.miqdor} <span className="birlik-tag">{item.birlik}</span></td>
-                      {/* ASOSIY O'ZGARISH: MASALLIQLARNI RO'YXAT QILIB CHIQARISH */}
                       <td style={{ fontSize: 'var(--font-size-12)', color: '#475569', maxWidth: '250px' }}>
                         <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
                           {item.masalliqlar && item.masalliqlar.map((m, idx) => (
                             <span key={idx} style={{ background: '#f1f5f9', padding: '2px 6px', borderRadius: '4px', border: '1px solid #e2e8f0' }}>
-                              {m.nomi} ({m.miqdori})
+                              {m.nomi} ({m.miqdori} {m.birlik || ''})
                             </span>
                           ))}
                         </div>
@@ -265,7 +264,7 @@ const Tannarxhisoblash = ({ open }) => {
                   </select>
                 </div>
 
-                {/* --- MASALLIQLAR BO'LIMI (SCROLL BILAN) --- */}
+                {/* --- MASALLIQLAR BO'LIMI --- */}
                 <div className="field-group full-width masalliqlar-wrapper" style={{ marginTop: '10px', background: '#f8fafc', padding: '15px', borderRadius: '8px', border: '1px solid #e2e8f0' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
                     <label style={{ fontWeight: 'var(--font-weight-700)', color: '#1e293b' }}>Sarf-xarajatlar</label>
@@ -276,22 +275,35 @@ const Tannarxhisoblash = ({ open }) => {
                   
                   <div style={{ display: 'flex', gap: 'var(--gap-10)', marginBottom: '5px', padding: '0 5px' }}>
                     <span style={{ flex: 2, fontSize: 'var(--font-size-12)', fontWeight: 'var(--font-weight-700)', color: '#64748b' }}>MASALLIQ NOMI</span>
+                    <span style={{ flex: 1, fontSize: 'var(--font-size-12)', fontWeight: 'var(--font-weight-700)', color: '#64748b' }}>BIRLIK</span>
                     <span style={{ flex: 1, fontSize: 'var(--font-size-12)', fontWeight: 'var(--font-weight-700)', color: '#64748b' }}>MIQDORI</span>
-                    <span style={{ flex: 1.5, fontSize: 'var(--font-size-12)', fontWeight: 'var(--font-weight-700)', color: '#64748b' }}>NARXI (DONA/KG)</span>
+                    <span style={{ flex: 1.5, fontSize: 'var(--font-size-12)', fontWeight: 'var(--font-weight-700)', color: '#64748b' }}>NARXI(kg/litr/dona)</span>
                     <span style={{ width: '22px' }}></span>
                   </div>
 
-                  {/* SCROLL QISMI SHU YERDA */}
                   <div style={{ maxHeight: '200px', overflowY: 'auto', paddingRight: '5px' }}>
                     {masalliqlarList.map((m, index) => (
                       <div key={index} className="masalliq-row" style={{ display: 'flex', gap: 'var(--gap-10)', marginBottom: '10px', alignItems: 'center' }}>
+                        {/* 1. Nomi */}
                         <input 
                           style={{ flex: 2 }}
-                          placeholder="Masalliq nomi..." 
+                          placeholder="Nomi..." 
                           value={m.nomi} 
                           onChange={(e) => handleRowChange(index, 'nomi', e.target.value)} 
                           required 
                         />
+                        {/* 2. Birlik (Yangi qo'shilgan Select) */}
+                        <select 
+                          style={{ flex: 1 }}
+                          value={m.birlik} 
+                          onChange={(e) => handleRowChange(index, 'birlik', e.target.value)}
+                        >
+                          <option value="kg">kg</option>
+                          <option value="litr">litr</option>
+                          <option value="dona">dona</option>
+                          <option value="gramm">gr</option>
+                        </select>
+                        {/* 3. Miqdori */}
                         <input 
                           style={{ flex: 1 }}
                           type="number" 
@@ -301,6 +313,7 @@ const Tannarxhisoblash = ({ open }) => {
                           onChange={(e) => handleRowChange(index, 'miqdori', e.target.value)} 
                           required 
                         />
+                        {/* 4. Narxi */}
                         <input 
                           style={{ flex: 1.5 }}
                           placeholder="Narxi..." 
@@ -311,7 +324,7 @@ const Tannarxhisoblash = ({ open }) => {
                         {masalliqlarList.length > 1 && (
                           <MinusCircle 
                             size={22} 
-                            color="#ef4444" 
+                            color="var(--primary-color)" 
                             style={{ cursor: 'pointer', flexShrink: 0 }} 
                             onClick={() => removeRow(index)} 
                           />
@@ -322,7 +335,7 @@ const Tannarxhisoblash = ({ open }) => {
                 </div>
                 
                 <div className="field-group">
-                  <label>Ishlab chiqarilgan jami miqdor</label>
+                  <label>Masalliqlardan ishlab chiqarilgan jami miqdor</label>
                   <input 
                     type="number" 
                     step="any" 
@@ -341,7 +354,7 @@ const Tannarxhisoblash = ({ open }) => {
                   </select>
                 </div>
                 <div className="field-group full-width">
-                  <label>Jami hisoblangan tannarx (Avtomatik)</label>
+                  <label>Jami hisoblangan tannarx</label>
                   <input 
                     type="text" 
                     placeholder="Hisoblanmoqda..."

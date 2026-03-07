@@ -205,7 +205,7 @@ input:checked+.toggle-slider:before {
 
 .edit-action-btn,
 .delete-action-btn {
-    background: #b91c1c;
+    background: var(--primary-color);
     color: white;
     border: none;
     padding: 8px;
@@ -298,7 +298,7 @@ input:checked+.toggle-slider:before {
 }
 
 .save-action-btn {
-    background: #b91c1c;
+    background: var(--primary-color);
     color: white;
     border: none;
     padding: 12px 30px;
@@ -319,7 +319,7 @@ input:checked+.toggle-slider:before {
 }
 
 .warn-svg {
-    color: #b91c1c;
+    color: var(--primary-color);
     margin-bottom: 15px;
 }
 
