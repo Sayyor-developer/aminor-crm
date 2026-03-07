@@ -270,16 +270,16 @@ const Tovuqchiqim = ({ open }) => {
               <div style={{display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '10px'}}>
                 <div className="input-group">
                     <label>Tovuq soni</label>
-                    <input className="input-style" type="number" value={formData.tovuqSoni} onChange={e => setFormData({...formData, tovuqSoni: e.target.value})} required />
+                    <input className="input-style" type="number" value={formData.tovuqSoni} onChange={e => setFormData({...formData, tovuqSoni: e.target.value})} placeholder='Soni...' required />
                 </div>
                 <div className="input-group">
-                    <label>Mahsulot soni</label>
-                    <input className="input-style" type="number" value={formData.mahsulotSoni} onChange={e => setFormData({...formData, mahsulotSoni: e.target.value})} required />
+                    <label>Tayyor mahsulot</label>
+                    <input className="input-style" type="number" value={formData.mahsulotSoni} onChange={e => setFormData({...formData, mahsulotSoni: e.target.value})} placeholder='Soni...' required />
                 </div>
               </div>
               <div className="input-group mb-3">
                 <label>Ta'minotchi nomi</label>
-                <input className="input-style w-full" type="text" value={formData.taminotchi} onChange={e => setFormData({...formData, taminotchi: e.target.value})} required />
+                <input className="input-style w-full" type="text" value={formData.taminotchi} onChange={e => setFormData({...formData, taminotchi: e.target.value})} placeholder='Nomi...' required />
               </div>
               <div className="input-group mb-3">
                 <label>Sana</label>

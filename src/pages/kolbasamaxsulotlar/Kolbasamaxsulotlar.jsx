@@ -186,7 +186,7 @@ export default function Kolbasamaxsulotlar({ open }) {
         <div className="header-main">
           <div className="header-left">
             <div className="header-icon"><PackageOpen size={24} /></div>
-            <h1>Kolbasa Ombori (Qoldiqlar)</h1>
+            <h1>Kolbasa Ombori</h1>
           </div>
           <div className="header-actions">
             <button className="btn-export kolbasa-qoshish-modal-style" onClick={() => setIsAddModalOpen(true)}>
