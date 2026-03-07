@@ -335,7 +335,7 @@ const Tannarxhisoblash = ({ open }) => {
                 </div>
                 
                 <div className="field-group">
-                  <label>Masalliqlardan ishlab chiqarilgan jami miqdor</label>
+                  <label>Ishlab chiqarilgan jami miqdor</label>
                   <input 
                     type="number" 
                     step="any" 

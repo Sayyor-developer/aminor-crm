@@ -90,7 +90,7 @@ const Moliya = ({ open }) => {
           </div>
 
           {/* YANGI QO'SHILGAN KARTA: UMUMIY QARZ */}
-          <div className="stat-card border-orange">
+          <div className="stat-card border-purple">
             <div className="stat-card-top">
                <div className="icon-box bg-orange-soft"><UserMinus size={20} /></div>
                <span className="trend-val text-orange" style={{ color: 'var(--primary-color)' }}>Qarz</span>
