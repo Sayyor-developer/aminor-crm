@@ -205,6 +205,7 @@ const Mijozlar = ({ open }) => {
                       <div className="flex-center">
                         <button className="m-btn-blue m-btn-icon" onClick={(e) => { e.stopPropagation(); setTanlangan(m); setTahrirlashModalOchiq(true); }}><Edit size={14} /></button>
                         <button className="m-btn-blue m-btn-red m-btn-icon" onClick={(e) => { e.stopPropagation(); setTanlangan(m); setOchirishModalOchiq(true); }}><Trash2 size={14} /></button>
+                        
                       </div>
                     </td>
                   </tr>

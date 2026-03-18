@@ -79,6 +79,13 @@ const MijozProfil = ({ open }) => {
     return eskiSotuvlarList.reduce((sum, s) => sum + (Number(s.summa || 0) - Number(s.tulangan || 0)), 0);
   }, [eskiSotuvlarList]);
 
+  // Tarix modalidagi jami hisob-kitoblar uchun memo
+  const eskiSotuvlarTotal = useMemo(() => {
+    const jami = eskiSotuvlarList.reduce((sum, s) => sum + Number(s.summa || 0), 0);
+    const tulangan = eskiSotuvlarList.reduce((sum, s) => sum + Number(s.tulangan || 0), 0);
+    return { jami, tulangan, qoldiq: jami - tulangan };
+  }, [eskiSotuvlarList]);
+
   const hammaJoriyOySotuvlari = useMemo(() => {
     const bugun = new Date();
     const oy = bugun.getMonth();
@@ -92,8 +99,6 @@ const MijozProfil = ({ open }) => {
     }).sort((a, b) => new Date(b.sana).getTime() - new Date(a.sana).getTime());
   }, [sotuvlar, id]);
 
-  // MANA SHU QISM SEN AYTGANDAY BO'LDI: 
-  // Agar birorta ham to'lov bo'lsa (tulangan > 0), qarz 0 bo'lib ko'rinadi.
   const joriyOyJamiSumma = useMemo(() => {
     const jamiXarid = hammaJoriyOySotuvlari.reduce((sum, s) => sum + Number(s.summa || 0), 0);
     const tolovQilinganmi = hammaJoriyOySotuvlari.some(s => Number(s.tulangan || 0) > 0);
@@ -195,15 +200,13 @@ const MijozProfil = ({ open }) => {
 
     const loader = toast.loading("To'lov bajarilmoqda...");
     try {
-        // 1. Umumiy qarzdorlikni yangilash
         await mijozYangilash({ 
             ...mijoz, 
             qarzdorlik: Math.max(0, parseFloat(mijoz.qarzdorlik || 0) - tolov) 
         });
 
-        // 2. Joriy oy sotuvlarining tulangan qismini to'ldirish (Joriy oy xaridi qarzini 0 qilish uchun)
         let qolganTolov = tolov;
-        const joriySotuvlarCopy = [...hammaJoriyOySotuvlari].reverse(); // Eng oxirgisidan boshlab yopish
+        const joriySotuvlarCopy = [...hammaJoriyOySotuvlari].reverse(); 
         
         for (let s of joriySotuvlarCopy) {
             const qoldiqQarz = Number(s.summa) - Number(s.tulangan || 0);
@@ -215,13 +218,10 @@ const MijozProfil = ({ open }) => {
                 });
                 qolganTolov -= tolanishiKerak;
             } else if (qolganTolov > 0 && qoldiqQarz <= 0) {
-                // Agar sotuv allaqachon yopilgan bo'lsa, shunchaki keyingisiga o'tadi
                 continue;
             }
         }
 
-        // AGAR TO'LOV SOTUVLAR SUMMASIDAN KO'P BO'LSA:
-        // Qolgan pulni baribir birorta sotuvga "tulangan" sifatida qo'shib qo'yamizki, joriyOyJamiSumma 0 bo'lsin
         if (qolganTolov > 0 && hammaJoriyOySotuvlari.length > 0) {
             const lastSotuv = hammaJoriyOySotuvlari[0];
             await sotuvYangilash({
@@ -509,23 +509,46 @@ const MijozProfil = ({ open }) => {
             </div>
             <div style={{ overflowY: 'auto', flex: 1, padding: '10px' }}>
                 <div ref={pdfExportRef} style={{ padding: '20px', background: '#fff' }}>
+                    <div className="pdf-header" style={{ marginBottom: '20px', borderBottom: '2px solid #eee', paddingBottom: '10px' }}>
+                      <h2 style={{ margin: 0 }}>{mijoz.ism}</h2>
+                      <p style={{ color: '#666' }}>Xaridlar tarixi hisoboti</p>
+                    </div>
                     <table className="mijoz-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
                         <thead>
                             <tr style={{ background: '#f8f9fa' }}>
-                                <th style={{ border: '1px solid #dee2e6', padding: '12px' }}>SANA</th>
-                                <th style={{ border: '1px solid #dee2e6', padding: '12px' }}>MAHSULOT</th>
-                                <th style={{ border: '1px solid #dee2e6', padding: '12px' }}>SUMMA</th>
+                                <th style={{ border: '1px solid #dee2e6', padding: '12px', textAlign: 'left' }}>SANA</th>
+                                <th style={{ border: '1px solid #dee2e6', padding: '12px', textAlign: 'left' }}>MAHSULOT (NARX)</th>
+                                <th style={{ border: '1px solid #dee2e6', padding: '12px', textAlign: 'right' }}>SUMMA</th>
                             </tr>
                         </thead>
                         <tbody>
                           {eskiSotuvlarList.map((s, i) => (
                             <tr key={i}>
                               <td style={{ border: '1px solid #dee2e6', padding: '12px' }}>{s.sana}</td>
-                              <td style={{ border: '1px solid #dee2e6', padding: '12px' }}>{s.mahsulot} ({s.miqdor} kg)</td>
-                              <td style={{ border: '1px solid #dee2e6', padding: '12px' }}>{Number(s.summa).toLocaleString()}</td>
+                              <td style={{ border: '1px solid #dee2e6', padding: '12px' }}>
+                                <strong>{s.mahsulot}</strong> <br />
+                                <small style={{ color: '#666' }}>{s.miqdor} kg  ( 1kg = {Number(s.summa / s.miqdor).toLocaleString()} UZS)</small>
+                              </td>
+                              <td style={{ border: '1px solid #dee2e6', padding: '12px', textAlign: 'right', fontWeight: 'bold' }}>
+                                {Number(s.summa).toLocaleString()}
+                              </td>
                             </tr>
                           ))}
                         </tbody>
+                        <tfoot>
+                          <tr style={{ background: '#f8f9fa' }}>
+                            <td colSpan="2" style={{ border: '1px solid #dee2e6', padding: '12px', textAlign: 'right', fontWeight: 'bold' }}>JAMI XARIDLAR:</td>
+                            <td style={{ border: '1px solid #dee2e6', padding: '12px', textAlign: 'right', fontWeight: 'bold' }}>{eskiSotuvlarTotal.jami.toLocaleString()} UZS</td>
+                          </tr>
+                          <tr>
+                            <td colSpan="2" style={{ border: '1px solid #dee2e6', padding: '12px', textAlign: 'right', fontWeight: 'bold', color: '#22c55e' }}>TO'LANGAN SUMMA:</td>
+                            <td style={{ border: '1px solid #dee2e6', padding: '12px', textAlign: 'right', fontWeight: 'bold', color: '#22c55e' }}>{eskiSotuvlarTotal.tulangan.toLocaleString()} UZS</td>
+                          </tr>
+                          <tr style={{ background: '#fff1f2' }}>
+                            <td colSpan="2" style={{ border: '1px solid #dee2e6', padding: '12px', textAlign: 'right', fontWeight: 'bold', color: '#e11d48' }}>ESKI QOLDIQ QARZ:</td>
+                            <td style={{ border: '1px solid #dee2e6', padding: '12px', textAlign: 'right', fontWeight: 'bold', color: '#e11d48' }}>{eskiSotuvlarTotal.qoldiq.toLocaleString()} UZS</td>
+                          </tr>
+                        </tfoot>
                     </table>
                 </div>
             </div>
