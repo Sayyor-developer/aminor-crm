@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { TbMoneybag, TbMeat, TbUsers, TbUserExclamation } from "react-icons/tb";
+import {  TbCash, TbUsers, TbUserExclamation, TbChartBar } from "react-icons/tb"; // TbCash va TbChartBar qo'shildi
 import {
   AreaChart,
   Area,
@@ -19,26 +19,25 @@ const Home = ({ open }) => {
   const {
     mijozlar = [],
     sotuvlar = [],
-    products = []
   } = useData();
 
   const [period, setPeriod] = useState('week');
 
-  const omborStats = useMemo(() => {
-    return {
-      jamiSoni: products.reduce((sum, p) => sum + parseFloat(p.stock || 0), 0),
-      jamiQiymati: products.reduce((sum, p) => sum + (parseFloat(p.price || 0) * parseFloat(p.stock || 0)), 0)
-    };
-  }, [products]);
-
-  const bugunStats = useMemo(() => {
+  // --- Yangi Hisob-kitoblar ---
+  const kirimStats = useMemo(() => {
     const bugunStr = new Date().toISOString().split('T')[0];
-    const bugunSales = sotuvlar.filter(s => s.sana === bugunStr);
+    
+    const jamiKirim = sotuvlar.reduce((sum, s) => sum + parseFloat(s.tulangan || 0), 0);
+    const bugunKirim = sotuvlar
+      .filter(s => s.sana === bugunStr)
+      .reduce((sum, s) => sum + parseFloat(s.tulangan || 0), 0);
+
     return {
-      summa: bugunSales.reduce((sum, s) => sum + parseFloat(s.tulangan || 0), 0),
-      miqdor: bugunSales.reduce((sum, s) => sum + parseFloat(s.miqdor || 0), 0)
+      jamiKirim,
+      bugunKirim
     };
   }, [sotuvlar]);
+  // ----------------------------
 
   const { chartData, chartWidth } = useMemo(() => {
     const now = new Date();
@@ -106,26 +105,29 @@ const Home = ({ open }) => {
     <div className={`home-page ${!open ? 'sidebar-h-closed' : ''}`}>
       <div className="main-wrapper">
         <div className="stats-container">
-          <div className="stat-card clickable-card" onClick={() => navigate('/kolbasamaxsulotlar')}>
+          
+          {/* --- O'zgargan qism: Umumiy Kirim --- */}
+          <div className="stat-card">
             <div className="stat-info">
               <div className="stat-header">
-                <div className="icon-box blue-bg"><TbMoneybag className="icon-svg" /></div>
-                <span className="stat-label">Ombor Qiymati</span>
+                <div className="icon-box blue-bg"><TbCash className="icon-svg" /></div>
+                <span className="stat-label">Umumiy Kirim</span>
               </div>
-              <h2 className="stat-value">{omborStats.jamiQiymati.toLocaleString()} <span className="unit">so'm</span></h2>
+              <h2 className="stat-value">{kirimStats.jamiKirim.toLocaleString()} <span className="unit">so'm</span></h2>
             </div>
-            <p className="stat-footer">Bugungi tushum: {bugunStats.summa.toLocaleString()} so'm</p>
+            <p className="stat-footer">Barcha kirimlar</p>
           </div>
 
-          <div className="stat-card clickable-card" onClick={() => navigate('/kolbasamaxsulotlar')}>
+          {/* --- O'zgargan qism: Bugungi Kirim --- */}
+          <div className="stat-card">
             <div className="stat-info">
               <div className="stat-header">
-                <div className="icon-box red-bg"><TbMeat className="icon-svg" /></div>
-                <span className="stat-label">Mahsulot Qoldig'i</span>
+                <div className="icon-box red-bg"><TbChartBar className="icon-svg" /></div>
+                <span className="stat-label">Bugungi Sotuv</span>
               </div>
-              <h2 className="stat-value">{omborStats.jamiSoni.toLocaleString()} <span className="unit">kg</span></h2>
+              <h2 className="stat-value">{kirimStats.bugunKirim.toLocaleString()} <span className="unit">so'm</span></h2>
             </div>
-            <p className="stat-footer">Bugun sotildi: {bugunStats.miqdor} kg</p>
+            <p className="stat-footer">Faqat bugungi sotuvlar</p>
           </div>
 
           <div className="stat-card clickable-card" onClick={() => navigate('/mijozlar')}>
@@ -159,6 +161,7 @@ const Home = ({ open }) => {
           </div>
         </div>
 
+        {/* Grafik va List qismlari o'zgarishsiz qoldi */}
         <div className="chart-section" style={{ background: '#fff', padding: '20px', borderRadius: '15px', marginTop: '25px', boxShadow: '0 4px 10px rgba(0,0,0,0.05)' }}>
           <div className="chart-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
             <h3 className="section-title">Savdo Tarixi (Xaridlar kesimida)</h3>

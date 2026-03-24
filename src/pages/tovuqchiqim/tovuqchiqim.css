@@ -178,7 +178,7 @@
     background: var(--white);
     padding: 18px;
     text-align: left;
-    font-size: 11px;
+    font-size: var(--font-size-12);
    
     text-transform: uppercase;
 }

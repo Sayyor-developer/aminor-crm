@@ -16,6 +16,7 @@ import Mijozlar from './pages/mijozlar/Mijozlar';
 import MijozProfil from './pages/mijozlar/MijozProfil';
 import Masalliqlar from './pages/masalliqlar/Masalliqlar';
 import Tannarxhisoblash from './pages/tannarxhisoblash/Tannarxhisoblash';
+import Xarajatlar from './pages/xarajatlar/Xarajatlar';
 import Moliya from './pages/moliya/Moliya';
 import Tovuqchiqim from './pages/tovuqchiqim/Tovuqchiqim';
 import Foydalanuvchilar from './pages/foydalanuvchilar/Foydalanuvchilar';
@@ -81,8 +82,10 @@ function App() {
     const perms = userData.permissions;
     if (!perms) return false;
 
-    if (Array.isArray(perms)) return perms.includes(sectionName);
-    
+    if (Array.isArray(perms)) {
+      return perms.includes(sectionName);
+    }
+
     if (typeof perms === 'object' && perms !== null) {
       return perms[sectionName] === true || 
              perms[sectionName.toLowerCase()] === true ||
@@ -95,10 +98,11 @@ function App() {
     '/home': 'Dashboard',
     '/kolbasamaxsulotlar': 'Kolbasa va Maxsulotlar',
     '/mijozlar': 'Mijozlar Bazasi',
-    '/masalliqlar': 'Masalliqlar',
+    '/masalliqlar': 'Masalliqlar bo\'limi',
     '/tannarxhisoblash': 'Tannarx hisoblash',
-    '/moliya': 'Moliya',
-    '/tovuqchiqim': 'Tovuq Chiqimlari',
+    '/xarajatlar': 'Xarajatlar',
+    '/moliya': 'Moliya bo\'limi',
+    '/tovuqchiqim': 'Tovuq mahsulotlari',
     '/foydalanuvchilar': 'Foydalanuvchilar',
     '/direktor': 'Direktor'
   };
@@ -141,6 +145,7 @@ function App() {
                   <Route path="/mijozlar/:id" element={hasAccess('Mijozlar Bazasi') ? <MijozProfil open={open} /> : <Navigate to="/home" replace />} />
                   <Route path="/masalliqlar" element={hasAccess('Masalliqlar') ? <Masalliqlar open={open} /> : <Navigate to="/home" replace />} />
                   <Route path="/tannarxhisoblash" element={hasAccess('Tannarx hisoblash') ? <Tannarxhisoblash open={open} /> : <Navigate to="/home" replace />} />
+                  <Route path="/xarajatlar" element={hasAccess('Xarajatlar') ? <Xarajatlar open={open} /> : <Navigate to="/home" replace />} />
                   <Route path="/moliya" element={hasAccess('Moliya') ? <Moliya open={open} /> : <Navigate to="/home" replace />} />
                   <Route path="/tovuqchiqim" element={hasAccess('Tovuq Chiqimlari') ? <Tovuqchiqim open={open} /> : <Navigate to="/home" replace />} />
                   <Route path="/foydalanuvchilar" element={hasAccess('Foydalanuvchilar') ? <Foydalanuvchilar open={open} /> : <Navigate to="/home" replace />} />

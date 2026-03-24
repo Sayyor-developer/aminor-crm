@@ -1,4 +1,4 @@
-import React, { useMemo, useState, useEffect,  useRef } from 'react'; 
+import React, { useMemo, useState, useEffect, useRef } from 'react'; 
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
   MdPhone, MdEdit, MdDelete, MdLocationOn, 
@@ -57,8 +57,11 @@ const MijozProfil = ({ open }) => {
   useEffect(() => {
     if (mijoz) {
       setFormData({
-        ism: mijoz.ism || '', telefon: mijoz.telefon || '',
-        manzil: mijoz.manzil || '', qarzdorlik: mijoz.qarzdorlik || 0, id: mijoz.id
+        ism: mijoz.ism || '', 
+        telefon: mijoz.telefon || '',
+        manzil: mijoz.manzil || '', 
+        qarzdorlik: mijoz.qarzdorlik || 0, 
+        id: mijoz.id
       });
     }
   }, [mijoz]);
@@ -71,20 +74,9 @@ const MijozProfil = ({ open }) => {
     return sotuvlar.filter(s => {
       const sSana = new Date(s.sana);
       return String(s.mijozId) === String(id) && 
-            (sSana.getMonth() < joriyOy || sSana.getFullYear() < joriyYil);
+             (sSana.getMonth() < joriyOy || sSana.getFullYear() < joriyYil);
     }).sort((a, b) => new Date(b.sana).getTime() - new Date(a.sana).getTime());
   }, [sotuvlar, id]);
-
-  const oydanQolganQarzVal = useMemo(() => {
-    return eskiSotuvlarList.reduce((sum, s) => sum + (Number(s.summa || 0) - Number(s.tulangan || 0)), 0);
-  }, [eskiSotuvlarList]);
-
-  // Tarix modalidagi jami hisob-kitoblar uchun memo
-  const eskiSotuvlarTotal = useMemo(() => {
-    const jami = eskiSotuvlarList.reduce((sum, s) => sum + Number(s.summa || 0), 0);
-    const tulangan = eskiSotuvlarList.reduce((sum, s) => sum + Number(s.tulangan || 0), 0);
-    return { jami, tulangan, qoldiq: jami - tulangan };
-  }, [eskiSotuvlarList]);
 
   const hammaJoriyOySotuvlari = useMemo(() => {
     const bugun = new Date();
@@ -94,16 +86,23 @@ const MijozProfil = ({ open }) => {
     return sotuvlar.filter(s => {
       const sSana = new Date(s.sana);
       return String(s.mijozId) === String(id) && 
-            sSana.getMonth() === oy && 
-            sSana.getFullYear() === yil;
+             sSana.getMonth() === oy && 
+             sSana.getFullYear() === yil;
     }).sort((a, b) => new Date(b.sana).getTime() - new Date(a.sana).getTime());
   }, [sotuvlar, id]);
 
+  const oydanQolganQarzVal = useMemo(() => {
+    return eskiSotuvlarList.reduce((sum, s) => sum + (Number(s.summa || 0) - Number(s.tulangan || 0)), 0);
+  }, [eskiSotuvlarList]);
+
+  const eskiSotuvlarTotal = useMemo(() => {
+    const jami = eskiSotuvlarList.reduce((sum, s) => sum + Number(s.summa || 0), 0);
+    const tulangan = eskiSotuvlarList.reduce((sum, s) => sum + Number(s.tulangan || 0), 0);
+    return { jami, tulangan, qoldiq: jami - tulangan };
+  }, [eskiSotuvlarList]);
+
   const joriyOyJamiSumma = useMemo(() => {
-    const jamiXarid = hammaJoriyOySotuvlari.reduce((sum, s) => sum + Number(s.summa || 0), 0);
-    const tolovQilinganmi = hammaJoriyOySotuvlari.some(s => Number(s.tulangan || 0) > 0);
-    
-    return tolovQilinganmi ? 0 : jamiXarid;
+    return hammaJoriyOySotuvlari.reduce((sum, s) => sum + (Number(s.summa || 0) - Number(s.tulangan || 0)), 0);
   }, [hammaJoriyOySotuvlari]);
 
   const totalPages = Math.ceil(hammaJoriyOySotuvlari.length / itemsPerPage);
@@ -162,15 +161,12 @@ const MijozProfil = ({ open }) => {
             }
             
             const isoSana = new Date().toISOString().split('T')[0];
-            
             await productYangilash({ ...mahsulot, stock: parseFloat(mahsulot.stock) - miqdor });
-            
             await mijozYangilash({ 
                 ...mijoz, 
                 qarzdorlik: parseFloat(mijoz.qarzdorlik || 0) + jami, 
                 oxirgiXarid: isoSana 
             });
-
             await sotuvQoshish({ 
                 mijozId: mijoz.id, 
                 mahsulot: sotuvData.mahsulot, 
@@ -194,68 +190,48 @@ const MijozProfil = ({ open }) => {
   const handleTolovBajarish = async (e) => {
     e.preventDefault();
     const rawTulangan = String(tolovData.tulanganSumma).replace(/\s/g, "");
-    let tolov = rawTulangan === '' ? 0 : parseFloat(rawTulangan);
+    let tolovSummasi = rawTulangan === '' ? 0 : parseFloat(rawTulangan);
 
-    if (tolov <= 0) return toast.error("To'lov summasini kiriting!");
-
-    const loader = toast.loading("To'lov bajarilmoqda...");
+    const loader = toast.loading("Jarayon bajarilmoqda...");
     try {
-        await mijozYangilash({ 
-            ...mijoz, 
-            qarzdorlik: Math.max(0, parseFloat(mijoz.qarzdorlik || 0) - tolov) 
-        });
+        const yangiUmumiyQarz = Math.max(0, parseFloat(mijoz.qarzdorlik || 0) - tolovSummasi);
+        await mijozYangilash({ ...mijoz, qarzdorlik: yangiUmumiyQarz });
 
-        let qolganTolov = tolov;
-        const joriySotuvlarCopy = [...hammaJoriyOySotuvlari].reverse(); 
-        
-        for (let s of joriySotuvlarCopy) {
-            const qoldiqQarz = Number(s.summa) - Number(s.tulangan || 0);
-            if (qolganTolov > 0 && qoldiqQarz > 0) {
-                const tolanishiKerak = Math.min(qoldiqQarz, qolganTolov);
-                await sotuvYangilash({
-                    ...s,
-                    tulangan: Number(s.tulangan || 0) + tolanishiKerak
-                });
-                qolganTolov -= tolanishiKerak;
-            } else if (qolganTolov > 0 && qoldiqQarz <= 0) {
-                continue;
+        if (tolovSummasi > 0) {
+            let qolganTolov = tolovSummasi;
+            const joriySotuvlarCopy = [...hammaJoriyOySotuvlari].reverse(); 
+            
+            for (let s of joriySotuvlarCopy) {
+                const qoldiqQarz = Number(s.summa) - Number(s.tulangan || 0);
+                if (qolganTolov > 0 && qoldiqQarz > 0) {
+                    const tolanishiKerak = Math.min(qoldiqQarz, qolganTolov);
+                    await sotuvYangilash({
+                        ...s,
+                        tulangan: Number(s.tulangan || 0) + tolanishiKerak
+                    });
+                    qolganTolov -= tolanishiKerak;
+                }
             }
         }
-
-        if (qolganTolov > 0 && hammaJoriyOySotuvlari.length > 0) {
-            const lastSotuv = hammaJoriyOySotuvlari[0];
-            await sotuvYangilash({
-                ...lastSotuv,
-                tulangan: Number(lastSotuv.tulangan || 0) + qolganTolov
-            });
-        }
-
-        toast.success("To'lov muvaffaqiyatli qabul qilindi!");
+        toast.success(tolovSummasi > 0 ? "To'lov qabul qilindi!" : "Sotuvlar qarzga o'tkazildi!");
         setShowTolovModal(false);
         setTolovData({ tolovTuri: 'naqd', tulanganSumma: '' });
+        setCurrentPage(1);
     } catch (err) {
-        toast.error("To'lovda xato: " + err.message);
+        toast.error("Xato: " + err.message);
     } finally {
         toast.dismiss(loader);
     }
   };
 
+  // SIZ AYTGAN ASOSIY QISM: Xaridni yopish va tarixga saqlash
   const handleConfirmMonth = async () => {
-    const bugun = new Date();
-    const oy = bugun.getMonth();
-    const yil = bugun.getFullYear();
-    const joriySotuvlar = sotuvlar.filter(s => {
-      const sSana = new Date(s.sana);
-      return String(s.mijozId) === String(id) && sSana.getMonth() === oy && sSana.getFullYear() === yil;
-    });
-    
-    if (joriySotuvlar.length === 0) return toast.error("Tasdiqlash uchun joriy oyda sotuvlar mavmus emas!");
-    
+    if (hammaJoriyOySotuvlari.length === 0) return toast.error("Tasdiqlash uchun joriy oyda sotuvlar mavjud emas!");
     const loader = toast.loading("Oyni yopish...");
     try {
-        for (let s of joriySotuvlar) {
+        for (let s of hammaJoriyOySotuvlari) {
             const eskiSana = new Date(s.sana);
-            eskiSana.setMonth(eskiSana.getMonth() - 1);
+            eskiSana.setMonth(eskiSana.getMonth() - 1); 
             await sotuvYangilash({ ...s, sana: eskiSana.toISOString().split('T')[0] });
         }
         toast.success("Barcha sotuvlar tarixga o'tkazildi!");
@@ -280,7 +256,7 @@ const MijozProfil = ({ open }) => {
 
   const handleAmountChange = (val) => {
     const rawValue = val.replace(/\s/g, "");
-    if (!isNaN(rawValue)) {
+    if (rawValue === "" || !isNaN(rawValue)) {
       setTolovData({ ...tolovData, tulanganSumma: rawValue.replace(/\B(?=(\d{3})+(?!\d))/g, " ") });
     }
   };
@@ -344,14 +320,12 @@ const MijozProfil = ({ open }) => {
               <h2>{mijoz.ism}</h2>
               <span className="id-badge">ID: #{mijoz.id}</span>
             </div>
-            <div className="old-debt-box">
-              <small>Oydan qolgan qarz</small>
-              <p>-{Number(oydanQolganQarzVal).toLocaleString()} UZS</p>
-            </div>
-            <div className={`balance-status-box ${mijoz.qarzdorlik > 0 ? 'is-debt' : 'is-ok'}`}>
-              <small>Umumiy qarz(bugungi xarid)</small>
+            
+            <div className={`balance-status-box ${mijoz.qarzdorlik > 0 ? 'is-debt' : 'is-ok'}`} style={{ marginTop: '20px' }}>
+              <small>Umumiy qarz balansi</small>
               <p>-{Number(mijoz.qarzdorlik).toLocaleString()} UZS</p>
             </div>
+
             <div className="contact-list">
               <div className="contact-row"><MdPhone className="row-icon" /> <span>{mijoz.telefon}</span></div>
               <div className="contact-row"><MdLocationOn className="row-icon" /> <span>{mijoz.manzil || 'Noma\'lum'}</span></div>
@@ -404,43 +378,44 @@ const MijozProfil = ({ open }) => {
             </div>
           )}
 
-          <div className="bottom-action-bar no-print" style={{ display: 'flex', gap: 'var(--gap-20)', marginTop: '20px', justifyContent: 'flex-end', alignItems: 'center', background: '#f8fafc', padding: '15px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
+          <div className="bottom-action-bar no-print" style={{ display: 'flex', gap: '20px', marginTop: '20px', justifyContent: 'flex-end', alignItems: 'center', background: '#f8fafc', padding: '15px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
             <div style={{ textAlign: 'right' }}>
-              <div style={{ fontSize: 'var(--font-size-12)', color: '#64748b', fontWeight: 'bold', textTransform: 'uppercase' }}>Joriy oy xaridi (qarz):</div>
-              <div style={{ fontSize: 'var(--font-size-20)', fontWeight: 'var(--font-weight-700)', color: '#1e293b' }}>{Number(joriyOyJamiSumma).toLocaleString()} UZS</div>
+              <div style={{ fontSize: '12px', color: '#64748b', fontWeight: 'bold', textTransform: 'uppercase' }}>Joriy oy xaridi (qarz):</div>
+              <div style={{ fontSize: '20px', fontWeight: '700', color: '#1e293b' }}>{Number(joriyOyJamiSumma).toLocaleString()} UZS</div>
             </div>
             
             <button className="btn-confirm-all" style={{ background: 'var(--primary-color)', color: '#fff', padding: '10px 20px', borderRadius: '10px', border: 'none', display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', fontWeight: 'var(--font-weight-700)', fontSize: 'var(--font-size-16)' }} 
               onClick={() => { setTolovData({ tolovTuri: 'naqd', tulanganSumma: '' }); setShowTolovModal(true); }}>
-              <MdPayments size={22} /> To'lov qilish
+              <MdPayments size={22} /> To'lov / Tasdiqlash
             </button>
             
-            <button className="btn-confirm-all" style={{ background: 'var(--primary-color)', color: '#fff', padding: '12px 20px', borderRadius: '10px', border: 'none', display: 'flex', alignItems: 'center', gap: 'var(--gap-10)', cursor: 'pointer', fontWeight: 'var(--font-weight-700)' }} onClick={handleConfirmMonth}>
-              <MdDoneAll size={20} /> Oyni yopish
+            <button className="btn-confirm-all" style={{ background: 'var(--primary-color)', color: '#fff', padding: '12px 20px', borderRadius: '10px', border: 'none', display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', fontWeight: 'var(--font-weight-700)' }} onClick={handleConfirmMonth}>
+              <MdDoneAll size={20} /> Xaridni yopish 
             </button>
           </div>
 
           {eskiSotuvlarList.length > 0 && (
             <div className="history-link-box no-print" onClick={() => setShowHistoryModal(true)} style={{ marginTop: '20px', padding: '15px', background: '#fff', borderRadius: '10px', border: '1px dashed #cbd5e0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--gap-10)' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <MdHistory size={24} color="#64748b" />
                 <div>
                   <div style={{ fontWeight: 'bold', color: '#1e293b' }}>Eski oylar tarixi</div>
-                  <div style={{ fontSize: 'var(--font-size-12)', color: '#64748b' }}>Barcha eski xaridlar ro'yxati</div>
+                  <div style={{ fontSize: '12px', color: '#64748b' }}>Barcha eski xaridlar ro'yxati</div>
                 </div>
               </div>
               <div style={{ textAlign: 'right' }}>
-                <div style={{ fontWeight: 'bold', fontSize: 'var(--font-size-18)', color: oydanQolganQarzVal > 0 ? '#ef4444' : '#22c55e' }}>
+                <div style={{ fontWeight: 'bold', fontSize: '18px', color: oydanQolganQarzVal > 0 ? '#ef4444' : '#22c55e' }}>
                   {oydanQolganQarzVal > 0 ? `-${Number(oydanQolganQarzVal).toLocaleString()}` : '0'} UZS
                 </div>
-                <div style={{ fontSize: 'var(--font-size-12)', color: '#64748b', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 'gap-4px' }}>Ko'rish <MdVisibility size={16} /></div>
+                <div style={{ fontSize: '12px', color: '#64748b', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: '4px' }}>Ko'rish <MdVisibility size={16} /></div>
               </div>
             </div>
           )}
         </main>
       </div>
 
-      {/* MODAL: SOTUV */}
+      {/* --- MODAL QISMLARI (ORIGINAL STYLE) --- */}
+
       {showSotuvModal && (
         <div className="logout-modal-overlay" onClick={() => setShowSotuvModal(false)}>
           <div className="edit-modal-content" onClick={(e) => e.stopPropagation()}>
@@ -458,8 +433,8 @@ const MijozProfil = ({ open }) => {
                   {products.map(p => <option key={p.id} value={p.name}>{p.name} ({p.stock} kg)</option>)}
                 </select>
               </div>
-              <div style={{display:'flex', gap:'var(--gap-10)'}}>
-                <div className="form-group" style={{flex:1}}><label>Miqdor(kg)</label><input type="number" step="0.01" value={sotuvData.miqdor} onChange={(e) => setSotuvData({...sotuvData, miqdor: e.target.value})} required /></div>
+              <div style={{display:'flex', gap:'10px'}}>
+                <div className="form-group" style={{flex:1}}><label>Miqdor (kg)</label><input type="number" step="0.01" value={sotuvData.miqdor} onChange={(e) => setSotuvData({...sotuvData, miqdor: e.target.value})} required /></div>
                 <div className="form-group" style={{flex:1}}><label>Narx</label><input type="number" value={sotuvData.narx} onChange={(e) => setSotuvData({...sotuvData, narx: e.target.value})} required /></div>
               </div>
               <div className="total-display-box">Summa: {(Number(sotuvData.miqdor) * Number(sotuvData.narx)).toLocaleString()} UZS</div>
@@ -469,14 +444,10 @@ const MijozProfil = ({ open }) => {
         </div>
       )}
 
-      {/* MODAL: TO'LOV QILISH */}
       {showTolovModal && (
         <div className="logout-modal-overlay" onClick={() => setShowTolovModal(false)}>
           <div className="edit-modal-content" onClick={(e) => e.stopPropagation()}>
-            <div className="edit-modal-header">
-              <h3>To'lovni qabul qilish</h3>
-              <button className="close-btn" onClick={() => setShowTolovModal(false)}><MdClose size={24}/></button>
-            </div>
+            <div className="edit-modal-header"><h3>To'lovni tasdiqlash</h3><button className="close-btn" onClick={() => setShowTolovModal(false)}><MdClose size={24}/></button></div>
             <form onSubmit={handleTolovBajarish} className="edit-form">
               <div className="form-group"><label>To'lov turi</label>
                 <div className="payment-type-grid">
@@ -487,22 +458,16 @@ const MijozProfil = ({ open }) => {
                   ))}
                 </div>
               </div>
-              <div className="form-group">
-                <label>To'lanayotgan summa</label>
-                <input type="text" value={tolovData.tulanganSumma} onChange={(e) => handleAmountChange(e.target.value)} placeholder="Summani kiriting" required />
-              </div>
-              <div className="edit-modal-footer">
-                <button type="submit" className="btn-save" style={{ background: 'var(--primary-color)' }}>To'lovni tasdiqlash</button>
-              </div>
+              <div className="form-group"><label>To'lanayotgan summa</label><input type="text" value={tolovData.tulanganSumma} onChange={(e) => handleAmountChange(e.target.value)} placeholder="0" /></div>
+              <div className="edit-modal-footer"><button type="submit" className="btn-save" style={{ background: 'var(--primary-color)' }}>Tasdiqlash</button></div>
             </form>
           </div>
         </div>
       )}
 
-      {/* MODAL: HISTORY */}
       {showHistoryModal && (
         <div className="logout-modal-overlay" onClick={() => setShowHistoryModal(false)}>
-          <div className="edit-modal-content" style={{ maxWidth: '850px', width: '95%', maxHeight: '90vh', display: 'flex', flexDirection: 'column' }} onClick={(e) => e.stopPropagation()}>
+          <div className="edit-modal-content" style={{ maxWidth: '950px', width: '98%', maxHeight: '90vh', display: 'flex', flexDirection: 'column' }} onClick={(e) => e.stopPropagation()}>
             <div className="edit-modal-header no-print">
               <h3>Xaridlar tarixi</h3>
               <button className="close-btn" onClick={() => setShowHistoryModal(false)}><MdClose size={24}/></button>
@@ -517,7 +482,10 @@ const MijozProfil = ({ open }) => {
                         <thead>
                             <tr style={{ background: '#f8f9fa' }}>
                                 <th style={{ border: '1px solid #dee2e6', padding: '12px', textAlign: 'left' }}>SANA</th>
-                                <th style={{ border: '1px solid #dee2e6', padding: '12px', textAlign: 'left' }}>MAHSULOT (NARX)</th>
+                                <th style={{ border: '1px solid #dee2e6', padding: '12px', textAlign: 'left' }}>MAHSULOT</th>
+                                <th style={{ border: '1px solid #dee2e6', padding: '12px', textAlign: 'center' }}>BIRLIK</th>
+                                <th style={{ border: '1px solid #dee2e6', padding: '12px', textAlign: 'center' }}>1 KG NARXI</th>
+                                <th style={{ border: '1px solid #dee2e6', padding: '12px', textAlign: 'center' }}>MIQDOR</th>
                                 <th style={{ border: '1px solid #dee2e6', padding: '12px', textAlign: 'right' }}>SUMMA</th>
                             </tr>
                         </thead>
@@ -525,29 +493,18 @@ const MijozProfil = ({ open }) => {
                           {eskiSotuvlarList.map((s, i) => (
                             <tr key={i}>
                               <td style={{ border: '1px solid #dee2e6', padding: '12px' }}>{s.sana}</td>
-                              <td style={{ border: '1px solid #dee2e6', padding: '12px' }}>
-                                <strong>{s.mahsulot}</strong> <br />
-                                <small style={{ color: '#666' }}>{s.miqdor} kg  ( 1kg = {Number(s.summa / s.miqdor).toLocaleString()} UZS)</small>
-                              </td>
-                              <td style={{ border: '1px solid #dee2e6', padding: '12px', textAlign: 'right', fontWeight: 'bold' }}>
-                                {Number(s.summa).toLocaleString()}
-                              </td>
+                              <td style={{ border: '1px solid #dee2e6', padding: '12px', fontWeight: 'bold' }}>{s.mahsulot}</td>
+                              <td style={{ border: '1px solid #dee2e6', padding: '12px', textAlign: 'center' }}>kg</td>
+                              <td style={{ border: '1px solid #dee2e6', padding: '12px', textAlign: 'center' }}>{Number(s.summa / s.miqdor).toLocaleString()}</td>
+                              <td style={{ border: '1px solid #dee2e6', padding: '12px', textAlign: 'center' }}>{s.miqdor}</td>
+                              <td style={{ border: '1px solid #dee2e6', padding: '12px', textAlign: 'right', fontWeight: 'bold' }}>{Number(s.summa).toLocaleString()} UZS</td>
                             </tr>
                           ))}
                         </tbody>
                         <tfoot>
-                          <tr style={{ background: '#f8f9fa' }}>
-                            <td colSpan="2" style={{ border: '1px solid #dee2e6', padding: '12px', textAlign: 'right', fontWeight: 'bold' }}>JAMI XARIDLAR:</td>
-                            <td style={{ border: '1px solid #dee2e6', padding: '12px', textAlign: 'right', fontWeight: 'bold' }}>{eskiSotuvlarTotal.jami.toLocaleString()} UZS</td>
-                          </tr>
-                          <tr>
-                            <td colSpan="2" style={{ border: '1px solid #dee2e6', padding: '12px', textAlign: 'right', fontWeight: 'bold', color: '#22c55e' }}>TO'LANGAN SUMMA:</td>
-                            <td style={{ border: '1px solid #dee2e6', padding: '12px', textAlign: 'right', fontWeight: 'bold', color: '#22c55e' }}>{eskiSotuvlarTotal.tulangan.toLocaleString()} UZS</td>
-                          </tr>
-                          <tr style={{ background: '#fff1f2' }}>
-                            <td colSpan="2" style={{ border: '1px solid #dee2e6', padding: '12px', textAlign: 'right', fontWeight: 'bold', color: '#e11d48' }}>ESKI QOLDIQ QARZ:</td>
-                            <td style={{ border: '1px solid #dee2e6', padding: '12px', textAlign: 'right', fontWeight: 'bold', color: '#e11d48' }}>{eskiSotuvlarTotal.qoldiq.toLocaleString()} UZS</td>
-                          </tr>
+                          <tr style={{ background: '#f8f9fa' }}><td colSpan="5" style={{ textAlign: 'right', fontWeight: 'bold', padding: '12px' }}>JAMI XARIDLAR:</td><td style={{ textAlign: 'right', fontWeight: 'bold', padding: '12px' }}>{eskiSotuvlarTotal.jami.toLocaleString()} UZS</td></tr>
+                          <tr><td colSpan="5" style={{ textAlign: 'right', fontWeight: 'bold', color: '#22c55e', padding: '12px' }}>TO'LANGAN SUMMA:</td><td style={{ textAlign: 'right', fontWeight: 'bold', color: '#22c55e', padding: '12px' }}>{eskiSotuvlarTotal.tulangan.toLocaleString()} UZS</td></tr>
+                          <tr style={{ background: '#fff1f2' }}><td colSpan="5" style={{ textAlign: 'right', fontWeight: 'bold', color: '#e11d48', padding: '12px' }}>ESKI QARZ:</td><td style={{ textAlign: 'right', fontWeight: 'bold', color: '#e11d48', padding: '12px' }}>{eskiSotuvlarTotal.qoldiq.toLocaleString()} UZS</td></tr>
                         </tfoot>
                     </table>
                 </div>
@@ -557,7 +514,6 @@ const MijozProfil = ({ open }) => {
         </div>
       )}
 
-      {/* MODAL: SOTUV DELETE */}
       {showSotuvDeleteModal && (
         <div className="logout-modal-overlay" onClick={() => setShowSotuvDeleteModal(false)}>
           <div className="logout-modal-content" onClick={(e) => e.stopPropagation()}>
@@ -571,7 +527,6 @@ const MijozProfil = ({ open }) => {
         </div>
       )}
 
-      {/* MODAL: MIJOZ EDIT */}
       {showEditModal && (
         <div className="logout-modal-overlay" onClick={() => setShowEditModal(false)}>
           <div className="edit-modal-content" onClick={(e) => e.stopPropagation()}>
@@ -585,7 +540,6 @@ const MijozProfil = ({ open }) => {
         </div>
       )}
 
-      {/* MODAL: MIJOZ DELETE */}
       {showDeleteModal && (
         <div className="logout-modal-overlay" onClick={() => setShowDeleteModal(false)}>
           <div className="edit-modal-content" onClick={(e) => e.stopPropagation()}>

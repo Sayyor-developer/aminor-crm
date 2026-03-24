@@ -234,7 +234,7 @@ const Mijozlar = ({ open }) => {
               <div className="input-guruhi mb-2" style={{ display: 'flex', gap: 'var(--gap-10)' }}>
                 <div style={{ flex: 1 }}>
                   <label className="text-gray">Boshlang'ich qarz</label>
-                  <input className="input-style" style={{ width: '100%' }} type="text" placeholder="0" value={formatNumber(yangiMijozState.qarzdorlik)} onChange={e => setYangiMijozState({ ...yangiMijozState, qarzdorlik: cleanNumber(e.target.value) })} />
+                  <input className="input-style" style={{ width: '' }} type="text" placeholder="0" value={formatNumber(yangiMijozState.qarzdorlik)} onChange={e => setYangiMijozState({ ...yangiMijozState, qarzdorlik: cleanNumber(e.target.value) })} />
                 </div>
                 <div style={{ flex: 1 }}>
                   <label className="text-gray">Sana</label>
