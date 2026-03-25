@@ -3,7 +3,8 @@
     min-height: 100vh;
     background-color: #f8fafc;
     transition: all 0.3s ease;
-    padding-top: 90px; /* Header uchun */
+    padding-top: 90px;
+    /* Header uchun */
 }
 
 .xarajat-sidebar-open {
@@ -42,7 +43,8 @@
 .xarajat-icon-circle {
     width: 48px;
     height: 48px;
-    background: var(--primary-color); /* Loyihangizdagi qizil rang */
+    background: var(--primary-color);
+    /* Loyihangizdagi qizil rang */
     color: #fff;
     border-radius: 50%;
     display: flex;
@@ -76,7 +78,7 @@
 .xarajat-add-btn:hover {
     background: var(--primary-color);
     transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }
 
 /* QIDIRUV */
@@ -174,6 +176,7 @@
     color: #94a3b8;
     font-style: italic;
 }
+
 /* FORMA KONTEYNERI */
 .xarajat-form-container {
     background: #fff;
@@ -187,9 +190,11 @@
 /* GORIZONTAL FORMA MANTIQI */
 .xarajat-horizontal-form {
     display: flex;
-    align-items: flex-end; /* Label va Inputlarni tekislash */
+    align-items: flex-end;
+    /* Label va Inputlarni tekislash */
     gap: 15px;
-    flex-wrap: wrap; /* Kichik ekranda pastga tushishi uchun */
+    flex-wrap: wrap;
+    /* Kichik ekranda pastga tushishi uchun */
 }
 
 .xarajat-field {
@@ -201,8 +206,8 @@
 }
 
 .xarajat-field label {
-    font-size: 13px;
-    font-weight: 600;
+    font-size: var(--font-size-12);
+    font-weight: var(--font-weight-600);
     color: #64748b;
 }
 
@@ -210,7 +215,7 @@
     padding: 11px 15px;
     border: 1px solid #e2e8f0;
     border-radius: 8px;
-    font-size: 14px;
+    font-size: var(--font-size-14);
     outline-color: var(--primary-color);
     transition: 0.2s;
 }
@@ -226,17 +231,18 @@
     border: none;
     padding: 11px 25px;
     border-radius: 8px;
-    font-weight: 600;
+    font-weight: var(--font-weight-600);
     cursor: pointer;
     display: flex;
     align-items: center;
     gap: 8px;
-    height: 42px; /* Inputlar bilan bir xil balandlik */
+    height: 42px;
+    /* Inputlar bilan bir xil balandlik */
     transition: 0.2s;
 }
 
 .xarajat-add-inline-btn:hover {
-    background: #991b1b;
+    background: var(--primary-color);
     transform: translateY(-1px);
 }
 
@@ -270,7 +276,7 @@
     background: #fff;
     border-radius: 12px;
     overflow: hidden;
-    box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
 }
 
 .xarajat-table {
@@ -282,7 +288,7 @@
     background: #f8fafc;
     padding: 15px 20px;
     text-align: left;
-    font-size: 12px;
+    font-size: var(--font-size-12);
     color: #64748b;
     text-transform: uppercase;
 }
@@ -290,17 +296,17 @@
 .xarajat-table td {
     padding: 14px 20px;
     border-bottom: 1px solid #f1f5f9;
-    font-size: 14px;
+    font-size: var(--font-size-14);
 }
 
 .xarajat-price {
-    font-weight: 700;
+    font-weight: var(--font-weight-700);
     color: #1e293b;
 }
 
 .xarajat-del-icon {
     background: #fee2e2;
-    color: #ef4444;
+    color: var(--primary-color);
     border: none;
     padding: 7px;
     border-radius: 6px;
@@ -312,61 +318,102 @@
     padding: 40px !important;
     color: #94a3b8;
 }
+
 /* Jadvalni o'rab turgan asosiy karta */
 .xarajat-card-box {
     background: #fff;
     border-radius: 12px;
-    box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
     margin-top: 20px;
-    
+
     /* MANA SHU QISMLAR SCROLL UCHUN JAVOB BERADI */
     width: 100%;
-    overflow-x: auto; /* Gorizontal scroll chiqarish */
-    -webkit-overflow-scrolling: touch; /* Mobil qurilmalarda silliq scroll */
+    overflow-x: auto;
+    /* Gorizontal scroll chiqarish */
+    -webkit-overflow-scrolling: touch;
+    /* Mobil qurilmalarda silliq scroll */
 }
 
 .xarajat-table {
     width: 100%;
     border-collapse: collapse;
-    min-width: 600px; /* MUHIM: Jadval kichik ekranda ham kamida 600px bo'lsin */
+    min-width: 600px;
+    /* MUHIM: Jadval kichik ekranda ham kamida 600px bo'lsin */
 }
 
-.xarajat-table th, 
+.xarajat-table th,
 .xarajat-table td {
-    white-space: nowrap; /* Matnlarni pastga tushib ketmasligini ta'minlaydi */
+    white-space: nowrap;
+    /* Matnlarni pastga tushib ketmasligini ta'minlaydi */
     padding: 14px 20px;
 }
-.xarajat-edit-icon {
-    background: #e0f2fe;
-    color: #0284c7;
-    border: none;
-    padding: 7px;
-    border-radius: 6px;
-    cursor: pointer;
-    margin-right: 8px;
-}
+
+
 
 /* MODAL STYLES */
 .xarajat-modal-overlay {
     position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(0,0,0,0.5);
-    display: flex; align-items: center; justify-content: center;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
     z-index: 1000;
 }
+
 .xarajat-modal {
     background: white;
     width: 400px;
     padding: 20px;
     border-radius: 15px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
 }
-.xarajat-modal-header { display: flex; justify-content: space-between; margin-bottom: 20px; }
-.xarajat-modal-body { display: flex; flex-direction: column; gap: 10px; }
-.xarajat-modal-body input { padding: 10px; border: 1px solid #ddd; border-radius: 8px; }
-.xarajat-modal-footer { display: flex; gap: 10px; margin-top: 20px; justify-content: flex-end; }
-.x-btn-save { background: #10b981; color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; }
-.x-btn-cancel { background: #f1f5f9; color: #64748b; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; }
+
+.xarajat-modal-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+.xarajat-modal-body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--gap-10);
+}
+
+.xarajat-modal-body input {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+}
+
+.xarajat-modal-footer {
+    display: flex;
+    gap: var(--gap-10);
+    margin-top: 20px;
+    justify-content: flex-end;
+}
+
+.x-btn-save {
+    background: #10b981;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+}
+
+.x-btn-cancel {
+    background: #f1f5f9;
+    color: #64748b;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+}
 
 /* RESPONSIVE */
 @media (max-width: 600px) {
@@ -374,5 +421,25 @@
         flex-direction: column;
         align-items: stretch;
         gap: 15px;
+    }
+
+    .xarajat-add-inline-btn {
+        width: 100%;
+    }
+
+    .xarajat-add-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 400px) {
+    .xarajat-horizontal-form {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .xarajat-add-inline-btn {
+        width: 100%;
     }
 }

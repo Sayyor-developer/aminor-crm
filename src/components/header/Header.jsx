@@ -40,7 +40,7 @@ const Header = ({ open, title }) => {
           {/* onClick endi modalni ochadi */}
           <button className="account-section" onClick={() => setShowModal(true)}>
               <AccountCircleIcon className="user-icon" />
-              <span className="user-name">Sign out</span>
+              <span className="user-name">Chiqish</span>
       
             <LogoutIcon className="logout-icon" />
           </button>

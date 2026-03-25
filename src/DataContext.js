@@ -44,7 +44,21 @@ export const DataProvider = ({ children }) => {
             if (cRes.data) setChiqimlar(cRes.data);
             if (masRes.data) setMasalliqlar(masRes.data); 
             if (tRes.data) setTannarxlar(tRes.data);
-            if (xRes.data) setXarajatlar(xRes.data);
+            
+            if (xRes.data) {
+                // --- XARAJATLARNI 1 OYDAN OSHGANINI AVTOMATIK O'CHIRISH ---
+                const birOyAvval = new Date();
+                birOyAvval.setDate(birOyAvval.getDate() - 30);
+                
+                const yangiXarajatlar = xRes.data.filter(x => new Date(x.sana) >= birOyAvval);
+                const ochirilishiKerak = xRes.data.filter(x => new Date(x.sana) < birOyAvval);
+
+                if (ochirilishiKerak.length > 0) {
+                    const ids = ochirilishiKerak.map(x => x.id);
+                    await supabase.from('xarajatlar').delete().in('id', ids);
+                }
+                setXarajatlar(yangiXarajatlar);
+            }
         } catch (err) {
             console.error("Ma'lumotlarni yuklashda xatolik:", err);
         } finally {
@@ -229,7 +243,7 @@ export const DataProvider = ({ children }) => {
         }
     };
 
-    // --- MOLIYAVIY HISOB-KITOB (USEMEMO) ---
+    // --- MOLIYAVIY HISOB-KITOB (MUSTAQIL) ---
     const jamiKirim = useMemo(() => {
         return sotuvlar.reduce((sum, s) => sum + parseFloat(s.tulangan || 0), 0);
     }, [sotuvlar]);
@@ -240,9 +254,8 @@ export const DataProvider = ({ children }) => {
 
     const jamiChiqim = useMemo(() => {
         const x = chiqimlar.reduce((sum, c) => sum + parseFloat(c.summa || 0), 0);
-        const m = masalliqlar.reduce((sum, mas) => sum + (parseFloat(mas.narxi || 0) * parseFloat(mas.miqdori || 0)), 0);
-        return x + m + jamiXarajatlarSumma;
-    }, [chiqimlar, masalliqlar, jamiXarajatlarSumma]);
+        return x + jamiXarajatlarSumma;
+    }, [chiqimlar, jamiXarajatlarSumma]);
 
     const jamiQarzlar = useMemo(() => {
         return mijozlar.reduce((sum, m) => sum + parseFloat(m.qarzdorlik || 0), 0);
@@ -271,5 +284,4 @@ export const DataProvider = ({ children }) => {
     );
 };
 
-// Custom Hook
 export const useData = () => useContext(DataContext);

@@ -1,13 +1,21 @@
 import React, { useMemo, useState } from 'react';
-import { TrendingUp, TrendingDown, DollarSign, UserMinus } from 'lucide-react'; // UserMinus ikonkasi qarz uchun
+import {  DollarSign, UserMinus, CalendarDays } from 'lucide-react'; 
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useData } from '../../DataContext'; 
 import './moliya.css';
 
 const Moliya = ({ open }) => {
-  // 1. Context-dan jamiQarzlar-ni ham olamiz
+  // Context-dan kerakli ma'lumotlarni olamiz
   const { sotuvlar, jamiKirim, jamiChiqim, sofFoyda, jamiQarzlar, loading } = useData();
   const [vaqtFiltr, setVaqtFiltr] = useState('1oy'); 
+
+  // Bugungi sotuvni hisoblash (Faqat bugungi sana bo'yicha)
+  const bugungiSotuv = useMemo(() => {
+    const bugun = new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD format
+    return (sotuvlar || [])
+      .filter(s => s.sana === bugun)
+      .reduce((sum, s) => sum + Number(s.tulangan || 0), 0);
+  }, [sotuvlar]);
 
   const moliyaStatistika = useMemo(() => {
     const bugun = new Date();
@@ -58,24 +66,15 @@ const Moliya = ({ open }) => {
           <p className="header-subtitle">Biznesning real vaqtdagi moliyaviy holati</p>
         </header>
 
-        {/* Stat-kartalar: Endi 4 ta karta bo'ladi */}
+        {/* Stat-kartalar: Jami Kirim/Chiqim o'rniga Bugungi sotuv qo'shildi */}
         <section className="stats-grid">
           <div className="stat-card border-green">
             <div className="stat-card-top">
-               <div className="icon-box bg-green-soft"><TrendingUp size={20}/></div>
-               <span className="trend-val text-kirim">Tushum</span>
+               <div className="icon-box bg-green-soft"><CalendarDays size={20}/></div>
+               <span className="trend-val text-kirim">Bugun</span>
             </div>
-            <div className="stat-label">Jami Kirim</div>
-            <div className="stat-value">{formatMoney(jamiKirim)} <small>so'm</small></div>
-          </div>
-
-          <div className="stat-card border-red">
-            <div className="stat-card-top">
-               <div className="icon-box bg-red-soft"><TrendingDown size={20}/></div>
-               <span className="trend-val text-chiqim">Xarajat</span>
-            </div>
-            <div className="stat-label">Jami Chiqimlar</div>
-            <div className="stat-value">{formatMoney(jamiChiqim)} <small>so'm</small></div>
+            <div className="stat-label">Bugungi Sotuvlar</div>
+            <div className="stat-value">{formatMoney(bugungiSotuv)} <small>so'm</small></div>
           </div>
 
           <div className="stat-card border-blue">
@@ -83,13 +82,12 @@ const Moliya = ({ open }) => {
                <div className="icon-box bg-blue-soft"><DollarSign size={20}/></div>
                <span className="trend-val text-blue">Net</span>
             </div>
-            <div className="stat-label">Sof Foyda</div>
+            <div className="stat-label">Umumiy kirim</div>
             <div className="stat-value" style={{ color: sofFoyda >= 0 ? '#10b981' : '#ef4444' }}>
               {formatMoney(sofFoyda)} <small>so'm</small>
             </div>
           </div>
 
-          {/* YANGI QO'SHILGAN KARTA: UMUMIY QARZ */}
           <div className="stat-card border-purple">
             <div className="stat-card-top">
                <div className="icon-box bg-orange-soft"><UserMinus size={20} /></div>
@@ -180,7 +178,6 @@ const Moliya = ({ open }) => {
                 <span><b>Jami Xarajatlar:</b></span> 
                 <span className="val-chiqim"> {formatMoney(jamiChiqim)} so'm</span>
               </div>
-              {/* Moliyaviy hisobotga qarzni ham qo'shib qo'yamiz xulosa uchun */}
               <div className="summary-row">
                 <span><b>Kutilayotgan Qarzlar:</b></span> 
                 <span > {formatMoney(jamiQarzlar)} so'm</span>

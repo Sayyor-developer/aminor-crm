@@ -12,8 +12,6 @@ const Xarajatlar = ({ open }) => {
     const [searchTerm, setSearchTerm] = useState('');
     const [formData, setFormData] = useState({ nomi: '', summa: '', sana: today });
     
-   
-
     const formatNumber = (num) => {
         if (!num) return '';
         return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
@@ -38,11 +36,6 @@ const Xarajatlar = ({ open }) => {
         } catch (err) { toast.error("Xato!"); }
     };
 
-
- 
-
-   
-
     const filteredItems = xarajatlar.filter(item => 
         item.nomi.toLowerCase().includes(searchTerm.toLowerCase())
     );
@@ -62,11 +55,11 @@ const Xarajatlar = ({ open }) => {
                     <form className="xarajat-horizontal-form" onSubmit={handleAdd}>
                         <div className="xarajat-field">
                             <label>Nomi</label>
-                            <input type="text" name="nomi" placeholder='Maxsulot nomi' value={formData.nomi} onChange={handleChange} required />
+                            <input type="text" name="nomi" placeholder='comment' value={formData.nomi} onChange={handleChange} required />
                         </div>
                         <div className="xarajat-field">
                             <label>Summa</label>
-                            <input type="text" name="summa" placeholder='Narxi..' value={formatNumber(formData.summa)} onChange={handleChange} required />
+                            <input type="text" name="summa" placeholder='Narx..' value={formatNumber(formData.summa)} onChange={handleChange} required />
                         </div>
                         <div className="xarajat-field">
                             <label>Sana</label>
@@ -99,7 +92,7 @@ const Xarajatlar = ({ open }) => {
                                     <td>{item.nomi}</td>
                                     <td className="xarajat-price">{formatNumber(item.summa)}</td>
                                     <td style={{ textAlign: 'right' }}>
-                                       
+                                        {/* O'chirish tugmasi olib tashlandi */}
                                     </td>
                                 </tr>
                             ))}
@@ -107,7 +100,6 @@ const Xarajatlar = ({ open }) => {
                     </table>
                 </div>
             </div>
-
         </div>
     );
 };

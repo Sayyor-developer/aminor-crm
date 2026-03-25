@@ -12,7 +12,6 @@ const Masalliqlar = ({ open }) => {
   const {
     masalliqlar = [],
     setMasalliqlar,
-    chiqimQoshish,
     supabase
   } = useData();
 
@@ -132,58 +131,54 @@ const Masalliqlar = ({ open }) => {
     }
   };
 
+  // --- TASDIQLASH (MOLIYA BILAN ALOQA YO'Q) ---
   const barchasiniTasdiqlash = async () => {
-    if (masalliqlar.length === 0) {
-      toast.error("Tasdiqlash uchun masalliqlar yo'q!");
+    const tasdiqlanadiganlar = masalliqlar.filter(m => m.status === true);
+    
+    if (tasdiqlanadiganlar.length === 0) {
+      toast.error("Tasdiqlash uchun aktiv masalliqlar yo'q!");
       return;
     }
+
     const t = toast.loading("Jarayon bajarilmoqda...");
-    const joriySana = new Date().toLocaleString();
-    const bugungiSana = new Date().toISOString().split('T')[0];
+    const joriyVaqt = new Date().toLocaleString();
+
     try {
-      const yangiKirimlar = masalliqlar.map(m => ({
+      // 1. Tarix uchun ma'lumot tayyorlash
+      const yangiTarixElementlari = tasdiqlanadiganlar.map(m => ({
         id: Date.now() + Math.random(),
-        sana: joriySana,
+        sana: joriyVaqt,
         nomi: m.nomi,
         miqdor: m.miqdori,
         birligi: m.birlik,
         summa: Number(m.miqdori) * Number(m.narxi || 0),
         zavod: m.zavod || '---'
       }));
-      const jamiSumma = yangiKirimlar.reduce((sum, item) => sum + item.summa, 0);
-      try {
-        if (jamiSumma > 0) {
-          await chiqimQoshish({
-            turi: "Masalliqlar xaridi",
-            manbaa: "Ombor (Yalpi)",
-            summa: jamiSumma,
-            sana: bugungiSana
-          });
-        }
-      } catch (e) { console.error(e); }
-      const ids = masalliqlar.map(m => m.id);
+
+      // 2. Supabase-dan o'chirish
+      const ids = tasdiqlanadiganlar.map(m => m.id);
       const { error: delErr } = await supabase.from('masalliqlar').delete().in('id', ids);
       if (delErr) throw delErr;
-      setTarix(prev => [...yangiKirimlar, ...prev]);
-      setMasalliqlar([]);
-      toast.success("Tasdiqlandi!", { id: t });
+
+      // 3. State-larni yangilash (Moliya funksiyasi chaqirilmadi!)
+      setTarix(prev => [...yangiTarixElementlari, ...prev]);
+      setMasalliqlar(prev => prev.filter(m => !ids.includes(m.id)));
+      
+      toast.success("Masalliqlar omborga qabul qilindi va arxivlandi!", { id: t });
     } catch (error) {
+      console.error(error);
       toast.error("Xatolik yuz berdi!", { id: t });
     }
   };
 
-  // --- PDF EKSPORT FUNKSIYASI ---
   const tarixExportPDF = () => {
     if (tarix.length === 0) return toast.error("Tarix bo'sh!");
-    
     const doc = new jsPDF();
     const sana = new Date().toLocaleDateString();
-    
     doc.setFontSize(18);
     doc.text("Masalliqlar Kirim Hisoboti", 14, 15);
     doc.setFontSize(10);
     doc.text(`Sana: ${sana}`, 14, 22);
-
     autoTable(doc, {
       startY: 28,
       head: [['Sana', 'Masalliq Nomi', 'Miqdor', 'Jami Summa', 'Ta\'minotchi']],
@@ -195,9 +190,8 @@ const Masalliqlar = ({ open }) => {
         t.zavod
       ]),
       styles: { fontSize: 8, cellPadding: 3 },
-      headStyles: { fillColor: [79, 70, 229] }, // Indigo rang
+      headStyles: { fillColor: [79, 70, 229] },
     });
-
     doc.save(`masalliqlar_hisoboti_${sana}.pdf`);
     toast.success("PDF yuklab olindi!");
   };
@@ -264,15 +258,15 @@ const Masalliqlar = ({ open }) => {
             </table>
           </div>
           <div style={{ padding: '20px', display: 'flex', justifyContent: 'flex-end', borderTop: '1px solid #eee' }}>
-            <button className="m-save-btn" style={{ padding: '10px 15px', display: 'flex', gap: 'var(--gap-10)'}} onClick={barchasiniTasdiqlash}>
-              <CheckCircle size={20} /> Tasdiqlash 
+            <button className="m-save-btn" style={{ padding: '10px 15px', display: 'flex', gap: '10px'}} onClick={barchasiniTasdiqlash}>
+              <CheckCircle size={20} /> Tasdiqlash (Faqat Ombor)
             </button>
           </div>
         </div>
 
         {/* --- MODALLAR --- */}
 
-        {/* 1. QOSHISH */}
+        {/* QOSHISH */}
         {qoshishModalOchiq && (
           <div className="m-overlay">
             <div className="m-modal">
@@ -313,7 +307,7 @@ const Masalliqlar = ({ open }) => {
           </div>
         )}
 
-        {/* 2. TAHRIRLASH */}
+        {/* TAHRIRLASH */}
         {tahrirlashModalOchiq && tanlangan && (
           <div className="m-overlay">
             <div className="m-modal">
@@ -346,7 +340,7 @@ const Masalliqlar = ({ open }) => {
           </div>
         )}
 
-        {/* 3. OCHIRISH */}
+        {/* OCHIRISH */}
         {ochirishModalOchiq && (
           <div className="m-overlay">
             <div className="m-modal m-modal-sm" style={{ maxWidth: '380px' }}>
@@ -355,19 +349,19 @@ const Masalliqlar = ({ open }) => {
                   <AlertTriangle size={32} color="#ef4444" />
                 </div>
                 <h3 style={{ fontSize: '20px', fontWeight: '700', color: '#1e293b', marginBottom: '8px' }}>O'chirilsinmi?</h3>
-                <p style={{ color: 'var(--primary-color)', fontSize: '14px', marginBottom: '24px', lineHeight: '1.5' }}>
-                  Haqiqatan ham ushbu masalliqni o'chirmoqchimisiz? Bu amalni ortga qaytarib bo'lmaydi.
+                <p style={{ color: '#64748b', fontSize: '14px', marginBottom: '24px', lineHeight: '1.5' }}>
+                  Haqiqatan ham ushbu masalliqni o'chirmoqchimisiz?
                 </p>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                  <button onClick={() => setOchirishModalOchiq(false)} className="m-cancel-btn" style={{ padding: '12px' }}>Bekor qilish</button>
-                  <button onClick={handleOchirish} className="m-delete-confirm-btn" style={{ padding: '12px' }}>Ha, o'chirilsin</button>
+                  <button onClick={() => setOchirishModalOchiq(false)} className="m-cancel-btn">Bekor qilish</button>
+                  <button onClick={handleOchirish} className="m-delete-confirm-btn">O'chirish</button>
                 </div>
               </div>
             </div>
           </div>
         )}
 
-        {/* --- TARIX BO'LIMI --- */}
+        {/* TARIX */}
         <div className="m-history-section" style={{ marginTop: '40px' }}>
           <div className="m-history-head" style={{display: 'flex', justifyContent: 'space-between', marginBottom: '15px'}}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
