@@ -5,7 +5,7 @@ import {
   MdPerson, MdHistory, MdCheckCircle,
   MdArrowBack, MdClose, MdSave, MdHelpOutline, MdAddShoppingCart,
   MdPayments, MdCreditCard, MdAccountBalanceWallet, MdDoneAll,
-  MdChevronLeft, MdChevronRight, MdVisibility, MdDownload
+  MdVisibility, MdDownload
 } from 'react-icons/md'; 
 import { useData } from '../../DataContext';
 import toast, { Toaster } from 'react-hot-toast'; 
@@ -39,9 +39,6 @@ const MijozProfil = ({ open }) => {
   const [selectedSotuv, setSelectedSotuv] = useState(null);
   const [isEditMode, setIsEditMode] = useState(false);
 
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
-
   const [sotuvData, setSotuvData] = useState({ 
     mahsulot: '', miqdor: '', narx: '' 
   });
@@ -66,30 +63,35 @@ const MijozProfil = ({ open }) => {
     }
   }, [mijoz]);
 
-  const eskiSotuvlarList = useMemo(() => {
-    const bugun = new Date();
-    const joriyOy = bugun.getMonth();
-    const joriyYil = bugun.getFullYear();
-
-    return sotuvlar.filter(s => {
-      const sSana = new Date(s.sana);
-      return String(s.mijozId) === String(id) && 
-             (sSana.getMonth() < joriyOy || sSana.getFullYear() < joriyYil);
-    }).sort((a, b) => new Date(b.sana).getTime() - new Date(a.sana).getTime());
-  }, [sotuvlar, id]);
-
+  // JORIY OY SOTUVLARI (yopilmaganlari)
   const hammaJoriyOySotuvlari = useMemo(() => {
-    const bugun = new Date();
-    const oy = bugun.getMonth();
-    const yil = bugun.getFullYear();
-    
-    return sotuvlar.filter(s => {
-      const sSana = new Date(s.sana);
-      return String(s.mijozId) === String(id) && 
-             sSana.getMonth() === oy && 
-             sSana.getFullYear() === yil;
-    }).sort((a, b) => new Date(b.sana).getTime() - new Date(a.sana).getTime());
+    return (sotuvlar || [])
+      .filter(s => String(s.mijozId) === String(id) && !s.yopilgan)
+      .sort((a, b) => new Date(b.sana).getTime() - new Date(a.sana).getTime());
   }, [sotuvlar, id]);
+
+  // ESKI OYLAR TARIXI (yopilgan barcha sotuvlar ro'yxati)
+  const eskiSotuvlarList = useMemo(() => {
+    return (sotuvlar || [])
+      .filter(s => String(s.mijozId) === String(id) && s.yopilgan)
+      .sort((a, b) => new Date(b.sana).getTime() - new Date(a.sana).getTime());
+  }, [sotuvlar, id]);
+
+  // CARDLAR UCHUN GURUHLASH (BatchId bo'yicha)
+  const yopilganPartiyalar = useMemo(() => {
+    const groups = {};
+    eskiSotuvlarList.forEach(s => {
+      const key = s.batchId || s.sana;
+      if (!groups[key]) groups[key] = [];
+      groups[key].push(s);
+    });
+    // Xavfsiz sort: faqat sana bo'yicha tartiblaymiz
+    return Object.entries(groups).sort((a, b) => {
+        const dateA = new Date(a[1][0].sana).getTime();
+        const dateB = new Date(b[1][0].sana).getTime();
+        return dateB - dateA;
+    });
+  }, [eskiSotuvlarList]);
 
   const oydanQolganQarzVal = useMemo(() => {
     return eskiSotuvlarList.reduce((sum, s) => sum + (Number(s.summa || 0) - Number(s.tulangan || 0)), 0);
@@ -104,13 +106,6 @@ const MijozProfil = ({ open }) => {
   const joriyOyJamiSumma = useMemo(() => {
     return hammaJoriyOySotuvlari.reduce((sum, s) => sum + (Number(s.summa || 0) - Number(s.tulangan || 0)), 0);
   }, [hammaJoriyOySotuvlari]);
-
-  const totalPages = Math.ceil(hammaJoriyOySotuvlari.length / itemsPerPage);
-  const joriySahifaSotuvlari = useMemo(() => {
-    const lastIndex = currentPage * itemsPerPage;
-    const firstIndex = lastIndex - itemsPerPage;
-    return hammaJoriyOySotuvlari.slice(firstIndex, lastIndex);
-  }, [hammaJoriyOySotuvlari, currentPage]);
 
   const handleDownloadPDF = () => {
     const element = pdfExportRef.current;
@@ -133,6 +128,29 @@ const MijozProfil = ({ open }) => {
       });
   };
 
+  // HAR BITTA CARD UCHUN PDF
+  const handleDownloadSingleBatchPDF = (batchId, products) => {
+    const element = document.getElementById(`batch-card-${batchId}`);
+    const options = {
+      margin: 15,
+      filename: `${mijoz.ism}_xarid_${products[0].sana}.pdf`,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2, useCORS: true },
+      jsPDF: { unit: 'mm', format: 'a5', orientation: 'portrait' }
+    };
+    
+    const loadingToast = toast.loading("Xarid cheki tayyorlanmoqda...");
+    html2pdf().set(options).from(element).save()
+      .then(() => {
+        toast.dismiss(loadingToast);
+        toast.success("Check yuklandi!");
+      })
+      .catch(() => {
+        toast.dismiss(loadingToast);
+        toast.error("Xatolik!");
+      });
+  };
+
   const handleSotuvBajarish = async (e) => {
     e.preventDefault();
     const miqdor = parseFloat(sotuvData.miqdor);
@@ -144,7 +162,6 @@ const MijozProfil = ({ open }) => {
         if (isEditMode) {
             const eskiSotuvQarz = Number(selectedSotuv.summa || 0) - Number(selectedSotuv.tulangan || 0);
             const yangiQarzBalansOzgardi = jami - eskiSotuvQarz;
-            
             await mijozYangilash({ ...mijoz, qarzdorlik: Number(mijoz.qarzdorlik) + yangiQarzBalansOzgardi });
             await sotuvYangilash({ 
                 ...selectedSotuv, 
@@ -159,7 +176,6 @@ const MijozProfil = ({ open }) => {
                 toast.dismiss(loader);
                 return toast.error("Omborda yetarli qoldiq yo'q!");
             }
-            
             const isoSana = new Date().toISOString().split('T')[0];
             await productYangilash({ ...mahsulot, stock: parseFloat(mahsulot.stock) - miqdor });
             await mijozYangilash({ 
@@ -173,7 +189,8 @@ const MijozProfil = ({ open }) => {
                 miqdor, 
                 summa: jami, 
                 tulangan: 0, 
-                sana: isoSana
+                sana: isoSana,
+                yopilgan: false 
             });
             toast.success("Muvaffaqiyatli saqlandi!");
         }
@@ -199,9 +216,11 @@ const MijozProfil = ({ open }) => {
 
         if (tolovSummasi > 0) {
             let qolganTolov = tolovSummasi;
-            const joriySotuvlarCopy = [...hammaJoriyOySotuvlari].reverse(); 
+            const barchaQarzdorSavdolar = [...eskiSotuvlarList, ...hammaJoriyOySotuvlari]
+                .filter(s => (Number(s.summa) - Number(s.tulangan || 0)) > 0)
+                .sort((a, b) => new Date(a.sana).getTime() - new Date(b.sana).getTime());
             
-            for (let s of joriySotuvlarCopy) {
+            for (let s of barchaQarzdorSavdolar) {
                 const qoldiqQarz = Number(s.summa) - Number(s.tulangan || 0);
                 if (qolganTolov > 0 && qoldiqQarz > 0) {
                     const tolanishiKerak = Math.min(qoldiqQarz, qolganTolov);
@@ -216,7 +235,6 @@ const MijozProfil = ({ open }) => {
         toast.success(tolovSummasi > 0 ? "To'lov qabul qilindi!" : "Sotuvlar qarzga o'tkazildi!");
         setShowTolovModal(false);
         setTolovData({ tolovTuri: 'naqd', tulanganSumma: '' });
-        setCurrentPage(1);
     } catch (err) {
         toast.error("Xato: " + err.message);
     } finally {
@@ -224,18 +242,19 @@ const MijozProfil = ({ open }) => {
     }
   };
 
-  // SIZ AYTGAN ASOSIY QISM: Xaridni yopish va tarixga saqlash
   const handleConfirmMonth = async () => {
     if (hammaJoriyOySotuvlari.length === 0) return toast.error("Tasdiqlash uchun joriy oyda sotuvlar mavjud emas!");
-    const loader = toast.loading("Oyni yopish...");
+    const loader = toast.loading("Xarid yopilmoqda...");
+    const batchId = `Batch-${Date.now()}`; 
     try {
         for (let s of hammaJoriyOySotuvlari) {
-            const eskiSana = new Date(s.sana);
-            eskiSana.setMonth(eskiSana.getMonth() - 1); 
-            await sotuvYangilash({ ...s, sana: eskiSana.toISOString().split('T')[0] });
+            await sotuvYangilash({ 
+                ...s, 
+                yopilgan: true, 
+                batchId: batchId 
+            });
         }
-        toast.success("Barcha sotuvlar tarixga o'tkazildi!");
-        setCurrentPage(1);
+        toast.success("Barcha sotuvlar tarixga va cardlarga o'tkazildi!");
     } catch (err) {
         toast.error("Xato: " + err.message);
     } finally {
@@ -343,13 +362,13 @@ const MijozProfil = ({ open }) => {
             </div>
           </div>
 
-          <div className="history-table-container joriy-oy-print">
+          <div className="history-table-container joriy-oy-print" style={{ maxHeight: '450px', overflowY: 'auto', border: '1px solid #e2e8f0', borderRadius: '12px' }}>
             <table className="mijoz-table">
-              <thead style={{ position: 'sticky', top: 0, background: '#fff', zIndex: 5 }}>
+              <thead style={{ position: 'sticky', top: 0, background: '#fff', zIndex: 5, boxShadow: '0 1px 2px rgba(0,0,0,0.05)' }}>
                 <tr><th>Sana</th><th>Mahsulot</th><th>Summa</th><th>Xodim</th><th className="no-print">Amallar</th></tr>
               </thead>
               <tbody>
-                {joriySahifaSotuvlari.length > 0 ? joriySahifaSotuvlari.map((s, i) => (
+                {hammaJoriyOySotuvlari.length > 0 ? hammaJoriyOySotuvlari.map((s, i) => (
                   <tr key={i}>
                     <td>{s.sana}</td>
                     <td className="bold-text">{s.mahsulot} ({s.miqdor} kg)</td>
@@ -367,29 +386,18 @@ const MijozProfil = ({ open }) => {
             </table>
           </div>
 
-          {totalPages > 1 && (
-            <div className="pagination-container no-print">
-              <div className="pagination-info">Jami: {hammaJoriyOySotuvlari.length} ta xarid</div>
-              <div className="pagination-controls">
-                <button disabled={currentPage === 1} onClick={() => setCurrentPage(prev => prev - 1)} className="pag-nav-btn"><MdChevronLeft size={20} /></button>
-                <div className="pag-current-box"><span className="pag-number-display">{currentPage}</span></div>
-                <button disabled={currentPage === totalPages} onClick={() => setCurrentPage(prev => prev + 1)} className="pag-nav-btn"><MdChevronRight size={20} /></button>
-              </div>
-            </div>
-          )}
-
           <div className="bottom-action-bar no-print" style={{ display: 'flex', gap: '20px', marginTop: '20px', justifyContent: 'flex-end', alignItems: 'center', background: '#f8fafc', padding: '15px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
             <div style={{ textAlign: 'right' }}>
               <div style={{ fontSize: '12px', color: '#64748b', fontWeight: 'bold', textTransform: 'uppercase' }}>Joriy oy xaridi (qarz):</div>
               <div style={{ fontSize: '20px', fontWeight: '700', color: '#1e293b' }}>{Number(joriyOyJamiSumma).toLocaleString()} UZS</div>
             </div>
             
-            <button className="btn-confirm-all" style={{ background: 'var(--primary-color)', color: '#fff', padding: '10px 20px', borderRadius: '10px', border: 'none', display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', fontWeight: 'var(--font-weight-700)', fontSize: 'var(--font-size-16)' }} 
+            <button className="btn-confirm-all" style={{ background: 'var(--primary-color)', color: '#fff', padding: '10px 20px', borderRadius: '10px', border: 'none', display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', fontWeight: '700', fontSize: '16px' }} 
               onClick={() => { setTolovData({ tolovTuri: 'naqd', tulanganSumma: '' }); setShowTolovModal(true); }}>
               <MdPayments size={22} /> To'lov / Tasdiqlash
             </button>
             
-            <button className="btn-confirm-all" style={{ background: 'var(--primary-color)', color: '#fff', padding: '12px 20px', borderRadius: '10px', border: 'none', display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', fontWeight: 'var(--font-weight-700)' }} onClick={handleConfirmMonth}>
+            <button className="btn-confirm-all" style={{ background: 'var(--primary-color)', color: '#fff', padding: '12px 20px', borderRadius: '10px', border: 'none', display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', fontWeight: '700' }} onClick={handleConfirmMonth}>
               <MdDoneAll size={20} /> Xaridni yopish 
             </button>
           </div>
@@ -411,11 +419,49 @@ const MijozProfil = ({ open }) => {
               </div>
             </div>
           )}
+
+          <div className="yopilgan-xaridlar-cards no-print" style={{ marginTop: '20px', maxHeight: '600px', overflowY: 'auto', paddingRight: '5px' }}>
+            {yopilganPartiyalar.map(([batchId, products], index) => {
+              const batchTotal = products.reduce((sum, p) => sum + Number(p.summa), 0);
+              const batchQarz = products.reduce((sum, p) => sum + (Number(p.summa) - Number(p.tulangan || 0)), 0);
+              return (
+                <div key={index} id={`batch-card-${batchId}`} className="xarid-card" style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '15px', marginBottom: '15px', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px', borderBottom: '1px solid #f1f5f9', paddingBottom: '8px', alignItems: 'flex-start' }}>
+                    <div>
+                      <span style={{ fontWeight: 'bold', color: '#64748b', display: 'block' }}>Vaqt: {products[0].sana}</span>
+                      <span style={{ fontSize: '14px', fontWeight: 'bold', color: batchQarz > 0 ? '#ef4444' : '#22c55e' }}>
+                        {batchQarz > 0 ? `Qoldiq: ${batchQarz.toLocaleString()} UZS` : 'To\'liq yopilgan'}
+                      </span>
+                    </div>
+                    <button 
+                      className="no-print"
+                      onClick={(e) => { e.stopPropagation(); handleDownloadSingleBatchPDF(batchId, products); }}
+                      style={{ background: '#f1f5f9', color: 'var(--primary-color)', border: 'none', padding: '8px', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px', fontSize: '12px', fontWeight: 'bold' }}
+                    >
+                      <MdDownload size={18} /> PDF
+                    </button>
+                  </div>
+                  
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '120px', overflowY: 'auto', paddingRight: '5px' }}>
+                    {products.map((p, i) => (
+                      <div key={i} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}>
+                        <span>{p.mahsulot} ({p.miqdor} kg)</span>
+                        <span style={{ fontWeight: '600' }}>{Number(p.summa).toLocaleString()} UZS</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div style={{ marginTop: '10px', paddingTop: '10px', borderTop: '1px dashed #e2e8f0', textAlign: 'right', fontWeight: 'bold', fontSize: '15px' }}>
+                    Jami: {batchTotal.toLocaleString()} UZS
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </main>
       </div>
 
-      {/* --- MODAL QISMLARI (ORIGINAL STYLE) --- */}
-
+      {/* MODALLAR */}
       {showSotuvModal && (
         <div className="logout-modal-overlay" onClick={() => setShowSotuvModal(false)}>
           <div className="edit-modal-content" onClick={(e) => e.stopPropagation()}>
@@ -495,7 +541,7 @@ const MijozProfil = ({ open }) => {
                               <td style={{ border: '1px solid #dee2e6', padding: '12px' }}>{s.sana}</td>
                               <td style={{ border: '1px solid #dee2e6', padding: '12px', fontWeight: 'bold' }}>{s.mahsulot}</td>
                               <td style={{ border: '1px solid #dee2e6', padding: '12px', textAlign: 'center' }}>kg</td>
-                              <td style={{ border: '1px solid #dee2e6', padding: '12px', textAlign: 'center' }}>{Number(s.summa / s.miqdor).toLocaleString()}</td>
+                              <td style={{ border: '1px solid #dee2e6', padding: '12px', textAlign: 'center' }}>{Number(s.summa / (s.miqdor || 1)).toLocaleString()}</td>
                               <td style={{ border: '1px solid #dee2e6', padding: '12px', textAlign: 'center' }}>{s.miqdor}</td>
                               <td style={{ border: '1px solid #dee2e6', padding: '12px', textAlign: 'right', fontWeight: 'bold' }}>{Number(s.summa).toLocaleString()} UZS</td>
                             </tr>

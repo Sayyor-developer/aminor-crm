@@ -5,17 +5,36 @@ import { useData } from '../../DataContext';
 import './moliya.css';
 
 const Moliya = ({ open }) => {
-  // Context-dan kerakli ma'lumotlarni olamiz
-  const { sotuvlar, jamiKirim, jamiChiqim, sofFoyda, jamiQarzlar, loading } = useData();
+  const { sotuvlar, jamiKirim, /* jamiChiqim, */ sofFoyda, jamiQarzlar, loading } = useData();
   const [vaqtFiltr, setVaqtFiltr] = useState('1oy'); 
 
-  // Bugungi sotuvni hisoblash (Faqat bugungi sana bo'yicha)
+  // --- YANGI: Sana oralig'i uchun state-lar ---
+  const [sanaDan, setSanaDan] = useState('');
+  const [sanaGacha, setSanaGacha] = useState('');
+
+  // Bugungi sotuvni hisoblash
   const bugungiSotuv = useMemo(() => {
-    const bugun = new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD format
+    const bugun = new Date().toLocaleDateString('en-CA'); 
     return (sotuvlar || [])
       .filter(s => s.sana === bugun)
       .reduce((sum, s) => sum + Number(s.tulangan || 0), 0);
   }, [sotuvlar]);
+
+  // --- YANGI: Tanlangan ikki sana orasidagi sotuvni hisoblash ---
+  const tanlanganMuddatSotuvi = useMemo(() => {
+    if (!sanaDan || !sanaGacha) return 0;
+    
+    const start = new Date(sanaDan);
+    const end = new Date(sanaGacha);
+    end.setHours(23, 59, 59, 999); // Kun oxirigacha qamrab olish
+
+    return (sotuvlar || [])
+      .filter(s => {
+        const sDate = new Date(s.sana);
+        return sDate >= start && sDate <= end;
+      })
+      .reduce((sum, s) => sum + Number(s.tulangan || 0), 0);
+  }, [sotuvlar, sanaDan, sanaGacha]);
 
   const moliyaStatistika = useMemo(() => {
     const bugun = new Date();
@@ -66,7 +85,6 @@ const Moliya = ({ open }) => {
           <p className="header-subtitle">Biznesning real vaqtdagi moliyaviy holati</p>
         </header>
 
-        {/* Stat-kartalar: Jami Kirim/Chiqim o'rniga Bugungi sotuv qo'shildi */}
         <section className="stats-grid">
           <div className="stat-card border-green">
             <div className="stat-card-top">
@@ -167,10 +185,41 @@ const Moliya = ({ open }) => {
             </div>
           </div>
 
+          {/* O'NG TARAFI: Moliyaviy hisobot o'rniga filtr qo'shildi */}
           <div className="white-card">
-            <h3 className="card-title">Moliyaviy Hisobot</h3>
+            <h3 className="card-title">Sana bo'yicha qidiruv</h3>
+            
+            <div className="date-filter-inputs" style={{ marginBottom: '25px', display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                    <label style={{ fontSize: '13px', color: '#64748b', fontWeight: '500' }}>Dan:</label>
+                    <input 
+                        type="date" 
+                        value={sanaDan} 
+                        onChange={(e) => setSanaDan(e.target.value)} 
+                        style={{ padding: '10px', borderRadius: '8px', border: '1px solid #e2e8f0', outline: 'none' }}
+                    />
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                    <label style={{ fontSize: '13px', color: '#64748b', fontWeight: '500' }}>Gacha:</label>
+                    <input 
+                        type="date" 
+                        value={sanaGacha} 
+                        onChange={(e) => setSanaGacha(e.target.value)} 
+                        style={{ padding: '10px', borderRadius: '8px', border: '1px solid #e2e8f0', outline: 'none' }}
+                    />
+                </div>
+            </div>
+
             <div className="summary-box">
-              <div className="summary-row">
+              <div className="summary-row total-row" style={{ borderTop: 'none', paddingTop: '0' }}>
+                <span style={{ fontSize: '14px' }}><b>TANLANGAN MUDDAT SOTUVI:</b></span> 
+              </div>
+              <div style={{ fontSize: '22px', fontWeight: 'bold', color: '#10b981', marginTop: '5px' }}>
+                {formatMoney(tanlanganMuddatSotuvi)} <small style={{ fontSize: '14px' }}>so'm</small>
+              </div>
+
+              {/* --- ESKI HISOBOT KOMENTGA OLINDI --- */}
+              {/* <div className="summary-row">
                 <span><b>Jami Tushum:</b></span> 
                 <span className="val-kirim"> {formatMoney(jamiKirim)} so'm</span>
               </div>
@@ -186,7 +235,8 @@ const Moliya = ({ open }) => {
               <div className="summary-row total-row" style={{ color: sofFoyda >= 0 ? '#10b981' : '#ef4444' }}>
                 <span><b>SOF FOYDA:</b></span> 
                 <span> {formatMoney(sofFoyda)} so'm</span>
-              </div>
+              </div> 
+              */}
             </div>
           </div>
         </section>

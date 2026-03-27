@@ -4,7 +4,6 @@ import { supabase } from './api/supabaseClient';
 const DataContext = createContext();
 
 export const DataProvider = ({ children }) => {
-    // LocalStorage-dan ma'lumotni xavfsiz o'qish funksiyasi
     const getLocal = (key, initial) => {
         const saved = localStorage.getItem(key);
         try {
@@ -14,7 +13,6 @@ export const DataProvider = ({ children }) => {
         }
     };
 
-    // --- BARCHA STATE-LAR ---
     const [mijozlar, setMijozlar] = useState(getLocal('mijozlar', []));
     const [products, setProducts] = useState(getLocal('products', []));
     const [sotuvlar, setSotuvlar] = useState(getLocal('sotuvlar', []));
@@ -24,7 +22,6 @@ export const DataProvider = ({ children }) => {
     const [xarajatlar, setXarajatlar] = useState(getLocal('xarajatlar', [])); 
     const [loading, setLoading] = useState(true);
 
-    // --- MA'LUMOTLARNI SUPABASE-DAN YUKLASH ---
     const fetchData = async () => {
         try {
             setLoading(true);
@@ -37,19 +34,25 @@ export const DataProvider = ({ children }) => {
                 supabase.from('tannarxlar').select('*').order('id', { ascending: false }),
                 supabase.from('xarajatlar').select('*').order('id', { ascending: false }) 
             ]);
-
+            
             if (mRes.data) setMijozlar(mRes.data.map(m => ({ ...m, oxirgiXarid: m.oxirgixarid })));
-            if (sRes.data) setSotuvlar(sRes.data.map(s => ({ ...s, mijozId: s.mijozid })));
+            
+            // Muhim: batchId va yopilgan statuslarini o'qib olish
+            if (sRes.data) setSotuvlar(sRes.data.map(s => ({ 
+                ...s, 
+                mijozId: s.mijozid,
+                batchId: s.batchid, // Supabase snake_case ishlatadi
+                yopilgan: s.yopilgan 
+            })));
+
             if (pRes.data) setProducts(pRes.data);
             if (cRes.data) setChiqimlar(cRes.data);
             if (masRes.data) setMasalliqlar(masRes.data); 
             if (tRes.data) setTannarxlar(tRes.data);
             
             if (xRes.data) {
-                // --- XARAJATLARNI 1 OYDAN OSHGANINI AVTOMATIK O'CHIRISH ---
                 const birOyAvval = new Date();
                 birOyAvval.setDate(birOyAvval.getDate() - 30);
-                
                 const yangiXarajatlar = xRes.data.filter(x => new Date(x.sana) >= birOyAvval);
                 const ochirilishiKerak = xRes.data.filter(x => new Date(x.sana) < birOyAvval);
 
@@ -70,7 +73,6 @@ export const DataProvider = ({ children }) => {
         fetchData();
     }, []);
 
-    // --- LOCALSTORAGE SINXRONIZATSIYASI ---
     useEffect(() => {
         if (!loading) {
             localStorage.setItem('mijozlar', JSON.stringify(mijozlar));
@@ -83,7 +85,6 @@ export const DataProvider = ({ children }) => {
         }
     }, [mijozlar, products, sotuvlar, chiqimlar, masalliqlar, tannarxlar, xarajatlar, loading]);
 
-    // --- MIJOZLAR FUNKSIYALARI ---
     const mijozQoshish = async (yangi) => {
         const { data, error } = await supabase.from('mijozlar').insert([yangi]).select();
         if (error) throw error;
@@ -109,7 +110,6 @@ export const DataProvider = ({ children }) => {
         setSotuvlar(prev => prev.filter(s => s.mijozId !== id));
     };
 
-    // --- MAHSULOTLAR (PRODUCTS) FUNKSIYALARI ---
     const productQoshish = async (yangi) => {
         const { data, error } = await supabase.from('products').insert([yangi]).select();
         if (error) throw error;
@@ -124,7 +124,6 @@ export const DataProvider = ({ children }) => {
         setProducts(prev => prev.map(x => x.id === p.id ? p : x));
     };
 
-    // --- SOTUVLAR & OMBOR (STOCK) FUNKSIYALARI ---
     const sotuvQoshish = async (yangiSotuv) => {
         const mahsulot = products.find(p => p.name.trim().toLowerCase() === yangiSotuv.mahsulot.trim().toLowerCase());
         if (!mahsulot) throw new Error(`"${yangiSotuv.mahsulot}" topilmadi!`);
@@ -134,8 +133,14 @@ export const DataProvider = ({ children }) => {
         if (joriyZaxira < sotuvMiqdori) throw new Error(`Omborda yetarli qoldiq yo'q!`);
 
         const { data, error } = await supabase.from('sotuvlar').insert([{
-            mijozid: yangiSotuv.mijozId, mahsulot: yangiSotuv.mahsulot, miqdor: yangiSotuv.miqdor,
-            summa: yangiSotuv.summa, tulangan: yangiSotuv.tulangan, sana: yangiSotuv.sana
+            mijozid: yangiSotuv.mijozId, 
+            mahsulot: yangiSotuv.mahsulot, 
+            miqdor: yangiSotuv.miqdor,
+            summa: yangiSotuv.summa, 
+            tulangan: yangiSotuv.tulangan, 
+            sana: yangiSotuv.sana,
+            batchid: yangiSotuv.batchId || null, // Qo'shildi
+            yopilgan: yangiSotuv.yopilgan || false // Qo'shildi
         }]).select();
 
         if (error) throw error;
@@ -144,13 +149,14 @@ export const DataProvider = ({ children }) => {
         await supabase.from('products').update({ stock: yangiZaxira }).eq('id', mahsulot.id);
         
         setProducts(prev => prev.map(p => p.id === mahsulot.id ? { ...p, stock: yangiZaxira } : p));
-        setSotuvlar(prev => [{ ...data[0], mijozId: data[0].mijozid }, ...prev]);
+        setSotuvlar(prev => [{ ...data[0], mijozId: data[0].mijozid, batchId: data[0].batchid }, ...prev]);
     };
 
     const sotuvYangilash = async (updated) => {
         const eskiSotuv = sotuvlar.find(s => s.id === updated.id);
         const mahsulot = products.find(p => p.name === updated.mahsulot);
 
+        // Ombor qoldig'ini hisoblash
         if (mahsulot && eskiSotuv) {
             const farq = Number(updated.miqdor) - Number(eskiSotuv.miqdor);
             const yangiStock = Number((Number(mahsulot.stock) - farq).toFixed(2));
@@ -158,9 +164,16 @@ export const DataProvider = ({ children }) => {
             setProducts(prev => prev.map(p => p.id === mahsulot.id ? { ...p, stock: yangiStock } : p));
         }
 
+        // SUPABASE UPDATE - BU YERDA HAMMA USTUNLAR BO'LISHI SHART
         const { error } = await supabase.from('sotuvlar').update({
-            mijozid: updated.mijozId, mahsulot: updated.mahsulot, miqdor: updated.miqdor,
-            summa: updated.summa, tulangan: updated.tulangan, sana: updated.sana
+            mijozid: updated.mijozId, 
+            mahsulot: updated.mahsulot, 
+            miqdor: updated.miqdor,
+            summa: updated.summa, 
+            tulangan: updated.tulangan, 
+            sana: updated.sana,
+            batchid: updated.batchId, // MUHIM: batchId ni saqlash
+            yopilgan: updated.yopilgan   // MUHIM: yopilgan statusini saqlash
         }).eq('id', updated.id);
 
         if (error) throw error;
@@ -182,7 +195,6 @@ export const DataProvider = ({ children }) => {
         setSotuvlar(prev => prev.filter(s => s.id !== id));
     };
 
-    // --- XARAJATLAR FUNKSIYALARI ---
     const xarajatQoshish = async (yangi) => {
         const { data, error } = await supabase.from('xarajatlar').insert([yangi]).select();
         if (error) throw error;
@@ -205,7 +217,6 @@ export const DataProvider = ({ children }) => {
         setXarajatlar(prev => prev.filter(x => x.id !== id));
     };
 
-    // --- TANNARX, MASALLIQ & CHIQIM FUNKSIYALARI ---
     const tannarxQoshish = async (yangi) => {
         const { data, error } = await supabase.from('tannarxlar').insert([yangi]).select();
         if (error) throw error;
@@ -243,7 +254,6 @@ export const DataProvider = ({ children }) => {
         }
     };
 
-    // --- MOLIYAVIY HISOB-KITOB (MUSTAQIL) ---
     const jamiKirim = useMemo(() => {
         return sotuvlar.reduce((sum, s) => sum + parseFloat(s.tulangan || 0), 0);
     }, [sotuvlar]);
@@ -265,7 +275,6 @@ export const DataProvider = ({ children }) => {
         return jamiKirim - jamiChiqim;
     }, [jamiKirim, jamiChiqim]);
 
-    // --- CONTEXT PROVIDER VALUE ---
     return (
         <DataContext.Provider value={{
             mijozlar, products, sotuvlar, chiqimlar, masalliqlar, tannarxlar, xarajatlar, loading,

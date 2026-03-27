@@ -996,6 +996,7 @@
         flex-direction: column;
         align-items: center;
         gap: inherit;
+        
     }
     .header{
         flex-direction: column;
