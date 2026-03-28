@@ -398,7 +398,7 @@
 }
 
 .x-btn-save {
-    background: #10b981;
+    background: var(--primary-color);
     color: white;
     border: none;
     padding: 10px 20px;
@@ -430,6 +430,111 @@
     .xarajat-add-btn {
         width: 100%;
         justify-content: center;
+    }
+}
+/* Filtr qatori dizayni */
+.xarajat-search-row {
+    margin: 25px 0;
+    background: #ffffff;
+    padding: 15px 20px;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.xarajat-filter-box {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+/* Har bir input guruhi uchun */
+.filter-input-grp {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.filter-input-grp label {
+    font-size: var(--font-size-12);
+    font-weight: var(--font-weight-700);
+    color: var(--primary-color);
+    text-transform: uppercase;
+    margin-left: 5px;
+}
+
+/* Sana inputi stili */
+.filter-date-input {
+    border: 2px solid #eef2ff !important;
+    background-color: #f9faff !important;
+    color: #374151;
+    font-weight: var(--font-weight-500);
+    padding: 10px 15px;
+    border-radius: 10px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    width: 400px !important;
+}
+
+.filter-date-input:focus {
+    border-color: var(--primary-color) !important;
+    background-color: #fff !important;
+    box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.1);
+}
+
+/* Ko'rsatish tugmasi */
+.xarajat-show-btn {
+    align-self: flex-end; /* Label tursa tugma pastga tushib qolmasligi uchun */
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-color) 100%);
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 10px;
+    font-weight: var(--font-weight-600);
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+    height: 44px;
+    margin-bottom: 2px;
+}
+
+.xarajat-show-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4);
+    filter: brightness(1.1);
+}
+
+.xarajat-show-btn svg {
+    font-size: var(--font-size-18);
+}
+.xarajat-total-row {
+    background-color: #f8fafc; /* Bir oz boshqacha fon */
+    border-top: 2px solid var(--primary-color) !important; /* Indigo chiziq */
+}
+
+.xarajat-total-price {
+    font-size: var(--font-size-16) !important;
+    font-weight: var(--font-weight-800) !important;
+    color: #1e293b !important; /* To'qroq rang */
+    background: #f1f5f9;
+}
+
+.xarajat-total-row td {
+    padding: 20px !important;
+}
+
+/* Mobil moslashuv (Responsive) */
+@media (max-width: 600px) {
+    .xarajat-filter-box {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 15px;
+    }
+    .filter-date-input {
+        width: 100% !important;
+    }
+    .xarajat-show-btn {
+        width: 100%;
     }
 }
 

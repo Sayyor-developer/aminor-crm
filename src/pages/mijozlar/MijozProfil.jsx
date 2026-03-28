@@ -85,7 +85,6 @@ const MijozProfil = ({ open }) => {
       if (!groups[key]) groups[key] = [];
       groups[key].push(s);
     });
-    // Xavfsiz sort: faqat sana bo'yicha tartiblaymiz
     return Object.entries(groups).sort((a, b) => {
         const dateA = new Date(a[1][0].sana).getTime();
         const dateB = new Date(b[1][0].sana).getTime();
@@ -128,7 +127,6 @@ const MijozProfil = ({ open }) => {
       });
   };
 
-  // HAR BITTA CARD UCHUN PDF
   const handleDownloadSingleBatchPDF = (batchId, products) => {
     const element = document.getElementById(`batch-card-${batchId}`);
     const options = {
@@ -138,7 +136,6 @@ const MijozProfil = ({ open }) => {
       html2canvas: { scale: 2, useCORS: true },
       jsPDF: { unit: 'mm', format: 'a5', orientation: 'portrait' }
     };
-    
     const loadingToast = toast.loading("Xarid cheki tayyorlanmoqda...");
     html2pdf().set(options).from(element).save()
       .then(() => {
@@ -218,7 +215,7 @@ const MijozProfil = ({ open }) => {
             let qolganTolov = tolovSummasi;
             const barchaQarzdorSavdolar = [...eskiSotuvlarList, ...hammaJoriyOySotuvlari]
                 .filter(s => (Number(s.summa) - Number(s.tulangan || 0)) > 0)
-                .sort((a, b) => new Date(a.sana).getTime() - new Date(b.sana).getTime());
+                .sort((a, b) => new Date(a.sana).getTime() - new Date(a.sana).getTime());
             
             for (let s of barchaQarzdorSavdolar) {
                 const qoldiqQarz = Number(s.summa) - Number(s.tulangan || 0);
@@ -423,7 +420,9 @@ const MijozProfil = ({ open }) => {
           <div className="yopilgan-xaridlar-cards no-print" style={{ marginTop: '20px', maxHeight: '600px', overflowY: 'auto', paddingRight: '5px' }}>
             {yopilganPartiyalar.map(([batchId, products], index) => {
               const batchTotal = products.reduce((sum, p) => sum + Number(p.summa), 0);
-              const batchQarz = products.reduce((sum, p) => sum + (Number(p.summa) - Number(p.tulangan || 0)), 0);
+              const batchTulangan = products.reduce((sum, p) => sum + Number(p.tulangan || 0), 0);
+              const batchQarz = batchTotal - batchTulangan;
+
               return (
                 <div key={index} id={`batch-card-${batchId}`} className="xarid-card" style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '15px', marginBottom: '15px', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px', borderBottom: '1px solid #f1f5f9', paddingBottom: '8px', alignItems: 'flex-start' }}>
@@ -442,17 +441,22 @@ const MijozProfil = ({ open }) => {
                     </button>
                   </div>
                   
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '120px', overflowY: 'auto', paddingRight: '5px' }}>
-                    {products.map((p, i) => (
-                      <div key={i} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}>
-                        <span>{p.mahsulot} ({p.miqdor} kg)</span>
-                        <span style={{ fontWeight: '600' }}>{Number(p.summa).toLocaleString()} UZS</span>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div style={{ marginTop: '10px', paddingTop: '10px', borderTop: '1px dashed #e2e8f0', textAlign: 'right', fontWeight: 'bold', fontSize: '15px' }}>
-                    Jami: {batchTotal.toLocaleString()} UZS
+                  {/* To'lov va Jami qismi */}
+                  <div style={{ 
+                    marginTop: '10px', 
+                    paddingTop: '10px', 
+                    borderTop: '1px dashed #e2e8f0', 
+                    display: 'flex', 
+                    justifyContent: 'flex-end', 
+                    alignItems: 'center', 
+                    gap: '20px' 
+                  }}>
+                    <div style={{ fontSize: '14px', color: '#64748b' }}>
+                      To'lov: <span style={{ color: '#22c55e', fontWeight: 'bold' }}>{batchTulangan.toLocaleString()} UZS</span>
+                    </div>
+                    <div style={{ fontSize: '15px', fontWeight: 'bold', color: '#1e293b' }}>
+                      Jami: {batchTotal.toLocaleString()} UZS
+                    </div>
                   </div>
                 </div>
               );

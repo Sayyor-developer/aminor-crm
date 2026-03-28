@@ -342,3 +342,137 @@
     background: var(--primary-color);
     color: var(--white);
 }
+
+.moliya-date-input {
+    padding: 8px 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: var(--font-size-14);
+    outline: none;
+}
+
+.moliya-search-btn {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 9px 16px;
+    border-radius: 8px;
+    font-weight: var(--font-weight-600);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.moliya-search-btn:hover {
+    background: var(--primary-color);
+}
+
+.moliya-mini-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.moliya-mini-table th {
+    text-align: left;
+    padding: 12px;
+    background: #f8fafc;
+    font-size: var(--font-size-12);
+    color: #64748b;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.moliya-mini-table td {
+    padding: 12px;
+    font-size: var(--font-size-14);
+    border-bottom: 1px solid #f1f5f9;
+}
+
+.text-kirim {
+    color: var(--primary-color);
+    font-weight: var(--font-weight-600);
+}
+
+/* --- RESPONSIVE DESIGN (380px gacha va undan kattaroq mobil qurilmalar uchun) --- */
+
+@media (max-width: 992px) {
+    .moliya-main-grid {
+        grid-template-columns: 1fr !important;
+        /* Ustunlarni bitta qatorga tushiradi */
+    }
+}
+
+@media (max-width: 480px) {
+    .moliya-container {
+        padding: 10px;
+    }
+
+    .header-title {
+        font-size: var(--font-size-20);
+    }
+
+    /* Stats kartalarini 1 ta ustun qilish */
+    .stats-grid {
+        grid-template-columns: 1fr !important;
+        gap: 10px;
+    }
+
+    /* Qidiruv inputlarini vertikal qilish */
+    .search-inputs-row {
+        flex-direction: column;
+        align-items: stretch !important;
+        width: 100%;
+    }
+
+    .moliya-date-input {
+        width: 100%;
+        /* Inputlar to'liq kenglikda */
+    }
+
+    .moliya-search-btn {
+        width: 100%;
+        justify-content: center;
+        padding: 12px;
+    }
+
+    .card-header-flex {
+        flex-direction: column;
+        align-items: flex-start !important;
+        gap: 15px;
+    }
+
+    /* Jadvalni kichik ekranlarda skroll bo'ladigan qilish */
+    .moliya-mini-table {
+        font-size: var(--font-size-12);
+        /* Matnni sal kichraytiramiz */
+    }
+
+    .moliya-mini-table th,
+    .moliya-mini-table td {
+        padding: 8px 5px;
+    }
+
+    .total-summary-mini div {
+        font-size: var(--font-size-20) !important;
+        /* Summani mobilga moslash */
+    }
+}
+
+/* Juda kichik ekranlar uchun (iPhone SE kabi) */
+@media (max-width: 380px) {
+    .stat-value {
+        font-size: var(--font-size-18);
+    }
+
+    .card-title {
+        font-size: var(--font-size-16);
+    }
+
+    /* Jadvalda mahsulot ustunini yashirish (joy tejash uchun) */
+    .moliya-mini-table th:nth-child(3),
+    .moliya-mini-table td:nth-child(3) {
+        display: none;
+    }
+}

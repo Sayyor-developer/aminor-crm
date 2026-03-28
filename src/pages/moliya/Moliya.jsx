@@ -1,18 +1,25 @@
 import React, { useMemo, useState } from 'react';
-import {  DollarSign, UserMinus, CalendarDays } from 'lucide-react'; 
+import { DollarSign, UserMinus, CalendarDays, Search, Table } from 'lucide-react'; 
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { useData } from '../../DataContext'; 
 import './moliya.css';
 
 const Moliya = ({ open }) => {
-  const { sotuvlar, jamiKirim, /* jamiChiqim, */ sofFoyda, jamiQarzlar, loading } = useData();
+  // mijozlar ni ham Context dan olamiz
+  const { sotuvlar, mijozlar, /* jamiKirim, */ sofFoyda, jamiQarzlar, loading } = useData();
   const [vaqtFiltr, setVaqtFiltr] = useState('1oy'); 
 
-  // --- YANGI: Sana oralig'i uchun state-lar ---
   const [sanaDan, setSanaDan] = useState('');
   const [sanaGacha, setSanaGacha] = useState('');
+  const [filteredList, setFilteredList] = useState([]); 
+  const [searchTriggered, setSearchTriggered] = useState(false);
 
-  // Bugungi sotuvni hisoblash
+  // --- FUNKSIYA: mijozId orqali ismni topish ---
+  const getMijozIsm = (id) => {
+    const mijoz = mijozlar.find(m => m.id === id);
+    return mijoz ? mijoz.ism : "Noma'lum";
+  };
+
   const bugungiSotuv = useMemo(() => {
     const bugun = new Date().toLocaleDateString('en-CA'); 
     return (sotuvlar || [])
@@ -20,21 +27,25 @@ const Moliya = ({ open }) => {
       .reduce((sum, s) => sum + Number(s.tulangan || 0), 0);
   }, [sotuvlar]);
 
-  // --- YANGI: Tanlangan ikki sana orasidagi sotuvni hisoblash ---
-  const tanlanganMuddatSotuvi = useMemo(() => {
-    if (!sanaDan || !sanaGacha) return 0;
+  const handleSearch = () => {
+    if (!sanaDan || !sanaGacha) return;
     
     const start = new Date(sanaDan);
     const end = new Date(sanaGacha);
-    end.setHours(23, 59, 59, 999); // Kun oxirigacha qamrab olish
+    end.setHours(23, 59, 59, 999);
 
-    return (sotuvlar || [])
-      .filter(s => {
-        const sDate = new Date(s.sana);
-        return sDate >= start && sDate <= end;
-      })
-      .reduce((sum, s) => sum + Number(s.tulangan || 0), 0);
-  }, [sotuvlar, sanaDan, sanaGacha]);
+    const results = (sotuvlar || []).filter(s => {
+      const sDate = new Date(s.sana);
+      return sDate >= start && sDate <= end;
+    });
+
+    setFilteredList(results);
+    setSearchTriggered(true);
+  };
+
+  const tanlanganTotal = useMemo(() => {
+    return filteredList.reduce((sum, s) => sum + Number(s.tulangan || 0), 0);
+  }, [filteredList]);
 
   const moliyaStatistika = useMemo(() => {
     const bugun = new Date();
@@ -57,15 +68,12 @@ const Moliya = ({ open }) => {
       fullKey: `${s.sana}-${index}`, 
       label: new Date(s.sana).toLocaleDateString('uz-UZ', { day: '2-digit', month: 'short' }),
       sotuv: Number(s.tulangan || 0),
-      mijoz: s.mijozIsm || "Noma'lum"
     }));
 
     return {
-      rentabellik: jamiKirim > 0 ? ((sofFoyda / jamiKirim) * 100).toFixed(1) : 0,
       chartData: chartData.length > 0 ? chartData : [{ label: 'Ma\'lumot yo\'q', sotuv: 0 }],
-      chartWidth: chartData.length > 8 ? `${chartData.length * 80}px` : '100%'
     };
-  }, [sotuvlar, vaqtFiltr, jamiKirim, sofFoyda]);
+  }, [sotuvlar, vaqtFiltr]);
 
   const formatMoney = (val) => Math.round(val || 0).toLocaleString('uz-UZ').replace(/,/g, ' ');
 
@@ -100,7 +108,7 @@ const Moliya = ({ open }) => {
                <div className="icon-box bg-blue-soft"><DollarSign size={20}/></div>
                <span className="trend-val text-blue">Net</span>
             </div>
-            <div className="stat-label">Umumiy kirim</div>
+            <div className="stat-label">Sof Foyda</div>
             <div className="stat-value" style={{ color: sofFoyda >= 0 ? '#10b981' : '#ef4444' }}>
               {formatMoney(sofFoyda)} <small>so'm</small>
             </div>
@@ -109,136 +117,115 @@ const Moliya = ({ open }) => {
           <div className="stat-card border-purple">
             <div className="stat-card-top">
                <div className="icon-box bg-orange-soft"><UserMinus size={20} /></div>
-               <span className="trend-val text-orange" style={{ color: 'var(--primary-color)' }}>Qarz</span>
+               <span className="trend-val text-orange">Qarz</span>
             </div>
             <div className="stat-label">Umumiy Qarzlar</div>
-            <div className="stat-value" style={{ color: 'var(--primary-color)' }}>
+            <div className="stat-value" style={{ color: 'black' }}>
               {formatMoney(jamiQarzlar)} <small>so'm</small>
             </div>
           </div>
         </section>
 
-        <section className="content-grid">
-          <div className="white-card chart-section-card">
-            <div className="chart-header">
-              <h3 className="card-title">Sotuvlar Dinamikasi</h3>
+        <section className="moliya-main-grid" style={{ display: 'grid', gridTemplateColumns: '2fr 1.2fr', gap: '20px' }}>
+          
+          {/* CHAP TARAF: SANA BO'YICHA QIDIRUV (KATTA) */}
+          <div className="white-card">
+            <div className="card-header-flex" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                <h3 className="card-title" style={{ margin: 0 }}>Sana bo'yicha hisobot</h3>
+                <div className="search-inputs-row" style={{ display: 'flex', gap: '10px', alignItems: 'flex-end' }}>
+                    <div className="input-field">
+                        <label style={{ fontSize: '12px', color: '#64748b' }}>Dan:</label>
+                        <input type="date" value={sanaDan} onChange={(e) => setSanaDan(e.target.value)} className="moliya-date-input" />
+                    </div>
+                    <div className="input-field">
+                        <label style={{ fontSize: '12px', color: '#64748b' }}>Gacha:</label>
+                        <input type="date" value={sanaGacha} onChange={(e) => setSanaGacha(e.target.value)} className="moliya-date-input" />
+                    </div>
+                    <button onClick={handleSearch} className="moliya-search-btn">
+                        <Search size={18} /> Ko'rsatish
+                    </button>
+                </div>
+            </div>
+
+            {searchTriggered ? (
+                <div className="search-results-area">
+                    <div className="total-summary-mini" style={{ padding: '15px', background: '#f0fdf4', borderRadius: '10px', marginBottom: '15px', border: '1px solid #dcfce7' }}>
+                        <span style={{ color: 'var(--primary-color)', fontSize: '14px', fontWeight: '500' }}>Tanlangan davr uchun jami tushum:</span>
+                        <div style={{ fontSize: '26px', fontWeight: 'bold', color: 'var(--primary-color)' }}>{formatMoney(tanlanganTotal)} so'm</div>
+                    </div>
+                    
+                    <div className="table-responsive" style={{ maxHeight: '400px', overflowY: 'auto', border: '1px solid #f1f5f9', borderRadius: '8px' }}>
+                        <table className="moliya-mini-table">
+                            <thead style={{ position: 'sticky', top: 0, zIndex: 1 }}>
+                                <tr>
+                                    <th>Sana</th>
+                                    <th>Mijoz ismi</th>
+                                    <th>Mahsulot</th>
+                                    <th>Summa</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {filteredList.length > 0 ? (
+                                    filteredList.map((s, idx) => (
+                                        <tr key={idx}>
+                                            <td>{s.sana}</td>
+                                            {/* BU YERDA MIJOZ ISMINI TOPAMIZ */}
+                                            <td style={{ fontWeight: '500' }}>{getMijozIsm(s.mijozId)}</td>
+                                            <td>{s.mahsulot}</td>
+                                            <td className="text-kirim">+{formatMoney(s.tulangan)}</td>
+                                        </tr>
+                                    ))
+                                ) : (
+                                    <tr><td colSpan="4" style={{ textAlign: 'center', padding: '20px' }}>Ma'lumot topilmadi</td></tr>
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            ) : (
+                <div className="empty-search-state" style={{ textAlign: 'center', padding: '80px 0', color: '#94a3b8', background: '#f8fafc', borderRadius: '12px', border: '2px dashed #e2e8f0' }}>
+                    <Table size={48} style={{ marginBottom: '10px', opacity: 0.3 }} />
+                    <p style={{ fontSize: '16px' }}>Sana oralig'ini tanlang va "Ko'rsatish" tugmasini bosing</p>
+                </div>
+            )}
+          </div>
+
+          {/* O'NG TARAF: DINAMIKA (KICHIK) */}
+          <div className="white-card">
+            <div className="chart-header" style={{ marginBottom: '20px' }}>
+              <h3 className="card-title">Dinamika</h3>
               <select 
                 value={vaqtFiltr} 
                 onChange={(e) => setVaqtFiltr(e.target.value)}
-                className="moliya-select"
+                className="moliya-select-mini"
               >
                 <option value="1oy">1 oy</option>
                 <option value="1yil">1 yil</option>
               </select>
             </div>
 
-            <div className="chart-scroll-wrapper">
-              <div style={{ width: moliyaStatistika.chartWidth, minWidth: '100%', height: '350px' }}>
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={moliyaStatistika.chartData}>
-                    <defs>
-                      <linearGradient id="colorSotuv" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="var(--primary-color)" stopOpacity={0.3}/>
-                        <stop offset="95%" stopColor="var(--primary-color)" stopOpacity={0}/>
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                    <XAxis 
-                      dataKey="fullKey" 
-                      fontSize={11} 
-                      tickLine={false}
-                      axisLine={false}
-                      tickFormatter={(val, i) => moliyaStatistika.chartData[i]?.label || ""}
-                    />
-                    <YAxis 
-                      tickFormatter={formatYAxis} 
-                      fontSize={11} 
-                      tickLine={false}
-                      axisLine={false}
-                    />
-                    <Tooltip 
-                       content={({ active, payload }) => {
-                        if (active && payload && payload.length) {
-                          const d = payload[0].payload;
-                          return (
-                            <div className="custom-tooltip">
-                              <p className="tooltip-date">{d.label}</p>
-                              <p className="tooltip-value">{formatMoney(d.sotuv)} so'm</p>
-                              {d.mijoz && <p className="tooltip-mijoz">{d.mijoz}</p>}
-                            </div>
-                          );
-                        }
-                        return null;
-                      }}
-                    />
-                    <Area 
-                      type="monotone" 
-                      dataKey="sotuv" 
-                      stroke="var(--primary-color)" 
-                      fill="url(#colorSotuv)" 
-                      strokeWidth={3} 
-                      activeDot={{ r: 6, strokeWidth: 0 }}
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
+            <div style={{ width: '100%', height: '280px' }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={moliyaStatistika.chartData}>
+                  <defs>
+                    <linearGradient id="colorSotuv" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="var(--primary-color)" stopOpacity={0.2}/>
+                      <stop offset="95%" stopColor="var(--primary-color)" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                  <XAxis dataKey="label" fontSize={10} tickLine={false} axisLine={false} />
+                  <YAxis tickFormatter={formatYAxis} fontSize={10} tickLine={false} axisLine={false} />
+                  <Tooltip 
+                    formatter={(value) => [`${formatMoney(value)} so'm`, 'Sotuv']}
+                    contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+                  />
+                  <Area type="monotone" dataKey="sotuv" stroke="var(--primary-color)" fill="url(#colorSotuv)" strokeWidth={2.5} />
+                </AreaChart>
+              </ResponsiveContainer>
             </div>
           </div>
 
-          {/* O'NG TARAFI: Moliyaviy hisobot o'rniga filtr qo'shildi */}
-          <div className="white-card">
-            <h3 className="card-title">Sana bo'yicha qidiruv</h3>
-            
-            <div className="date-filter-inputs" style={{ marginBottom: '25px', display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                    <label style={{ fontSize: '13px', color: '#64748b', fontWeight: '500' }}>Dan:</label>
-                    <input 
-                        type="date" 
-                        value={sanaDan} 
-                        onChange={(e) => setSanaDan(e.target.value)} 
-                        style={{ padding: '10px', borderRadius: '8px', border: '1px solid #e2e8f0', outline: 'none' }}
-                    />
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
-                    <label style={{ fontSize: '13px', color: '#64748b', fontWeight: '500' }}>Gacha:</label>
-                    <input 
-                        type="date" 
-                        value={sanaGacha} 
-                        onChange={(e) => setSanaGacha(e.target.value)} 
-                        style={{ padding: '10px', borderRadius: '8px', border: '1px solid #e2e8f0', outline: 'none' }}
-                    />
-                </div>
-            </div>
-
-            <div className="summary-box">
-              <div className="summary-row total-row" style={{ borderTop: 'none', paddingTop: '0' }}>
-                <span style={{ fontSize: '14px' }}><b>TANLANGAN MUDDAT SOTUVI:</b></span> 
-              </div>
-              <div style={{ fontSize: '22px', fontWeight: 'bold', color: '#10b981', marginTop: '5px' }}>
-                {formatMoney(tanlanganMuddatSotuvi)} <small style={{ fontSize: '14px' }}>so'm</small>
-              </div>
-
-              {/* --- ESKI HISOBOT KOMENTGA OLINDI --- */}
-              {/* <div className="summary-row">
-                <span><b>Jami Tushum:</b></span> 
-                <span className="val-kirim"> {formatMoney(jamiKirim)} so'm</span>
-              </div>
-              <div className="summary-row">
-                <span><b>Jami Xarajatlar:</b></span> 
-                <span className="val-chiqim"> {formatMoney(jamiChiqim)} so'm</span>
-              </div>
-              <div className="summary-row">
-                <span><b>Kutilayotgan Qarzlar:</b></span> 
-                <span > {formatMoney(jamiQarzlar)} so'm</span>
-              </div>
-              <div className="divider"></div>
-              <div className="summary-row total-row" style={{ color: sofFoyda >= 0 ? '#10b981' : '#ef4444' }}>
-                <span><b>SOF FOYDA:</b></span> 
-                <span> {formatMoney(sofFoyda)} so'm</span>
-              </div> 
-              */}
-            </div>
-          </div>
         </section>
       </div>
     </div>
