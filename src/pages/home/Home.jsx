@@ -111,7 +111,7 @@ const Home = ({ open }) => {
             <div className="stat-info">
               <div className="stat-header">
                 <div className="icon-box blue-bg"><TbCash className="icon-svg" /></div>
-                <span className="stat-label">Umumiy Kirim</span>
+                <span className="stat-label">Umumiy Sotuv</span>
               </div>
               <h2 className="stat-value">{kirimStats.jamiKirim.toLocaleString()} <span className="unit">so'm</span></h2>
             </div>

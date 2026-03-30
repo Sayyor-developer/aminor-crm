@@ -82,21 +82,6 @@ const SideBar = ({ open, setOpen, userPermissions = [], userRole = '' }) => {
           </li>
         )}
 
-        {canSee('Xarajatlar') && (
-          <li>
-            <NavLink to="/xarajatlar" className={({ isActive }) => isActive ? "side active" : "side"}>
-             <SiInfracost /> <span className="link-text">Xarajatlar</span>
-            </NavLink>
-          </li>
-        )}
-
-        {canSee('Moliya') && (
-          <li>
-            <NavLink to="/moliya" className={({ isActive }) => isActive ? "side active" : "side"}>
-              <FaMoneyBillTrendUp /> <span className="link-text">Moliya bo'limi</span>
-            </NavLink>
-          </li>
-        )}
 
         {canSee('Tovuq Chiqimlari') && (
           <li>
@@ -114,6 +99,21 @@ const SideBar = ({ open, setOpen, userPermissions = [], userRole = '' }) => {
           </li>
         )}
 
+        {canSee('Xarajatlar') && (
+          <li>
+            <NavLink to="/xarajatlar" className={({ isActive }) => isActive ? "side active" : "side"}>
+             <SiInfracost /> <span className="link-text">Xarajatlar</span>
+            </NavLink>
+          </li>
+        )}
+
+        {canSee('Moliya') && (
+          <li>
+            <NavLink to="/moliya" className={({ isActive }) => isActive ? "side active" : "side"}>
+              <FaMoneyBillTrendUp /> <span className="link-text">Moliya bo'limi</span>
+            </NavLink>
+          </li>
+        )}
         {canSee('Direktor') && (
           <li>
             <NavLink to="/direktor" className={({ isActive }) => isActive ? "side active" : "side"}>

@@ -108,7 +108,7 @@ const Moliya = ({ open }) => {
                <div className="icon-box bg-blue-soft"><DollarSign size={20}/></div>
                <span className="trend-val text-blue">Net</span>
             </div>
-            <div className="stat-label">Sof Foyda</div>
+            <div className="stat-label">Umumiy Sotuv</div>
             <div className="stat-value" style={{ color: sofFoyda >= 0 ? '#10b981' : '#ef4444' }}>
               {formatMoney(sofFoyda)} <small>so'm</small>
             </div>
