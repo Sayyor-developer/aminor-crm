@@ -39,8 +39,12 @@ const MijozProfil = ({ open }) => {
   const [selectedSotuv, setSelectedSotuv] = useState(null);
   const [isEditMode, setIsEditMode] = useState(false);
 
+  // Sana maydoni qo'shildi (default: bugungi sana)
   const [sotuvData, setSotuvData] = useState({ 
-    mahsulot: '', miqdor: '', narx: '' 
+    mahsulot: '', 
+    miqdor: '', 
+    narx: '',
+    sana: new Date().toISOString().split('T')[0] 
   });
 
   const [tolovData, setTolovData] = useState({
@@ -63,21 +67,21 @@ const MijozProfil = ({ open }) => {
     }
   }, [mijoz]);
 
-  // JORIY OY SOTUVLARI (yopilmaganlari)
+  // JORIY OY SOTUVLARI
   const hammaJoriyOySotuvlari = useMemo(() => {
     return (sotuvlar || [])
       .filter(s => String(s.mijozId) === String(id) && !s.yopilgan)
       .sort((a, b) => new Date(b.sana).getTime() - new Date(a.sana).getTime());
   }, [sotuvlar, id]);
 
-  // ESKI OYLAR TARIXI (yopilgan barcha sotuvlar ro'yxati)
+  // ESKI OYLAR TARIXI
   const eskiSotuvlarList = useMemo(() => {
     return (sotuvlar || [])
       .filter(s => String(s.mijozId) === String(id) && s.yopilgan)
       .sort((a, b) => new Date(b.sana).getTime() - new Date(a.sana).getTime());
   }, [sotuvlar, id]);
 
-  // CARDLAR UCHUN GURUHLASH (BatchId bo'yicha)
+  // CARDLAR UCHUN GURUHLASH
   const yopilganPartiyalar = useMemo(() => {
     const groups = {};
     eskiSotuvlarList.forEach(s => {
@@ -164,7 +168,8 @@ const MijozProfil = ({ open }) => {
                 ...selectedSotuv, 
                 mahsulot: sotuvData.mahsulot, 
                 miqdor, 
-                summa: jami
+                summa: jami,
+                sana: sotuvData.sana // Tanlangan sana bilan yangilash
             });
             toast.success("Sotuv yangilandi!");
         } else {
@@ -173,12 +178,11 @@ const MijozProfil = ({ open }) => {
                 toast.dismiss(loader);
                 return toast.error("Omborda yetarli qoldiq yo'q!");
             }
-            const isoSana = new Date().toISOString().split('T')[0];
             await productYangilash({ ...mahsulot, stock: parseFloat(mahsulot.stock) - miqdor });
             await mijozYangilash({ 
                 ...mijoz, 
                 qarzdorlik: parseFloat(mijoz.qarzdorlik || 0) + jami, 
-                oxirgiXarid: isoSana 
+                oxirgiXarid: sotuvData.sana // Tanlangan sana oxirgi xarid sifatida
             });
             await sotuvQoshish({ 
                 mijozId: mijoz.id, 
@@ -186,14 +190,14 @@ const MijozProfil = ({ open }) => {
                 miqdor, 
                 summa: jami, 
                 tulangan: 0, 
-                sana: isoSana,
+                sana: sotuvData.sana, // Tanlangan sana bilan qo'shish
                 yopilgan: false 
             });
             toast.success("Muvaffaqiyatli saqlandi!");
         }
         setShowSotuvModal(false);
         setIsEditMode(false);
-        setSotuvData({ mahsulot: '', miqdor: '', narx: '' });
+        setSotuvData({ mahsulot: '', miqdor: '', narx: '', sana: new Date().toISOString().split('T')[0] });
     } catch (err) {
         toast.error("Xato: " + err.message);
     } finally {
@@ -215,7 +219,7 @@ const MijozProfil = ({ open }) => {
             let qolganTolov = tolovSummasi;
             const barchaQarzdorSavdolar = [...eskiSotuvlarList, ...hammaJoriyOySotuvlari]
                 .filter(s => (Number(s.summa) - Number(s.tulangan || 0)) > 0)
-                .sort((a, b) => new Date(a.sana).getTime() - new Date(a.sana).getTime());
+                .sort((a, b) => new Date(a.sana).getTime() - new Date(b.sana).getTime());
             
             for (let s of barchaQarzdorSavdolar) {
                 const qoldiqQarz = Number(s.summa) - Number(s.tulangan || 0);
@@ -265,7 +269,8 @@ const MijozProfil = ({ open }) => {
     setSotuvData({ 
       mahsulot: s.mahsulot, 
       miqdor: s.miqdor, 
-      narx: s.summa / s.miqdor
+      narx: s.summa / s.miqdor,
+      sana: s.sana // Tahrirlashda o'z sanasini ko'rsatish
     });
     setShowSotuvModal(true);
   };
@@ -353,7 +358,16 @@ const MijozProfil = ({ open }) => {
           <div className="content-tabs no-print" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div className="tab-left"><button className="active"><MdHistory size={22}  /> Sotuvlar (Joriy oy)</button></div>
             <div className="tab-right-actions">
-              <button className="btn-add-sotuv" style={{background:'var(--primary-color)'}} onClick={() => { setIsEditMode(false); setSotuvData({ mahsulot: '', miqdor: '', narx: '' }); setShowSotuvModal(true); }}>
+              <button className="btn-add-sotuv" style={{background:'var(--primary-color)'}} onClick={() => { 
+                  setIsEditMode(false); 
+                  setSotuvData({ 
+                      mahsulot: '', 
+                      miqdor: '', 
+                      narx: '', 
+                      sana: new Date().toISOString().split('T')[0] // Modal ochilganda bugungi sana
+                  }); 
+                  setShowSotuvModal(true); 
+              }}>
                 <MdAddShoppingCart /> Yangi sotuv
               </button>
             </div>
@@ -418,30 +432,29 @@ const MijozProfil = ({ open }) => {
           )}
 
           <div className="yopilgan-xaridlar-cards no-print" style={{ marginTop: '20px', maxHeight: '600px', overflowY: 'auto', paddingRight: '5px' }}>
-            {yopilganPartiyalar.map(([batchId, products], index) => {
-              const batchTotal = products.reduce((sum, p) => sum + Number(p.summa), 0);
-              const batchTulangan = products.reduce((sum, p) => sum + Number(p.tulangan || 0), 0);
+            {yopilganPartiyalar.map(([batchId, products_batch], index) => {
+              const batchTotal = products_batch.reduce((sum, p) => sum + Number(p.summa), 0);
+              const batchTulangan = products_batch.reduce((sum, p) => sum + Number(p.tulangan || 0), 0);
               const batchQarz = batchTotal - batchTulangan;
 
               return (
                 <div key={index} id={`batch-card-${batchId}`} className="xarid-card" style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: '12px', padding: '15px', marginBottom: '15px', boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px', borderBottom: '1px solid #f1f5f9', paddingBottom: '8px', alignItems: 'flex-start' }}>
                     <div>
-                      <span style={{ fontWeight: 'bold', color: '#64748b', display: 'block' }}>Vaqt: {products[0].sana}</span>
+                      <span style={{ fontWeight: 'bold', color: '#64748b', display: 'block' }}>Vaqt: {products_batch[0].sana}</span>
                       <span style={{ fontSize: '14px', fontWeight: 'bold', color: batchQarz > 0 ? '#ef4444' : '#22c55e' }}>
                         {batchQarz > 0 ? `Qoldiq: ${batchQarz.toLocaleString()} UZS` : 'To\'liq yopilgan'}
                       </span>
                     </div>
                     <button 
                       className="no-print"
-                      onClick={(e) => { e.stopPropagation(); handleDownloadSingleBatchPDF(batchId, products); }}
+                      onClick={(e) => { e.stopPropagation(); handleDownloadSingleBatchPDF(batchId, products_batch); }}
                       style={{ background: '#f1f5f9', color: 'var(--primary-color)', border: 'none', padding: '8px', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '5px', fontSize: '12px', fontWeight: 'bold' }}
                     >
                       <MdDownload size={18} /> PDF
                     </button>
                   </div>
                   
-                  {/* To'lov va Jami qismi */}
                   <div style={{ 
                     marginTop: '10px', 
                     paddingTop: '10px', 
@@ -487,6 +500,19 @@ const MijozProfil = ({ open }) => {
                 <div className="form-group" style={{flex:1}}><label>Miqdor (kg)</label><input type="number" step="0.01" value={sotuvData.miqdor} onChange={(e) => setSotuvData({...sotuvData, miqdor: e.target.value})} required /></div>
                 <div className="form-group" style={{flex:1}}><label>Narx</label><input type="number" value={sotuvData.narx} onChange={(e) => setSotuvData({...sotuvData, narx: e.target.value})} required /></div>
               </div>
+              
+              {/* YANGI SANA INPUTI */}
+              <div className="form-group">
+                <label>Sotuv sanasi</label>
+                <input 
+                  type="date" 
+                  className="input-style" 
+                  value={sotuvData.sana} 
+                  onChange={(e) => setSotuvData({...sotuvData, sana: e.target.value})} 
+                  required 
+                />
+              </div>
+
               <div className="total-display-box">Summa: {(Number(sotuvData.miqdor) * Number(sotuvData.narx)).toLocaleString()} UZS</div>
               <div className="edit-modal-footer"><button type="submit" className="btn-save" style={{background:'var(--primary-color)'}}>{isEditMode ? "Saqlash" : "Tasdiqlash"}</button></div>
             </form>
