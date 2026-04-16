@@ -106,8 +106,9 @@ export default function Kolbasamaxsulotlar({ open }) {
 
   // --- SUPABASE: YANGI MAHSULOT QO'SHISH ---
   const handleAddProduct = async () => {
-    if (!newProduct.name.trim() || !newProduct.price || !newProduct.stock) {
-      toast.error("Ma'lumotlarni to'liq kiriting!");
+    // FAQAT nomi yo'qligini tekshiramiz, narx va stock bo'sh bo'lsa 0 deb ketadi
+    if (!newProduct.name.trim()) {
+      toast.error("Mahsulot nomini kiriting!");
       return;
     }
 
@@ -116,8 +117,9 @@ export default function Kolbasamaxsulotlar({ open }) {
         name: newProduct.name.trim(),
         unit: newProduct.unit,
         active: true,
-        price: Number(cleanNumber(newProduct.price)),
-        stock: Number(newProduct.stock)
+        // Bo'sh bo'lsa Number() orqali 0 ga aylanadi
+        price: Number(cleanNumber(newProduct.price)) || 0,
+        stock: Number(newProduct.stock) || 0
       };
 
       // DataContext dagi funksiyani chaqiramiz
@@ -127,7 +129,6 @@ export default function Kolbasamaxsulotlar({ open }) {
       setIsAddModalOpen(false);
       toast.success("Mahsulot omborga qo'shildi!");
     } catch (err) {
-      // RLS xatolarini aniqroq ko'rsatish
       if (err.message.includes('row-level security')) {
         toast.error("Baza ruxsat bermadi (RLS Policy xatosi)!");
       } else {
@@ -138,16 +139,16 @@ export default function Kolbasamaxsulotlar({ open }) {
 
   // --- SUPABASE: TAHRIRLASHNI SAQLASH ---
   const handleUpdateProduct = async () => {
-    if (!selectedProduct.name.trim() || !selectedProduct.price || !selectedProduct.stock) {
-      toast.error("Ma'lumotlarni to'ldiring!");
+    if (!selectedProduct.name.trim()) {
+      toast.error("Mahsulot nomini kiriting!");
       return;
     }
 
     try {
       const updatedData = {
         name: selectedProduct.name.trim(),
-        price: Number(cleanNumber(String(selectedProduct.price))),
-        stock: Number(selectedProduct.stock),
+        price: Number(cleanNumber(String(selectedProduct.price))) || 0,
+        stock: Number(selectedProduct.stock) || 0,
         unit: selectedProduct.unit
       };
 
@@ -190,7 +191,6 @@ export default function Kolbasamaxsulotlar({ open }) {
           </div>
           <div className="header-actions">
             <button className="btn-export kolbasa-qoshish-modal-style" onClick={() => setIsAddModalOpen(true)}>
-              {/* size={16} edi, 20 qildik. Agar yana ham katta kerak bo'lsa 22 yoki 24 qilib ko'r */}
               <Plus size={24} strokeWidth={5.5} /> Yangi mahsulot
             </button>
             <button className="btn-export pdf" onClick={exportToPDF}>
@@ -296,7 +296,7 @@ export default function Kolbasamaxsulotlar({ open }) {
                   </select>
                 </div>
                 <div>
-                  <label className="input-label">Miqdori(kg)</label>
+                  <label className="input-label">Miqdori</label>
                   <input className="input-style w-full" type="number" placeholder="0" value={newProduct.stock} onChange={e => setNewProduct({ ...newProduct, stock: e.target.value })} />
                 </div>
               </div>
