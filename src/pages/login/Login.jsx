@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import logo from '../../assets/Aminorlogo.png';
+import logo from '../../assets/image.png';
 import {
     Box, TextField, Button, Typography, Paper,
     InputAdornment, IconButton
@@ -30,7 +30,7 @@ const Login = () => {
             const { error } = await supabase.auth.signInWithPassword({
                 email: email.trim(),
                 password: password,
-            });
+            });   
 
             if (error) {
                 if (error.message === "Invalid login credentials") {

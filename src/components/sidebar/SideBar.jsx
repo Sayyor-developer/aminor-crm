@@ -1,7 +1,7 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
 import './sidebar.css';
-import logo from '../../assets/Aminorlogo.png';
+import logo from '../../assets/image.png';
 import { IoHome } from "react-icons/io5";
 import { FaBowlFood, FaMoneyBillTrendUp } from "react-icons/fa6";
 import { MdPeopleAlt, MdMenuBook, MdOutlinePriceChange } from "react-icons/md";
